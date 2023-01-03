@@ -1,0 +1,143 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialIntegrity"]
+}
+
+datasource db {
+  provider             = "mysql"
+  url                  = env("DATABASE_URL")
+  referentialIntegrity = "prisma"
+}
+
+// Necessary for Next auth
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// --
+
+model IssueIdMapping {
+  id                Int      @id @default(autoincrement())
+  notion_page_id    String?  @unique
+  discord_thread_id String?  @unique
+  author            String?  @db.Text
+  title             String?  @db.Text
+  createdAt         DateTime @default(now())
+  Issue             Issue?
+
+  @@index([notion_page_id, discord_thread_id])
+}
+
+model Logs {
+  id        Int      @id @default(autoincrement()) @db.UnsignedInt
+  timestamp DateTime @default(now()) @db.Timestamp(0)
+  level     String   @db.Text
+  message   String   @db.Text
+  scope     String   @db.Text
+  meta      Json?
+}
+
+enum IssueStatus {
+  TODO
+  ASSIGNED
+  DONE
+  CLOSED
+}
+
+model Issue {
+  id               Int            @id @default(autoincrement())
+  issueMapping     IssueIdMapping @relation(fields: [issueIdMappingId], references: [id])
+  issueIdMappingId Int            @unique
+  title            String?        @db.Text
+  description      String?        @db.Text
+  author           String?        @db.Text
+  status           IssueStatus    @default(TODO)
+  lab              String?        @db.Text
+  version          String?        @db.Text
+  discordThreadId  String?        @db.Text
+  type             String?        @db.Text
+  stepsToReproduce String?        @db.Text
+  component        String?        @db.Text
+  severity         String?        @db.Text
+  specs            String?        @db.Text
+  codeSnippet      String?        @db.Text
+  checkTechLead    Boolean?
+  checkDesign      Boolean?
+  scope            String?        @db.Text
+  attachment       String?        @db.Text
+  attachment2      String?        @db.Text
+  azureWorkItem    String?        @db.Text
+  timestamp        DateTime       @default(now()) @db.Timestamp(0)
+  createdAt        DateTime?
+
+  @@index([issueIdMappingId])
+}
+
+model Kudos {
+  id        Int        @id @default(autoincrement()) @db.UnsignedInt
+  type      String
+  from      GuildUser? @relation("from", fields: [fromId], references: [id])
+  fromId    String?
+  to        GuildUser? @relation("to", fields: [toId], references: [id])
+  toId      String?
+  timestamp DateTime   @default(now()) @db.Timestamp(0)
+
+  @@index([fromId])
+  @@index([toId])
+}
+
+model GuildUser {
+  id           String   @id
+  username     String   @db.Text
+  avatarURL    String?  @db.Text
+  isBot        Boolean? @default(false)
+  friendlyName String?  @db.Text
+  roles        String?  @db.Text
+  color        String?  @db.Text
+
+  from Kudos[] @relation("from")
+  to   Kudos[] @relation("to")
+}
