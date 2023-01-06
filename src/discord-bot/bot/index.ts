@@ -6,6 +6,8 @@ import Discord, {
   userMention,
 } from "discord.js";
 import { parseKudos } from "../../shared/dataUtils";
+import AzureDiscord from "../azure/controllers/discord";
+import AzureMail from "../azure/controllers/mail";
 import type { startPrisma } from "../data";
 import { notionBatchUpdate } from "../data/utils";
 import type { startNotion } from "../notion";
@@ -354,6 +356,12 @@ export const startBot = ({
         });
       }
     });
+
+    client.on("ready", () => {
+      const azureDiscord = new AzureDiscord(client)
+      const azureMail = new AzureMail({ autoReconnect: true })
+      azureMail.on("mail", (mail) => azureDiscord.processMail(mail))
+    })
 
     client.login(DISCORD_BOT_TOKEN);
   }
