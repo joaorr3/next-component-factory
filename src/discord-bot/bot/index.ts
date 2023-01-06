@@ -118,14 +118,16 @@ export const startBot = ({
                 discord_thread_id: response.threadId ?? null,
               });
 
+              logger.db.discord({
+                level: "info",
+                message: `Archiving thread ${response.threadId}`,
+              });
+
               if (pageId) {
-                logger.db.discord({
-                  level: "info",
-                  message: `Updating page: [${pageId}] status using db. :)`,
-                });
                 const issue = await prismaActions?.getIssueDetailsByThreadId({
                   discord_thread_id: response.threadId ?? null,
                 });
+
                 if (issue) {
                   await prismaActions?.updateIssue({
                     id: issue?.id,
@@ -133,16 +135,13 @@ export const startBot = ({
                     value: "DONE",
                   });
                 }
+
                 await notionActions?.updatePageStatus(pageId, "DONE");
-              } else {
-                logger.db.discord({
+
+                logger.db.notion({
                   level: "info",
-                  message: `Force updating page: [${pageId}] status. :(`,
+                  message: `Updating Notion Page: [${pageId}]`,
                 });
-                await notionActions?.forceUpdatePageStatus(
-                  response.threadId,
-                  "DONE"
-                );
               }
               break;
             }
