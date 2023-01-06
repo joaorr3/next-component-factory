@@ -131,13 +131,22 @@ model Kudos {
 
 model GuildUser {
   id           String   @id
+  notionUserId Int?     @unique
   username     String   @db.Text
   avatarURL    String?  @db.Text
   isBot        Boolean? @default(false)
   friendlyName String?  @db.Text
   roles        String?  @db.Text
   color        String?  @db.Text
+  from         Kudos[]  @relation("from")
+  to           Kudos[]  @relation("to")
 
-  from Kudos[] @relation("from")
-  to   Kudos[] @relation("to")
+  notionUser NotionUser? @relation(fields: [notionUserId], references: [id])
+}
+
+model NotionUser {
+  id           Int        @id
+  notionUserId String     @unique
+  username     String?    @db.Text
+  GuildUser    GuildUser?
 }

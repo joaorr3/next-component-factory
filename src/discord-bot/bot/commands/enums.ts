@@ -71,3 +71,7 @@ export enum KudosOption {
   to = "to",
   type = "type",
 }
+
+export enum AssignOption {
+  assignee = "assignee",
+}

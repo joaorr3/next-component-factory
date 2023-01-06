@@ -57,6 +57,8 @@ export const isValidURL = (url?: string | null) => {
   return true;
 };
 
+export const derive = <T>(fn: () => T): T => fn();
+
 export const logInteraction = ({
   client,
   commandName,

@@ -168,6 +168,9 @@ export const startNotion = ({ start }: { start: boolean }) => {
     });
   }
 
+  /**
+   * @deprecated
+   */
   const getPageIdByProperty = async (property: {
     name: string;
     value: string;
@@ -376,6 +379,9 @@ export const startNotion = ({ start }: { start: boolean }) => {
     }
   };
 
+  /**
+   * @deprecated
+   */
   const forceUpdatePageStatus = async (
     threadId?: string,
     status: IssueDetailsModel["status"] = "TODO"
@@ -485,6 +491,36 @@ export const startNotion = ({ start }: { start: boolean }) => {
     }
   };
 
+  const updateAssignTo = async ({
+    pageId,
+    userId,
+  }: {
+    pageId?: string;
+    userId?: string;
+  }) => {
+    try {
+      if (pageId && userId) {
+        await notion.pages.update({
+          page_id: pageId,
+          properties: {
+            "Assign To": {
+              people: [
+                {
+                  id: userId,
+                },
+              ],
+            },
+          },
+        });
+      }
+    } catch (error) {
+      logger.db.notion({
+        level: "error",
+        message: `updatePageAssignTo: ${error}`,
+      });
+    }
+  };
+
   return {
     addIssue,
     getPageUrl,
@@ -492,5 +528,6 @@ export const startNotion = ({ start }: { start: boolean }) => {
     updatePageStatus,
     updateCreatedAt,
     updatePageExternalIcon,
+    updateAssignTo,
   };
 };

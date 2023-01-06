@@ -145,28 +145,36 @@ export const startBot = ({
               }
               break;
             }
-            case "open": {
-              const { thread } = response;
+            case "assign": {
+              const { thread, user, assignee } = response;
 
-              const issueDetails =
-                await prismaActions?.getIssueDetailsByThreadId({
-                  discord_thread_id: thread?.id || null,
+              const pageId = await prismaActions?.getNotionPageByThreadId({
+                discord_thread_id: thread?.id || null,
+              });
+
+              const notionUserId =
+                await prismaActions?.getNotionUserIdByGuildUserId(
+                  assignee?.id || user.id
+                );
+
+              if (pageId && notionUserId) {
+                await notionActions?.updateAssignTo({
+                  pageId,
+                  userId: notionUserId,
                 });
-
-              if (!issueDetails) {
+                logger.db.notion({
+                  level: "info",
+                  message: `Assigned issue ${pageId} to ${notionUserId}`,
+                });
+              } else {
                 await thread?.send({
                   content: "Sorry, can't find any info about this issue.",
                 });
-                logger.db.discord({
-                  level: "info",
-                  message: `ThreadID: ${thread?.id} | issue details not found`,
+                logger.db.notion({
+                  level: "error",
+                  message: `Could not assign issue: ${pageId} to ${notionUserId}`,
                 });
               }
-
-              logger.console.discord({
-                level: "info",
-                message: `Issue Details: ${issueDetails?.title} - ${issueDetails?.author}`,
-              });
 
               break;
             }

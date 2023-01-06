@@ -2,7 +2,7 @@ import { REST } from "@discordjs/rest";
 import type { GuildUser } from "@prisma/client";
 import Discord, { roleMention, Routes, userMention } from "discord.js";
 import { camelCase } from "lodash";
-import { randomInt } from "../../utils";
+import { derive, randomInt } from "../../utils";
 import { logger } from "../../utils/logger";
 import { getTextChannel, getThreadChannel } from "../channels";
 import {
@@ -38,6 +38,7 @@ import {
 } from "./builders";
 import { versionHint } from "./constants";
 import {
+  AssignOption,
   BatchOptions,
   IssueCommandOptions,
   KudosOption,
@@ -182,7 +183,14 @@ export const registerCommands = (config: RegisterCommandsArgs) => {
         )
         .setRequired(false)
     ),
-    command("open"),
+    command("assign").addUserOption((option) =>
+      option
+        .setName(AssignOption.assignee)
+        .setRequired(false)
+        .setDescription(
+          "The person responsible for doing the work. If not provided, this issue will be assigned to you."
+        )
+    ),
     command("notion_batch_update")
       .addStringOption((option) =>
         option.setName(BatchOptions.start_date).setDescription("DD/MM/YYYY")
@@ -195,7 +203,7 @@ export const registerCommands = (config: RegisterCommandsArgs) => {
         option
           .setName(KudosOption.to)
           .setRequired(true)
-          .setDescription("The user to receive this.")
+          .setDescription("Who do you want to send this Kudos?")
       )
       .addStringOption((option) =>
         option
@@ -537,14 +545,36 @@ export const commandReactions = async ({
         response: undefined,
       };
     },
-    open: async () => {
-      const { channelId } = interaction;
+    assign: async () => {
+      const { channelId, user, options } = interaction;
 
       const currentChannel = getThreadChannel(guild, { id: channelId });
+      const guildUser = getUserById(guild, user.id);
+      const guildDevRole = getRole(guild, { name: GuildRoles.dev });
+      const userHasDevRole = hasRole(guildUser, guildDevRole);
+
+      const validAssignee = derive(() => {
+        const assigneeOption =
+          options.getUser(AssignOption.assignee) ?? undefined;
+        if (assigneeOption) {
+          const assigneeUser = getUserById(guild, assigneeOption.id);
+          const assigneeHasDevRole = hasRole(assigneeUser, guildDevRole);
+          if (assigneeHasDevRole) {
+            return { assignee: assigneeOption, assigneeUser };
+          }
+        }
+      });
 
       if (!currentChannel?.isThread()) {
         await interaction.reply({
-          content: "/open command must be executed inside threads",
+          content: "/assign command must be executed inside threads",
+          ephemeral: true,
+        });
+
+        return undefined;
+      } else if (!userHasDevRole) {
+        await interaction.reply({
+          content: "/assign command should be executed by CF Devs only",
           ephemeral: true,
         });
 
@@ -552,13 +582,20 @@ export const commandReactions = async ({
       }
 
       await interaction.reply({
-        content: "Done!",
+        content: `Great! I'll assign this to ${
+          validAssignee?.assignee
+            ? validAssignee?.assigneeUser?.displayName
+            : "you"
+        }.`,
+        ephemeral: true,
       });
 
       return {
-        name: "open",
+        name: "assign",
         response: {
           thread: currentChannel,
+          user,
+          assignee: validAssignee?.assignee,
         },
       };
     },
@@ -676,6 +713,7 @@ export const commandReactions = async ({
             }))
           ),
           avatarURL: user.avatarURL({ extension: "png" }),
+          notionUserId: null,
         })
       );
 
