@@ -70,6 +70,7 @@ export enum BatchOptions {
 export enum KudosOption {
   to = "to",
   type = "type",
+  public = "public",
 }
 
 export enum AssignOption {

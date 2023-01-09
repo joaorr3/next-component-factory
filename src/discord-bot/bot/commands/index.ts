@@ -21,7 +21,7 @@ import type {
   Roles,
 } from "../types";
 import { getUserById } from "../users";
-import { getGuild, visitorRole } from "../utils";
+import { BotLog, getGuild, visitorRole } from "../utils";
 import { c18Gif, tenor } from "../utils/gifs";
 import { c18Quotes } from "../utils/quotes";
 import {
@@ -216,7 +216,16 @@ export const registerCommands = (config: RegisterCommandsArgs) => {
               value: camelCase(k.type),
             }))
           )
+      )
+      .addBooleanOption((option: Discord.SlashCommandBooleanOption) =>
+        option
+          .setName(KudosOption.public)
+          .setDescription(
+            "By default the kudos you send are anonymous. Choose true to let them know it was you."
+          )
+          .setRequired(false)
       ),
+
     command("list_kudos"),
     command("sync_guild_users"),
   ].map((command) => command.toJSON());
@@ -587,7 +596,6 @@ export const commandReactions = async ({
             ? validAssignee?.assigneeUser?.displayName
             : "you"
         }.`,
-        ephemeral: true,
       });
 
       return {
@@ -638,6 +646,7 @@ export const commandReactions = async ({
 
       const kudosRecipient = options.getUser(KudosOption.to, true);
       const kudosType = options.getString(KudosOption.type, true);
+      const publicOption = options.getBoolean(KudosOption.public);
 
       if (user.id === kudosRecipient.id) {
         await interaction.reply({
@@ -651,6 +660,30 @@ export const commandReactions = async ({
       await interaction.reply({
         content: "Thank you! https://next-cf.up.railway.app/kudos",
         ephemeral: true,
+      });
+
+      const kudosAnnouncementMessage = derive(() => {
+        if (publicOption) {
+          return `Hey ${userMention(kudosRecipient.id)}! ${userMention(
+            user.id
+          )} thinks you're ${kudosType}.`;
+        }
+
+        return `Hey ${userMention(
+          kudosRecipient.id
+        )}! Someone thinks you're ${kudosType}.`;
+      });
+
+      BotLog.publicLog(guild, () => {
+        return Embed({
+          title: "Kudos",
+          url: "https://next-cf.up.railway.app/kudos",
+          description: kudosAnnouncementMessage,
+
+          footer: {
+            text: "React to this message to let them know you appreciate this.",
+          },
+        });
       });
 
       return {
