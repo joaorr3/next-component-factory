@@ -63,6 +63,10 @@ export const startBot = ({
           GUILD_ID: guild.id,
         });
       }
+
+      const azureDiscord = new AzureDiscord(client)
+      const azureMail = new AzureMail({ autoReconnect: true })
+      azureMail.on("mail", (mail) => azureDiscord.processMail(mail))
     });
 
     client.on(Discord.Events.InteractionCreate, async (interaction) => {
@@ -356,12 +360,6 @@ export const startBot = ({
         });
       }
     });
-
-    client.on("ready", () => {
-      const azureDiscord = new AzureDiscord(client)
-      const azureMail = new AzureMail({ autoReconnect: true })
-      azureMail.on("mail", (mail) => azureDiscord.processMail(mail))
-    })
 
     client.login(DISCORD_BOT_TOKEN);
   }
