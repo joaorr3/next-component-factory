@@ -196,7 +196,7 @@ export const Select = ({
     <BaseField label={label} description={description} error={error}>
       {/* @ts-ignore */}
       <TwSelect ref={ref} defaultValue="" disabled={disabled} {...register}>
-        <option value="" disabled hidden>
+        <option value="" disabled>
           -- select an option --
         </option>
 

@@ -69,7 +69,7 @@ export const IssueFiltersComponent = ({
           defaultValue={defaultValues().type}
           {...register("type")}
         >
-          <option value="">Issue Type</option>
+          <option value="">None</option>
 
           {["bug", "help", "feat", "cr"].map((value, key) => {
             return (
