@@ -23,7 +23,7 @@ export const useRoles = (props?: UseRoles) => {
 
   const { anyOf, allOf } = props;
 
-  const isAdmin = roles?.find((r) => r.id === Roles.admin);
+  const isAdmin = !!roles?.find((r) => r.id === Roles.admin);
   if (isAdmin) {
     return {
       valid: true,
@@ -32,8 +32,8 @@ export const useRoles = (props?: UseRoles) => {
     };
   }
 
-  const hasAnyOf = getAnyOf(roles, anyOf);
-  const hasAllOf = getAllOf(roles, allOf);
+  const hasAnyOf = getHasAnyOf(roles, anyOf);
+  const hasAllOf = getHasAllOf(roles, allOf);
 
   if (anyOf && allOf) {
     return {
@@ -52,10 +52,10 @@ export const useRoles = (props?: UseRoles) => {
 
 const hasRolesMap = (userRoles?: Role[], roles?: RolesKeys[]) => {
   if (!userRoles) {
-    return [];
+    return undefined;
   }
 
-  const hasRoles = roles?.map((r) => {
+  const hasRolesMap = roles?.map((r) => {
     const roleId = Roles[r];
     const has = !!userRoles?.find(({ id }) => id === roleId);
     return {
@@ -64,19 +64,24 @@ const hasRolesMap = (userRoles?: Role[], roles?: RolesKeys[]) => {
     };
   });
 
-  return hasRoles;
+  return hasRolesMap;
 };
 
-const getAnyOf = (userRoles?: Role[], anyOfRoles?: RolesKeys[]) => {
+const getHasAnyOf = (userRoles?: Role[], anyOfRoles?: RolesKeys[]) => {
   if (!anyOfRoles) return false;
   const hasRoles = hasRolesMap(userRoles, anyOfRoles);
-  const hasAllRoles = !!hasRoles?.find((r) => r.has);
-  return hasAllRoles;
+
+  // The user need to have at least one of the necessary roles.
+  const hasAtLeastOneRole = !!hasRoles?.find((r) => r.has);
+  return hasAtLeastOneRole;
 };
 
-const getAllOf = (userRoles?: Role[], allOfRoles?: RolesKeys[]) => {
+const getHasAllOf = (userRoles?: Role[], allOfRoles?: RolesKeys[]) => {
   if (!allOfRoles) return false;
-  const hasRoles = hasRolesMap(userRoles, allOfRoles);
-  const hasAllRoles = !!hasRoles?.find((r) => !r.has);
-  return hasAllRoles;
+  const rolesMap = hasRolesMap(userRoles, allOfRoles);
+
+  // If the user has all the roles necessary, this value should be zero.
+  const rolesInLack = rolesMap?.filter((r) => !r.has).length;
+  const hasAllOfRoles = rolesInLack === 0;
+  return hasAllOfRoles;
 };

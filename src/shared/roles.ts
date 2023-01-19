@@ -4,8 +4,8 @@ import { z } from "zod";
 
 export const Roles = {
   admin: "976885627066933248",
-  dev: "976884124449116342",
   cf: "977206962833997824",
+  dev: "976884124449116342",
   labs: "978344432069927003",
   test: "test",
 } as const;
