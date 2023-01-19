@@ -1,4 +1,5 @@
 import { useSession } from "next-auth/react";
+import { derive } from "../shared/utils";
 import { trpc } from "../utils/trpc";
 
 export const useUser = () => {
@@ -12,9 +13,15 @@ export const useUser = () => {
     enabled: status === "authenticated",
   });
 
+  const isLoading = derive(() => {
+    const loading = user.isLoading && roles.isLoading;
+    const status = user.fetchStatus !== "idle" && roles.fetchStatus !== "idle";
+    return loading && status;
+  });
+
   return {
     user: user.data,
     roles: roles.data,
-    isLoading: user.isLoading && roles.isLoading,
+    isLoading,
   };
 };

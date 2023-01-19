@@ -3,7 +3,8 @@ import type { GuildUser } from "@prisma/client";
 import Discord, { roleMention, Routes, userMention } from "discord.js";
 import { camelCase } from "lodash";
 import { env } from "../../../env/server";
-import { derive, randomInt } from "../../utils";
+import { derive } from "../../../shared/utils";
+import { randomInt } from "../../utils";
 import { logger } from "../../utils/logger";
 import { getTextChannel, getThreadChannel } from "../channels";
 import {
