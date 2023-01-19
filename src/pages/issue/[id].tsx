@@ -4,6 +4,7 @@ import React from "react";
 import { BackButton } from "../../components/BackButton";
 import { IssueDetail } from "../../components/Issue/IssueDetail";
 import { routes } from "../../routes";
+import { useLoading } from "../../utils/GlobalState/GlobalStateProvider";
 import { withRoles } from "../../utils/hoc";
 import { trpc } from "../../utils/trpc";
 
@@ -14,6 +15,8 @@ export const IssueDetails = (): JSX.Element => {
   const issue = trpc.issues.detail.useQuery({
     id: typeof id === "string" ? id : "",
   });
+
+  useLoading(issue.isLoading && issue.fetchStatus !== "idle");
 
   return (
     <React.Fragment>

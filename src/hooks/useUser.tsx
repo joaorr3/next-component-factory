@@ -7,10 +7,12 @@ export const useUser = () => {
 
   const user = trpc.user.current.useQuery(undefined, {
     enabled: status === "authenticated",
+    staleTime: 600000,
   });
 
   const roles = trpc.roles.currentUser.useQuery(undefined, {
     enabled: status === "authenticated",
+    staleTime: 600000,
   });
 
   const isLoading = derive(() => {

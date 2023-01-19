@@ -1,6 +1,7 @@
 import type { GuildUser } from "@prisma/client";
 import produce from "immer";
 import React, { type Reducer } from "react";
+import { type FiltersModel } from "../../components/Issue/Filters";
 import { localStorageActions } from "../../hooks/useLocalStorage";
 import { useUser } from "../../hooks/useUser";
 import type { Role } from "../../shared/roles";
@@ -13,6 +14,9 @@ export type ContextModel = {
     profile?: GuildUser;
     roles?: Role[];
   };
+  issues: {
+    searchFilters: FiltersModel;
+  };
 };
 
 export enum ActionTypes {
@@ -21,6 +25,7 @@ export enum ActionTypes {
   SET_LOADING = "SET_LOADING",
   SET_USER = "SET_USER",
   REMOVE_USER = "REMOVE_USER",
+  SET_ISSUE_FILTERS = "SET_ISSUE_FILTERS",
 }
 
 type InitActionType = {
@@ -28,7 +33,7 @@ type InitActionType = {
   payload: Partial<ContextModel>;
 };
 
-type SetThemeActionType = {
+type SetThemeNameActionType = {
   type: ActionTypes.SET_THEME_NAME;
   payload: Partial<ContextModel["themeName"]>;
 };
@@ -48,12 +53,18 @@ type RemoveUserActionType = {
   payload: undefined;
 };
 
+type SetIssueFiltersActionType = {
+  type: ActionTypes.SET_ISSUE_FILTERS;
+  payload: Partial<ContextModel["issues"]["searchFilters"]>;
+};
+
 type Actions =
   | InitActionType
-  | SetThemeActionType
+  | SetThemeNameActionType
   | SetLoadingActionType
   | SetUserActionType
-  | RemoveUserActionType;
+  | RemoveUserActionType
+  | SetIssueFiltersActionType;
 
 type ActionHandler<P> = (payload: P, fx?: (payload: P) => void) => void;
 
@@ -61,11 +72,12 @@ export interface ContextHandlers {
   state: ContextModel;
   dispatch: React.Dispatch<Actions>;
   actions: {
-    init: ActionHandler<Partial<ContextModel>>;
-    setThemeName: ActionHandler<Partial<ContextModel["themeName"]>>;
-    setLoading: ActionHandler<Partial<ContextModel["isLoading"]>>;
-    setUser: ActionHandler<Partial<ContextModel["user"]>>;
+    init: ActionHandler<InitActionType["payload"]>;
+    setThemeName: ActionHandler<SetThemeNameActionType["payload"]>;
+    setLoading: ActionHandler<SetLoadingActionType["payload"]>;
+    setUser: ActionHandler<SetUserActionType["payload"]>;
     removeUser: () => void;
+    setIssueFilters: ActionHandler<SetIssueFiltersActionType["payload"]>;
   };
 }
 
@@ -94,6 +106,17 @@ const GlobalStateProducer = produce<Reducer<ContextModel, Actions>>(
         draft.user.profile = undefined;
         draft.user.roles = undefined;
         break;
+      case ActionTypes.SET_ISSUE_FILTERS:
+        const id = action.payload.id;
+        const title = action.payload.title;
+        const author = action.payload.author;
+        const type = action.payload.type;
+
+        draft.issues.searchFilters.id = id;
+        draft.issues.searchFilters.title = title;
+        draft.issues.searchFilters.author = author;
+        draft.issues.searchFilters.type = type;
+        break;
     }
   }
 );
@@ -108,6 +131,9 @@ const initialState: ContextModel = {
   themeName: "dark",
   isLoading: false,
   user: {},
+  issues: {
+    searchFilters: {},
+  },
 };
 
 export function GlobalStateProvider({
@@ -140,6 +166,10 @@ export function GlobalStateProvider({
       },
       removeUser: () => {
         dispatch({ type: ActionTypes.REMOVE_USER, payload: undefined });
+      },
+      setIssueFilters: (payload, fx) => {
+        dispatch({ type: ActionTypes.SET_ISSUE_FILTERS, payload });
+        fx?.(payload);
       },
     }),
     []

@@ -10,29 +10,45 @@ import {
 } from "../../components/Issue/Filters";
 import { IssueCard } from "../../components/Issue/IssueCard";
 import { Button } from "../../components/IssueForm/Fields";
+import { useHandler } from "../../hooks/useHandler";
 import { routes } from "../../routes";
+import {
+  useGlobalState,
+  useLoading,
+} from "../../utils/GlobalState/GlobalStateProvider";
 import { withRoles } from "../../utils/hoc";
 import { trpc } from "../../utils/trpc";
 
 const routeInfo = routes.IssueOpen;
 
 const Issue: NextPage = () => {
-  const [filters, setFilters] = React.useState<FiltersModel>({});
+  const {
+    state: {
+      issues: { searchFilters },
+    },
+    actions,
+  } = useGlobalState();
 
-  const hasAnyFilter = !!filters.id || !!filters.title || !!filters.author;
+  const issues = trpc.issues.search.useQuery(searchFilters, {
+    staleTime: 300000,
+  });
 
-  const issues = trpc.issues.search.useQuery(filters);
-
-  const hasResults = hasAnyFilter && !!issues.data?.length;
-  const showAllData = !hasAnyFilter && !!issues.data?.length;
+  useLoading(issues.isLoading && issues.fetchStatus !== "idle");
 
   const handleOnPress = React.useCallback((id?: number) => {
     Router.push(routes.IssueDetail.dynamicPath(String(id)));
   }, []);
 
-  const handleFilters = React.useCallback((values: FiltersModel) => {
-    setFilters(values);
-  }, []);
+  const handleFilters = React.useCallback(
+    (values: FiltersModel) => {
+      actions.setIssueFilters(values);
+    },
+    [actions]
+  );
+
+  const getDefaultValues = useHandler(() => {
+    return searchFilters;
+  }, [searchFilters]);
 
   return (
     <React.Fragment>
@@ -46,7 +62,16 @@ const Issue: NextPage = () => {
           </Link>
         </div>
 
-        <IssueFilters onChange={handleFilters} />
+        <div className="mb-5">
+          <IssueFilters
+            onChange={handleFilters}
+            defaultValues={getDefaultValues}
+          />
+
+          <span className="text grow text-xs opacity-50">
+            {issues.data?.length} results
+          </span>
+        </div>
 
         <div>
           {issues.data?.map((issue, key) => (
@@ -57,12 +82,6 @@ const Issue: NextPage = () => {
             />
           ))}
         </div>
-
-        {!hasResults && !showAllData && (
-          <div className="flex justify-center">
-            <p>No results</p>
-          </div>
-        )}
       </main>
     </React.Fragment>
   );

@@ -11,11 +11,15 @@ export type FiltersModel = {
 };
 
 export type IssueFiltersProps = {
+  defaultValues: () => FiltersModel;
   onChange?: (props: FiltersModel) => void;
 };
 
-export const IssueFiltersX = ({ onChange }: IssueFiltersProps): JSX.Element => {
-  const { getValues, setValue, watch, register } = useForm<FiltersModel>();
+export const IssueFiltersComponent = ({
+  defaultValues,
+  onChange,
+}: IssueFiltersProps): JSX.Element => {
+  const { getValues, setValue, watch, register } = useForm<FiltersModel>({});
 
   const handleSetValue = debounce(
     (field: keyof FiltersModel, value: string) => {
@@ -25,8 +29,8 @@ export const IssueFiltersX = ({ onChange }: IssueFiltersProps): JSX.Element => {
   );
 
   React.useEffect(() => {
-    const subscription = watch((value) => {
-      onChange?.(value);
+    const subscription = watch((filters) => {
+      onChange?.(filters);
     });
     return () => subscription.unsubscribe();
   }, [onChange, watch]);
@@ -34,31 +38,38 @@ export const IssueFiltersX = ({ onChange }: IssueFiltersProps): JSX.Element => {
   return (
     <div>
       <p className="ml-3 mb-3">Search</p>
-      <div className="mb-5 flex">
+      <div className="flex">
         <Fields.TwTextField
           className="mr-4"
           placeholder="Issue ID"
+          defaultValue={defaultValues().id}
+          {...register("id")}
           value={getValues("id")}
           onChange={(e) => handleSetValue("id", e.target.value)}
         />
         <Fields.TwTextField
           className="mr-4"
           placeholder="Issue Title"
+          defaultValue={defaultValues().title}
+          {...register("title")}
           value={getValues("title")}
           onChange={(e) => handleSetValue("title", e.target.value)}
         />
         <Fields.TwTextField
           className="mr-4"
           placeholder="Issue Author"
+          defaultValue={defaultValues().author}
+          {...register("author")}
           value={getValues("author")}
           onChange={(e) => handleSetValue("author", e.target.value)}
         />
 
-        {/* @ts-ignore */}
-        <Fields.TwSelect {...register("type")}>
-          <option value="" selected>
-            Issue Type
-          </option>
+        <Fields.TwSelect
+          // @ts-ignore
+          defaultValue={defaultValues().type}
+          {...register("type")}
+        >
+          <option value="">Issue Type</option>
 
           {["bug", "help", "feat", "cr"].map((value, key) => {
             return (
@@ -73,4 +84,4 @@ export const IssueFiltersX = ({ onChange }: IssueFiltersProps): JSX.Element => {
   );
 };
 
-export const IssueFilters = React.memo(IssueFiltersX);
+export const IssueFilters = React.memo(IssueFiltersComponent);

@@ -1,7 +1,9 @@
 import { type Issue } from "@prisma/client";
+import { isNaN } from "lodash";
 import { z } from "zod";
 import { type FiltersModel } from "../../../components/Issue/Filters";
 import { issueProcedureSchema } from "../../../components/IssueForm/validator";
+import { derive } from "../../../shared/utils";
 
 import { protectedProcedure, router } from "../trpc";
 
@@ -23,19 +25,36 @@ export const issuesRouter = router({
   search: protectedProcedure
     .input(z.custom<FiltersModel>())
     .query(async ({ ctx, input: { id, title, author, type } }) => {
+      const validId = derive(() => {
+        if (id) {
+          const parsed = parseInt(id);
+          return !isNaN(parsed) ? parsed : undefined;
+        }
+
+        return undefined;
+      });
+
+      if (!!validId || !!title || !!author || !!type) {
+        return await ctx.prisma.issue.findMany({
+          where: {
+            id: validId,
+            title: {
+              contains: title,
+            },
+            author: {
+              contains: author,
+            },
+            type: {
+              contains: type,
+            },
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        });
+      }
+
       return await ctx.prisma.issue.findMany({
-        where: {
-          id: id ? Number(id) : undefined,
-          title: {
-            contains: title,
-          },
-          author: {
-            contains: author,
-          },
-          type: {
-            contains: type,
-          },
-        },
         orderBy: {
           createdAt: "desc",
         },

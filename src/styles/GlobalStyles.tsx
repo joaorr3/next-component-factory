@@ -1,6 +1,7 @@
 import { createGlobalStyle, css } from "styled-components";
 import { type ThemeModel } from "../theme";
 
+//region Normalize
 export const normalize = css`
   /* http://meyerweb.com/eric/tools/css/reset/ 
    v2.0 | 20110126
@@ -133,6 +134,8 @@ export const normalize = css`
   }
 `;
 
+//endregion
+
 const customScrollBar = css`
   &::-webkit-scrollbar {
     width: 8px;
@@ -156,7 +159,7 @@ export const GlobalStyle = createGlobalStyle<{ theme: ThemeModel }>`
     width: 100%;
     overflow-x: hidden;
     font-size: 100%;
-    /* ${customScrollBar} */
+    ${customScrollBar}
   }
   
   body {
