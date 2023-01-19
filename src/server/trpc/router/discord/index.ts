@@ -1,20 +1,22 @@
 import { WebhookClient } from "discord.js";
-import { env } from "../../../env/server.mjs";
-import { getArtifactUrl, npmInstallHint } from "../../../shared/dataUtils";
+import { env } from "../../../../env/server";
+import { getArtifactUrl, npmInstallHint } from "../../../../shared/dataUtils";
+import { WebhookType } from "../../../../shared/webhookType";
 import {
   buildValidator,
-  prValidator,
   workItemValidator,
-} from "../../../utils/validators/discord";
-import { publicProcedure, router } from "../trpc";
+} from "../../../../utils/validators/discord";
+import { publicProcedure, router } from "../../trpc";
+import { prRouter } from "./pr";
 
-const webhookClient = new WebhookClient({
-  url: env.DISCORD_WEBHOOK_URL,
+export const c18WebhookClient = new WebhookClient({
+  url: env.DISCORD_WEBHOOK_C18_URL,
 });
 
 export const discordRouter = router({
-  release: publicProcedure.input(buildValidator).query(async ({ input }) => {
-    webhookClient.send({
+  build: publicProcedure.input(buildValidator).query(async ({ input }) => {
+    c18WebhookClient.send({
+      content: WebhookType.BUILD,
       embeds: [
         {
           author: {
@@ -41,40 +43,13 @@ export const discordRouter = router({
 
     return "OK";
   }),
-  pr: publicProcedure.input(prValidator).query(async ({ input }) => {
-    webhookClient.send({
-      embeds: [
-        {
-          author: {
-            name: input.resource.createdBy.displayName,
-            url: input.resource.createdBy.url,
-            icon_url: input.resource.createdBy.imageUrl,
-          },
-          title: input.resource.title,
-          description: input.resource.description,
-          fields: [
-            {
-              name: "Source branch",
-              value: input.resource.sourceRefName,
-              inline: true,
-            },
-            {
-              name: "Merge Status",
-              value: input.resource.mergeStatus,
-              inline: true,
-            },
-          ],
-          url: input.resource.url,
-        },
-      ],
-    });
-
-    return "OK";
-  }),
+  pr: prRouter,
   workItem: publicProcedure
     .input(workItemValidator)
     .query(async ({ input }) => {
-      webhookClient.send({
+      c18WebhookClient.send({
+        isWebhook: true,
+        content: `${WebhookType.WORK_ITEM}`,
         embeds: [
           {
             author: {

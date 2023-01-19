@@ -1,11 +1,11 @@
 import { Client } from "@notionhq/client";
 import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 import { range } from "lodash";
+import { env } from "../../env/server";
 import { guildChannelUrl } from "../bot/channels";
 import { IssueScope, IssueSeverityLevel } from "../bot/commands/enums";
 import { c18Avatar } from "../bot/constants";
 import type { IssueDetailsModel, Notion } from "../models";
-import { config } from "../utils";
 import { logger } from "../utils/logger";
 
 const space: Notion.Spacer = {
@@ -156,9 +156,9 @@ const scopeToLabel = (scope?: string | null) => {
 export const startNotion = ({ start }: { start: boolean }) => {
   if (!start) return;
 
-  const { NOTION_TOKEN, NOTION_ISSUES_DB_ID } = config();
+  // const { NOTION_TOKEN, NOTION_ISSUES_DB_ID } = config();
   const notion = new Client({
-    auth: NOTION_TOKEN,
+    auth: env.NOTION_TOKEN,
   });
 
   if (notion) {
@@ -177,7 +177,7 @@ export const startNotion = ({ start }: { start: boolean }) => {
   }) => {
     try {
       const { results } = (await notion.databases.query({
-        database_id: NOTION_ISSUES_DB_ID,
+        database_id: env.NOTION_ISSUES_DB_ID,
       })) as Notion.QueryDatabaseRes;
 
       const pagesProperty = (property: string) =>
@@ -236,7 +236,7 @@ export const startNotion = ({ start }: { start: boolean }) => {
       const res = await notion.pages.create({
         parent: {
           type: "database_id",
-          database_id: NOTION_ISSUES_DB_ID,
+          database_id: env.NOTION_ISSUES_DB_ID,
         },
         icon: {
           type: "external",

@@ -1,5 +1,6 @@
 import type Discord from "discord.js";
 import { getTextChannel } from "../channels";
+import { GuildChannelName } from "../constants";
 
 function getErrorStack(error: unknown) {
   if (typeof error === "string") return error;
@@ -10,23 +11,12 @@ function getErrorStack(error: unknown) {
 export function baseBotLogger(name?: string) {
   return (
     guild: Discord.Guild,
-    messageFn: () => string | Discord.EmbedBuilder
+    messageFn: () => Discord.BaseMessageOptions
   ) => {
     const botsChannel = getTextChannel(guild, { name });
     if (!botsChannel) return;
 
-    let message: Discord.BaseMessageOptions;
-    try {
-      const result = messageFn();
-      if (typeof result === "string") {
-        message = { content: result };
-      } else {
-        message = { embeds: [result] };
-      }
-    } catch (error: unknown) {
-      console.error(`Unable to get message for bot log`, getErrorStack(error));
-      return;
-    }
+    const message: Discord.BaseMessageOptions = messageFn();
 
     const callerStack = new Error("Caller stack:");
 
@@ -45,5 +35,9 @@ export function baseBotLogger(name?: string) {
   };
 }
 
-export const log = baseBotLogger("debug-bot-logs");
-export const publicLog = baseBotLogger("bot-logs");
+export const log = baseBotLogger(GuildChannelName.debugBotLogs);
+export const publicLog = baseBotLogger(GuildChannelName.botLogs);
+
+export const prLog = baseBotLogger(GuildChannelName.pr);
+export const buildLog = baseBotLogger(GuildChannelName.releases);
+export const workItemLog = baseBotLogger(GuildChannelName.workItem);

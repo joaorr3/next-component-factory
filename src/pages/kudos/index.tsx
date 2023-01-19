@@ -1,21 +1,24 @@
+import { ReactSlipAndSlide } from "@react-slip-and-slide/web";
+import {
+  Chart as ChartJS,
+  Filler,
+  LineElement,
+  PointElement,
+  RadialLinearScale,
+  Tooltip,
+} from "chart.js";
+import { shuffle } from "lodash";
+import Head from "next/head";
 import Image from "next/image";
+import React from "react";
+import { Radar } from "react-chartjs-2";
 import styled, { css } from "styled-components";
 import { P } from "../../components/base";
 import type { ParsedKudos } from "../../shared/dataUtils";
 import { useTheme } from "../../styles/ThemeProvider";
+import { useLoading } from "../../utils/GlobalState/GlobalStateProvider";
 import { trpc } from "../../utils/trpc";
-import { Radar } from "react-chartjs-2";
-import { ReactSlipAndSlide } from "@react-slip-and-slide/web";
-import {
-  Chart as ChartJS,
-  RadialLinearScale,
-  PointElement,
-  LineElement,
-  Filler,
-  Tooltip,
-} from "chart.js";
-import { shuffle } from "lodash";
-import React from "react";
+// import { withRoles } from "../../utils/hoc";
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip);
 
@@ -38,39 +41,51 @@ const customScrollBarBase = css`
 const Kudos = () => {
   const kudos = trpc.kudos.all.useQuery();
 
-  return (
-    <div
-      style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
-    >
-      {kudos.data && (
-        <div
-          className="outer"
-          style={{
-            width: "100%",
-            // overflow: "hidden",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          <ReactSlipAndSlide
-            data={shuffle(kudos.data)}
-            itemWidth={300}
-            itemHeight={500}
-            overflowHidden={false}
-            containerWidth={1000}
-            renderItem={({ item, index }) => {
-              return <KudosCard key={index} {...item} />;
-            }}
-          />
-        </div>
-      )}
+  useLoading(kudos.isLoading);
 
-      {/* <div style={{ display: "flex", flexWrap: "wrap" }}>
+  return (
+    <React.Fragment>
+      <Head>
+        <title>Kudos</title>
+      </Head>
+
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        {kudos.data && (
+          <div
+            className="outer"
+            style={{
+              width: "100%",
+              // overflow: "hidden",
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <ReactSlipAndSlide
+              data={shuffle(kudos.data)}
+              itemWidth={300}
+              itemHeight={500}
+              overflowHidden={false}
+              containerWidth={1000}
+              renderItem={({ item, index }) => {
+                return <KudosCard key={index} {...item} />;
+              }}
+            />
+          </div>
+        )}
+
+        {/* <div style={{ display: "flex", flexWrap: "wrap" }}>
         {kudos.data?.map((data, i) => {
           return <KudosCard key={i} {...data} />;
         })}
       </div> */}
-    </div>
+      </div>
+    </React.Fragment>
   );
 };
 
@@ -87,11 +102,16 @@ const KudosCardContainer = styled.div`
     backgroundColorSecondary};
   box-shadow: 0px 4px 20px 4px #00000010;
   user-select: none;
+  cursor: grab;
 
   &:hover {
     box-shadow: 0px 8px 20px 6px #00000026;
   }
+  &:active {
+    cursor: grabbing;
+  }
 `;
+
 const ScrollView = styled.div`
   ${customScrollBarBase}
   width: 100%;
@@ -186,7 +206,7 @@ const Avatar = ({ name, avatarURL }: ParsedKudos["user"]) => {
   );
 };
 
-const Spider = ({ user, kudos }: ParsedKudos) => {
+const Spider = ({ kudos }: ParsedKudos) => {
   const ks = Object.entries(kudos).map(([k, _]) => k);
   const vs = Object.entries(kudos).map(([_, v]) => v);
 
@@ -249,4 +269,5 @@ const Spider = ({ user, kudos }: ParsedKudos) => {
   );
 };
 
-export default React.memo(Kudos);
+export default Kudos;
+// export default withRoles(Kudos, { cf: true });

@@ -8,6 +8,7 @@ export const themeNames = {
 export type ThemeNames = keyof typeof themeNames;
 
 export type ThemeModel = {
+  themeName: ThemeNames;
   backgroundColor: string;
   backgroundColorSecondary: string;
   textColor: string;
@@ -18,6 +19,7 @@ export type ThemeModel = {
 const baseFontSize = 16;
 
 export const Light: ThemeModel = {
+  themeName: "light",
   backgroundColor: "#fff",
   backgroundColorSecondary: "#eaeaea",
   textColor: "#000",
@@ -25,6 +27,7 @@ export const Light: ThemeModel = {
   fontSize: baseFontSize,
 };
 export const Dark: ThemeModel = {
+  themeName: "dark",
   backgroundColor: "#181818",
   backgroundColorSecondary: "#1e1e1e",
   textColor: "#D3D3D3",
@@ -39,8 +42,11 @@ export const Themes: Record<ThemeNames, ThemeModel> = {
 
 export function setColorsByTheme() {
   const root = document.documentElement;
+
+  const fallback = JSON.stringify("dark");
+
   const stored = JSON.parse(
-    window.localStorage.getItem("currentTheme") || "light"
+    window.localStorage.getItem("currentTheme") || fallback
   );
 
   const darkBg = "#181818";

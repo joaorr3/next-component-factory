@@ -89,22 +89,35 @@ export const prValidator = baseValidator.merge(
         project: z.object({
           id: z.string(),
           name: z.string(),
+          description: z.string(),
           url: z.string(),
           state: z.string(),
+          revision: z.number(),
           visibility: z.string(),
-          lastUpdateTime: z.string(),
+          lastUpdateTime: z.string().datetime(),
         }),
-        defaultBranch: z.string(),
+        size: z.number(),
         remoteUrl: z.string(),
+        sshUrl: z.string(),
+        webUrl: z.string(),
+        isDisabled: z.boolean(),
+        isInMaintenance: z.boolean(),
       }),
       pullRequestId: z.number(),
+      codeReviewId: z.number(),
       status: z.string(),
       createdBy: z.object({
         displayName: z.string(),
         url: z.string(),
+        _links: z.object({
+          avatar: z.object({
+            href: z.string(),
+          }),
+        }),
         id: z.string(),
         uniqueName: z.string(),
         imageUrl: z.string(),
+        descriptor: z.string(),
       }),
       creationDate: z.string(),
       title: z.string(),
@@ -112,6 +125,7 @@ export const prValidator = baseValidator.merge(
       sourceRefName: z.string(),
       targetRefName: z.string(),
       mergeStatus: z.string(),
+      isDraft: z.boolean(),
       mergeId: z.string(),
       lastMergeSourceCommit: z.object({
         commitId: z.string(),
@@ -121,26 +135,22 @@ export const prValidator = baseValidator.merge(
         commitId: z.string(),
         url: z.string(),
       }),
-      lastMergeCommit: z.object({
-        commitId: z.string(),
-        url: z.string(),
-      }),
       reviewers: z.array(
         z.object({
           reviewerUrl: z.string().nullable(),
           vote: z.number(),
+          hasDeclined: z.boolean(),
+          isFlagged: z.boolean(),
           displayName: z.string(),
           url: z.string(),
+          _links: z.object({
+            avatar: z.object({
+              href: z.string(),
+            }),
+          }),
           id: z.string(),
           uniqueName: z.string(),
           imageUrl: z.string(),
-          isContainer: z.boolean(),
-        })
-      ),
-      commits: z.array(
-        z.object({
-          commitId: z.string(),
-          url: z.string(),
         })
       ),
       url: z.string(),
@@ -152,6 +162,8 @@ export const prValidator = baseValidator.merge(
           href: z.string(),
         }),
       }),
+      supportsIterations: z.boolean(),
+      artifactId: z.string(),
     }),
   })
 );

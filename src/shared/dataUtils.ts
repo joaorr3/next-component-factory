@@ -40,6 +40,7 @@ export const parseKudos = (kudos?: Input) => {
       isBot: !!to?.isBot,
       roles: to?.roles || "",
       notionUserId: to?.notionUserId || null,
+      azureUserId: to?.azureUserId || null,
     })
   );
   const grouped = groupBy(kudos, "toId");

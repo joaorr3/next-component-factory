@@ -2,6 +2,7 @@ import { REST } from "@discordjs/rest";
 import type { GuildUser } from "@prisma/client";
 import Discord, { roleMention, Routes, userMention } from "discord.js";
 import { camelCase } from "lodash";
+import { env } from "../../../env/server";
 import { derive, randomInt } from "../../utils";
 import { logger } from "../../utils/logger";
 import { getTextChannel, getThreadChannel } from "../channels";
@@ -17,7 +18,6 @@ import type {
   CommandReactionsArgs,
   CommandsResponse,
   DiscordCommandObject,
-  RegisterCommandsArgs,
   Roles,
 } from "../types";
 import { getUserById } from "../users";
@@ -51,7 +51,7 @@ import {
 import { issueCommand } from "./issue/issue-command";
 import { getArtifactUrl, getPrUrl, npmInstallHint } from "./utils";
 
-export const registerCommands = (config: RegisterCommandsArgs) => {
+export const registerCommands = () => {
   const commands = [
     command("ping"),
     command("gif"),
@@ -88,13 +88,15 @@ export const registerCommands = (config: RegisterCommandsArgs) => {
       .addAttachmentOption((option) =>
         option
           .setName(IssueCommandOptions.attachment)
-          .setDescription("Screenshot")
+          .setDescription(
+            "Screenshots are very useful, as they allows us to quickly understand the context."
+          )
           .setRequired(true)
       )
       .addAttachmentOption((option) =>
         option
           .setName(IssueCommandOptions.attachment2)
-          .setDescription("Screenshot 2")
+          .setDescription("Optional screenshot")
           .setRequired(false)
       )
       .addStringOption((option) =>
@@ -230,18 +232,12 @@ export const registerCommands = (config: RegisterCommandsArgs) => {
     command("sync_guild_users"),
   ].map((command) => command.toJSON());
 
-  const rest = new REST({ version: "10" }).setToken(config.DISCORD_BOT_TOKEN);
+  const rest = new REST({ version: "10" }).setToken(env.DISCORD_BOT_TOKEN);
 
   rest
-    .put(
-      Routes.applicationGuildCommands(
-        config.DISCORD_CLIENT_ID,
-        config.GUILD_ID
-      ),
-      {
-        body: commands,
-      }
-    )
+    .put(Routes.applicationGuildCommands(env.DISCORD_CLIENT_ID, env.GUILD_ID), {
+      body: commands,
+    })
     .then(() => {
       logger.console.discord({
         level: "info",
@@ -506,7 +502,7 @@ export const commandReactions = async ({
     publish: async () => {
       const { options, user } = interaction;
       const releasesNotesChannel = getTextChannel(guild, {
-        name: GuildChannelName.releasesNotes,
+        name: GuildChannelName.releases,
       });
       const guildUser = getUserById(guild, user.id);
       const guildDevRole = getRole(guild, { name: GuildRoles.dev });
@@ -675,15 +671,19 @@ export const commandReactions = async ({
       });
 
       BotLog.publicLog(guild, () => {
-        return Embed({
-          title: "Kudos",
-          url: "https://next-cf.up.railway.app/kudos",
-          description: kudosAnnouncementMessage,
+        return {
+          embeds: [
+            Embed({
+              title: "Kudos",
+              url: "https://next-cf.up.railway.app/kudos",
+              description: kudosAnnouncementMessage,
 
-          footer: {
-            text: "React to this message to let them know you appreciate this.",
-          },
-        });
+              footer: {
+                text: "React to this message to let them know you appreciate this.",
+              },
+            }),
+          ],
+        };
       });
 
       return {
@@ -747,6 +747,7 @@ export const commandReactions = async ({
           ),
           avatarURL: user.avatarURL({ extension: "png" }),
           notionUserId: null,
+          azureUserId: null,
         })
       );
 

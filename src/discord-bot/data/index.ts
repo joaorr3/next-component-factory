@@ -230,7 +230,7 @@ export const startPrisma = ({ start }: { start: boolean }) => {
       });
       if (user) {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { notionUserId, id, ...restData } = user;
+        const { notionUserId, id, azureUserId, ...restData } = user;
         await prisma.guildUser.update({
           where: {
             id: user.id,

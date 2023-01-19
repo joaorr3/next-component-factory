@@ -1,7 +1,6 @@
 import type { GuildUser } from "@prisma/client";
 import type Discord from "discord.js";
 import type { IssueDetailsModel } from "../models";
-import type { EnvConfig } from "../utils";
 import type { IssueSeverityLevel } from "./commands/enums";
 
 export type ChannelType =
@@ -11,9 +10,9 @@ export type ChannelType =
   | Discord.ChannelType.GuildPublicThread;
 
 export type RegisterCommandsArgs = {
-  DISCORD_BOT_TOKEN: EnvConfig["DISCORD_BOT_TOKEN"];
-  DISCORD_CLIENT_ID: EnvConfig["DISCORD_CLIENT_ID"];
-  GUILD_ID: string;
+  discordBotToken: string;
+  discordClientId: string;
+  guildId: string;
 };
 
 export type IssueInfo = {
@@ -40,7 +39,8 @@ export type Roles =
   | "credit-experience"
   | "e-commerce"
   | "Visitors 👽"
-  | "personal-credit";
+  | "personal-credit"
+  | "T4G";
 
 export type CommandName =
   | "ping"

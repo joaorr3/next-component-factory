@@ -4,33 +4,33 @@ import { getUserById } from "../bot/users";
 import { getGuild } from "../bot/utils";
 import { logger } from "./logger";
 
-export type EnvConfig = {
-  DISCORD_BOT_TOKEN: string;
-  DISCORD_CLIENT_ID: string;
-  GUILD_NAME: string;
-  GUILD_ID: string;
-  NOTION_TOKEN: string;
-  NOTION_ISSUES_DB_ID: string;
-  capabilities: {
-    discord: boolean;
-    notion: boolean;
-    prisma: boolean;
-  };
-};
+// export type EnvConfig = {
+//   DISCORD_BOT_TOKEN: string;
+//   DISCORD_CLIENT_ID: string;
+//   GUILD_NAME: string;
+//   GUILD_ID: string;
+//   NOTION_TOKEN: string;
+//   NOTION_ISSUES_DB_ID: string;
+//   capabilities: {
+//     discord: boolean;
+//     notion: boolean;
+//     prisma: boolean;
+//   };
+// };
 
-export const config = (): EnvConfig => ({
-  DISCORD_BOT_TOKEN: process.env.DISCORD_BOT_TOKEN ?? "",
-  DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID ?? "",
-  GUILD_NAME: process.env.GUILD_NAME ?? "",
-  GUILD_ID: process.env.GUILD_ID ?? "",
-  NOTION_TOKEN: process.env.NOTION_TOKEN ?? "",
-  NOTION_ISSUES_DB_ID: process.env.NOTION_ISSUES_DB_ID ?? "",
-  capabilities: {
-    discord: process.env.START_DISCORD === "true",
-    notion: process.env.START_NOTION === "true",
-    prisma: process.env.START_PRISMA === "true",
-  },
-});
+// export const config = (): EnvConfig => ({
+//   DISCORD_BOT_TOKEN: process.env.DISCORD_BOT_TOKEN ?? "",
+//   DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID ?? "",
+//   GUILD_NAME: process.env.GUILD_NAME ?? "",
+//   GUILD_ID: process.env.GUILD_ID ?? "",
+//   NOTION_TOKEN: process.env.NOTION_TOKEN ?? "",
+//   NOTION_ISSUES_DB_ID: process.env.NOTION_ISSUES_DB_ID ?? "",
+//   capabilities: {
+//     discord: process.env.START_DISCORD === "true",
+//     notion: process.env.START_NOTION === "true",
+//     prisma: process.env.START_PRISMA === "true",
+//   },
+// });
 
 export const sleep = (t: number) =>
   new Promise((resolve) => setTimeout(resolve, t));
