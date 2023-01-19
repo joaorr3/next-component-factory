@@ -156,7 +156,6 @@ export const GlobalStyle = createGlobalStyle<{ theme: ThemeModel }>`
     width: 100%;
     overflow-x: hidden;
     font-size: 100%;
-    overflow-y: scroll !important;
     /* ${customScrollBar} */
   }
   
