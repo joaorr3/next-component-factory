@@ -1,6 +1,7 @@
 import { createGlobalStyle, css } from "styled-components";
 import { type ThemeModel } from "../theme";
 
+//region Normalize
 export const normalize = css`
   /* http://meyerweb.com/eric/tools/css/reset/ 
    v2.0 | 20110126
@@ -133,14 +134,32 @@ export const normalize = css`
   }
 `;
 
-export const GlobalStyle = createGlobalStyle<{ theme: ThemeModel }>`
-  ${normalize}
+//endregion
 
+const customScrollBar = css`
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #686868;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    background-clip: padding-box;
+  }
+`;
+
+export const GlobalStyle = createGlobalStyle<{ theme: ThemeModel }>`  
+  ${normalize}
+  
   html {
     height: 100%;
     width: 100%;
     overflow-x: hidden;
     font-size: 100%;
+    ${customScrollBar}
   }
   
   body {
@@ -150,11 +169,7 @@ export const GlobalStyle = createGlobalStyle<{ theme: ThemeModel }>`
     position: relative;
     overflow: hidden;
     font-family: 'Lato', sans-serif;
-    font-size: ${({ theme: { fontSize } }) => fontSize}px;
-    /* background-color: ${({ theme: { backgroundColor } }) =>
-      backgroundColor}; */
     background-color: var(--color-bg);
-    /* color: ${({ theme: { textColor } }) => textColor}; */
     color: var(--color-fg);
     transition-property: color, background-color;
     transition-duration: 220ms;
@@ -165,5 +180,4 @@ export const GlobalStyle = createGlobalStyle<{ theme: ThemeModel }>`
     height: 100%;
     width: 100%;
   }
-
 `;

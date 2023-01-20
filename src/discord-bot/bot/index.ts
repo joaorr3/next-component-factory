@@ -5,13 +5,15 @@ import Discord, {
   Partials,
   userMention,
 } from "discord.js";
+import { env } from "../../env/server";
 import { parseKudos } from "../../shared/dataUtils";
 import AzureDiscord from "../azure/controllers/discord";
 import AzureMail from "../azure/controllers/mail";
+import { WebhookType } from "../../shared/webhookType";
 import type { startPrisma } from "../data";
 import { notionBatchUpdate } from "../data/utils";
 import type { startNotion } from "../notion";
-import { config, logInteraction, sleep } from "../utils";
+import { logInteraction, sleep } from "../utils";
 import { logger } from "../utils/logger";
 import { getTextChannel, getThreadChannel } from "./channels";
 import { commandReactions, registerCommands } from "./commands";
@@ -30,9 +32,7 @@ export const startBot = ({
   notionActions?: ReturnType<typeof startNotion>;
   prismaActions?: ReturnType<typeof startPrisma>;
 }) => {
-  const { DISCORD_BOT_TOKEN, DISCORD_CLIENT_ID } = config();
-
-  if (DISCORD_BOT_TOKEN) {
+  if (env.DISCORD_BOT_TOKEN) {
     const client = new Discord.Client({
       intents: [
         GatewayIntentBits.Guilds,
@@ -41,27 +41,28 @@ export const startBot = ({
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.GuildMessageReactions,
         GatewayIntentBits.GuildMessageReactions,
+        GatewayIntentBits.GuildWebhooks,
       ],
       partials: [Partials.Message, Partials.Channel, Partials.Reaction],
     });
 
-    client.once(Discord.Events.ClientReady, () => {
+    client.once(Discord.Events.ClientReady, async () => {
       logger.console.discord({ level: "info", message: "Ready" });
 
       const guild = getGuild(client);
 
       if (guild) {
         BotLog.log(guild, () => {
-          return Embed({
-            title: "I'm ready! [Next]",
-          });
+          return {
+            embeds: [
+              Embed({
+                title: "I'm ready! [Next]",
+              }),
+            ],
+          };
         });
 
-        registerCommands({
-          DISCORD_CLIENT_ID,
-          DISCORD_BOT_TOKEN,
-          GUILD_ID: guild.id,
-        });
+        registerCommands();
       }
 
       const azureDiscord = new AzureDiscord(client)
@@ -151,28 +152,36 @@ export const startBot = ({
               }
               break;
             }
-            case "open": {
-              const { thread } = response;
+            case "assign": {
+              const { thread, user, assignee } = response;
 
-              const issueDetails =
-                await prismaActions?.getIssueDetailsByThreadId({
-                  discord_thread_id: thread?.id || null,
+              const pageId = await prismaActions?.getNotionPageByThreadId({
+                discord_thread_id: thread?.id || null,
+              });
+
+              const notionUserId =
+                await prismaActions?.getNotionUserIdByGuildUserId(
+                  assignee?.id || user.id
+                );
+
+              if (pageId && notionUserId) {
+                await notionActions?.updateAssignTo({
+                  pageId,
+                  userId: notionUserId,
                 });
-
-              if (!issueDetails) {
+                logger.db.notion({
+                  level: "info",
+                  message: `Assigned issue ${pageId} to ${notionUserId}`,
+                });
+              } else {
                 await thread?.send({
                   content: "Sorry, can't find any info about this issue.",
                 });
-                logger.db.discord({
-                  level: "info",
-                  message: `ThreadID: ${thread?.id} | issue details not found`,
+                logger.db.notion({
+                  level: "error",
+                  message: `Could not assign issue: ${pageId} to ${notionUserId}`,
                 });
               }
-
-              logger.console.discord({
-                level: "info",
-                message: `Issue Details: ${issueDetails?.title} - ${issueDetails?.author}`,
-              });
 
               break;
             }
@@ -361,6 +370,45 @@ export const startBot = ({
       }
     });
 
-    client.login(DISCORD_BOT_TOKEN);
+    client.on(Discord.Events.GuildMemberUpdate, async (member) => {
+      console.log(member.id);
+    });
+
+    client.on(Discord.Events.MessageCreate, async (message) => {
+      const guild = message.guild;
+      if (guild) {
+        if (message.webhookId) {
+          const whs = await guild?.fetchWebhooks();
+          const c18_wh = whs?.find(
+            (wh) => wh.id === env.DISCORD_WEBHOOK_C18_ID
+          );
+          const wh_message = await c18_wh?.fetchMessage(message.id);
+
+          if (c18_wh && wh_message) {
+            console.log("message: ", JSON.stringify(message));
+            // message from a webhook
+            switch (wh_message.content) {
+              case WebhookType.BUILD:
+                BotLog.buildLog(guild, () => {
+                  return { embeds: wh_message.embeds };
+                });
+                break;
+              case WebhookType.PR:
+                BotLog.prLog(guild, () => {
+                  return { embeds: wh_message.embeds };
+                });
+                break;
+              case WebhookType.WORK_ITEM:
+                BotLog.workItemLog(guild, () => {
+                  return { embeds: wh_message.embeds };
+                });
+                break;
+            }
+          }
+        }
+      }
+    });
+
+    client.login(env.DISCORD_BOT_TOKEN);
   }
 };

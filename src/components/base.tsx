@@ -5,19 +5,11 @@ export const P = styled.p`
 `;
 
 export const Bold = styled(P)`
-  font-weight: 900;
+  /* display: inline-block; */
+  font-weight: 600;
 `;
 
 export const A = styled(P)`
-  color: ${({ theme: { linkColor } }) => linkColor};
+  /* color: ${({ theme: { linkColor } }) => linkColor}; */
   cursor: pointer;
-`;
-
-export const Overlay = styled.div`
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
 `;

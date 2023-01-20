@@ -47,6 +47,9 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+
+  GuildUser     GuildUser @relation(fields: [discordUserId], references: [id])
+  discordUserId String    @unique
 }
 
 model VerificationToken {
@@ -131,13 +134,45 @@ model Kudos {
 
 model GuildUser {
   id           String   @id
+  notionUserId Int?     @unique
+  azureUserId  String?  @unique
   username     String   @db.Text
   avatarURL    String?  @db.Text
   isBot        Boolean? @default(false)
   friendlyName String?  @db.Text
   roles        String?  @db.Text
   color        String?  @db.Text
+  from         Kudos[]  @relation("from")
+  to           Kudos[]  @relation("to")
 
-  from Kudos[] @relation("from")
-  to   Kudos[] @relation("to")
+  notionUser  NotionUser?   @relation(fields: [notionUserId], references: [id])
+  PullRequest PullRequest[]
+  User        User?
+}
+
+model NotionUser {
+  id           Int        @id
+  notionUserId String     @unique
+  username     String?    @db.Text
+  GuildUser    GuildUser?
+}
+
+model PullRequest {
+  id               Int       @id @default(autoincrement())
+  pullRequestId    String    @unique
+  webhookMessageId String    @unique
+  guildUserId      String
+  guildUser        GuildUser @relation(fields: [guildUserId], references: [id])
+}
+
+model FAQ {
+  id       Int    @id @default(autoincrement())
+  type     String
+  markdown String @db.LongText
+}
+
+model Image {
+  id  String @id @default(cuid())
+  key String
+  url String
 }

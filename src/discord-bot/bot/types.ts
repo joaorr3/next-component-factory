@@ -1,7 +1,6 @@
 import type { GuildUser } from "@prisma/client";
 import type Discord from "discord.js";
 import type { IssueDetailsModel } from "../models";
-import type { EnvConfig } from "../utils";
 import type { IssueSeverityLevel } from "./commands/enums";
 
 export type ChannelType =
@@ -11,9 +10,9 @@ export type ChannelType =
   | Discord.ChannelType.GuildPublicThread;
 
 export type RegisterCommandsArgs = {
-  DISCORD_BOT_TOKEN: EnvConfig["DISCORD_BOT_TOKEN"];
-  DISCORD_CLIENT_ID: EnvConfig["DISCORD_CLIENT_ID"];
-  GUILD_ID: string;
+  discordBotToken: string;
+  discordClientId: string;
+  guildId: string;
 };
 
 export type IssueInfo = {
@@ -40,7 +39,8 @@ export type Roles =
   | "credit-experience"
   | "e-commerce"
   | "Visitors 👽"
-  | "personal-credit";
+  | "personal-credit"
+  | "T4G";
 
 export type CommandName =
   | "ping"
@@ -51,7 +51,7 @@ export type CommandName =
   | "pr"
   | "archive"
   | "publish"
-  | "open"
+  | "assign"
   | "notion_batch_update"
   | "kudos"
   | "list_kudos"
@@ -111,10 +111,14 @@ type PublishCommand =
     }
   | undefined;
 
-type OpenCommand =
+type AssignCommand =
   | {
-      name: "open";
-      response: { thread?: Discord.AnyThreadChannel };
+      name: "assign";
+      response: {
+        thread?: Discord.AnyThreadChannel;
+        user: Discord.User;
+        assignee?: Discord.User;
+      };
     }
   | undefined;
 
@@ -165,7 +169,7 @@ export type DiscordCommandObject = {
   pr: () => Promise<PrCommand>;
   archive: () => Promise<ArchiveCommand>;
   publish: () => Promise<PublishCommand>;
-  open: () => Promise<OpenCommand>;
+  assign: () => Promise<AssignCommand>;
   notion_batch_update: () => Promise<NotionBatchUpdateCommand>;
   kudos: () => Promise<KudosCommand>;
   list_kudos: () => Promise<ListKudosCommand>;
@@ -191,7 +195,7 @@ export type CommandsResponse = Promise<
   | PrCommand
   | ArchiveCommand
   | PublishCommand
-  | OpenCommand
+  | AssignCommand
   | NotionBatchUpdateCommand
   | KudosCommand
   | ListKudosCommand

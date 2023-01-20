@@ -2,10 +2,14 @@ import type { KudosType, Roles } from "./types";
 
 export const GuildChannelName = {
   pr: "pr-approvals",
-  releasesNotes: "release-notes",
+  releases: "releases",
   issueTracking: "issue-tracking",
   issueValidation: "issue-validation",
-};
+  workItem: "work-item",
+  botLogs: "bot-logs",
+  debugBotLogs: "debug-bot-logs",
+  webhookLogs: "webhook-logs",
+} as const;
 
 export const GuildRoles = {
   admin: "Admin",
@@ -15,7 +19,7 @@ export const GuildRoles = {
   issueValidation: "issue-validation",
   techLead: "tech-lead",
   visitor: "Visitors 👽",
-};
+} as const;
 
 export const Emojis = {
   check: "✅",
@@ -30,7 +34,7 @@ export const Emojis = {
   six: "6️⃣",
   seven: "7️⃣",
   eight: "8️⃣",
-};
+} as const;
 
 export const autoAssignableRole: Roles[] = [
   "LABS 🧪",
@@ -46,6 +50,7 @@ export const autoAssignableRole: Roles[] = [
   "credit-experience",
   "e-commerce",
   "personal-credit",
+  "T4G",
 ];
 
 export const c18Avatar =

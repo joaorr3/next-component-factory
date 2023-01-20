@@ -1,11 +1,8 @@
-import type { Issue } from "@prisma/client";
 import type { Attachment } from "discord.js";
+import { type IssueModel } from "../../shared/models";
 export * as Notion from "./notion";
 
-export type IssueDetailsModel = Omit<
-  Issue,
-  "id" | "issueIdMappingId" | "timestamp"
->;
+export type IssueDetailsModel = IssueModel;
 
 export type OptionsDataExtractorModel = Omit<
   IssueDetailsModel,

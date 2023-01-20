@@ -1,14 +1,15 @@
 import React from "react";
 import { ThemeContext, ThemeProvider as Provider } from "styled-components";
-import { Themes, type ThemeModel, type ThemeNames } from "../theme";
+import { Themes, type ThemeModel } from "../theme";
+import { useGlobalState } from "../utils/GlobalState/GlobalStateProvider";
 
-type Props = React.PropsWithChildren<{
-  themeName: ThemeNames | null;
-}>;
+const ThemeProvider = ({ children }: React.PropsWithChildren) => {
+  const {
+    state: { themeName },
+  } = useGlobalState();
 
-const ThemeProvider = ({ themeName, children }: Props) => {
   const theme = React.useMemo(() => {
-    return Themes[themeName || "light"];
+    return Themes[themeName];
   }, [themeName]);
 
   React.useEffect(() => {

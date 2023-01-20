@@ -1,4 +1,3 @@
-// @ts-check
 import { z } from "zod";
 
 /**
@@ -20,12 +19,19 @@ export const serverSchema = z.object({
 
   NODE_ENV: z.enum(["development", "test", "production"]),
 
-  DISCORD_WEBHOOK_URL: z.string().url(),
+  DISCORD_WEBHOOK_WORK_ITEM: z.string().url(),
+  DISCORD_WEBHOOK_PR: z.string().url(),
+  DISCORD_WEBHOOK_BUILD: z.string().url(),
+
+  DISCORD_WEBHOOK_C18_URL: z.string().url(),
+  DISCORD_WEBHOOK_C18_ID: z.string(),
 
   DISCORD_CLIENT_ID: z.string(),
   DISCORD_CLIENT_SECRET: z.string(),
   DISCORD_BOT_TOKEN: z.string(),
+
   GUILD_NAME: z.string(),
+  GUILD_ID: z.string(),
 
   NOTION_TOKEN: z.string(),
   NOTION_ISSUES_DB_ID: z.string(),
@@ -36,6 +42,12 @@ export const serverSchema = z.object({
   START_PRISMA: z.string(),
 
   DATABASE_URL: z.string().url(),
+
+  AWS_S3_BUCKET: z.string(),
+  AWS_S3_USER: z.string(),
+  AWS_S3_ACCESS_KEY: z.string(),
+  AWS_S3_SECRET_KEY: z.string(),
+  AWS_S3_PUBLIC_URL: z.string().url(),
 });
 
 /**

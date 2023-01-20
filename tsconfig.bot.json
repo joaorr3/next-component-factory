@@ -99,6 +99,11 @@
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true /* Skip type checking all .d.ts files. */
   },
-  "include": ["./src/discord-bot/**/*.ts", "./src/shared/*.ts"],
+  "include": [
+    "./src/discord-bot/**/*.ts",
+    "./src/shared/*.ts",
+    "./src/env/*",
+    "./src/types/*"
+  ],
   "exclude": ["./node_modules"]
 }

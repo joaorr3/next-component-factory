@@ -39,6 +39,8 @@ export const parseKudos = (kudos?: Input) => {
       color: to?.color || "",
       isBot: !!to?.isBot,
       roles: to?.roles || "",
+      notionUserId: to?.notionUserId || null,
+      azureUserId: to?.azureUserId || null,
     })
   );
   const grouped = groupBy(kudos, "toId");

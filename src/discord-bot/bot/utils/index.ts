@@ -1,17 +1,16 @@
 import type Discord from "discord.js";
-import { config } from "../../utils";
+import { env } from "../../../env/server";
 import { RoleAction } from "../commands/enums";
 import { GuildRoles } from "../constants";
 import { getRole } from "../roles";
 import { getUserById } from "../users";
 
 export * as Gif from "./gifs";
-export * as Quotes from "./quotes";
 export * as BotLog from "./logs";
+export * as Quotes from "./quotes";
 
 export const getGuild = (client: Discord.Client): Discord.Guild | undefined => {
-  const { GUILD_NAME } = config();
-  const guild = client.guilds.cache.find(({ name }) => name === GUILD_NAME);
+  const guild = client.guilds.cache.find(({ name }) => name === env.GUILD_NAME);
   return guild;
 };
 

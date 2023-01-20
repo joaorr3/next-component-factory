@@ -2,6 +2,8 @@ import { REST } from "@discordjs/rest";
 import type { GuildUser } from "@prisma/client";
 import Discord, { roleMention, Routes, userMention } from "discord.js";
 import { camelCase } from "lodash";
+import { env } from "../../../env/server";
+import { derive } from "../../../shared/utils";
 import { randomInt } from "../../utils";
 import { logger } from "../../utils/logger";
 import { getTextChannel, getThreadChannel } from "../channels";
@@ -17,11 +19,10 @@ import type {
   CommandReactionsArgs,
   CommandsResponse,
   DiscordCommandObject,
-  RegisterCommandsArgs,
   Roles,
 } from "../types";
 import { getUserById } from "../users";
-import { getGuild, visitorRole } from "../utils";
+import { BotLog, getGuild, visitorRole } from "../utils";
 import { c18Gif, tenor } from "../utils/gifs";
 import { c18Quotes } from "../utils/quotes";
 import {
@@ -38,6 +39,7 @@ import {
 } from "./builders";
 import { versionHint } from "./constants";
 import {
+  AssignOption,
   BatchOptions,
   IssueCommandOptions,
   KudosOption,
@@ -50,7 +52,7 @@ import {
 import { issueCommand } from "./issue/issue-command";
 import { getArtifactUrl, getPrUrl, npmInstallHint } from "./utils";
 
-export const registerCommands = (config: RegisterCommandsArgs) => {
+export const registerCommands = () => {
   const commands = [
     command("ping"),
     command("gif"),
@@ -87,13 +89,15 @@ export const registerCommands = (config: RegisterCommandsArgs) => {
       .addAttachmentOption((option) =>
         option
           .setName(IssueCommandOptions.attachment)
-          .setDescription("Screenshot")
+          .setDescription(
+            "Screenshots are very useful, as they allows us to quickly understand the context."
+          )
           .setRequired(true)
       )
       .addAttachmentOption((option) =>
         option
           .setName(IssueCommandOptions.attachment2)
-          .setDescription("Screenshot 2")
+          .setDescription("Optional screenshot")
           .setRequired(false)
       )
       .addStringOption((option) =>
@@ -182,7 +186,14 @@ export const registerCommands = (config: RegisterCommandsArgs) => {
         )
         .setRequired(false)
     ),
-    command("open"),
+    command("assign").addUserOption((option) =>
+      option
+        .setName(AssignOption.assignee)
+        .setRequired(false)
+        .setDescription(
+          "The person responsible for doing the work. If not provided, this issue will be assigned to you."
+        )
+    ),
     command("notion_batch_update")
       .addStringOption((option) =>
         option.setName(BatchOptions.start_date).setDescription("DD/MM/YYYY")
@@ -195,7 +206,7 @@ export const registerCommands = (config: RegisterCommandsArgs) => {
         option
           .setName(KudosOption.to)
           .setRequired(true)
-          .setDescription("The user to receive this.")
+          .setDescription("Who do you want to send this Kudos?")
       )
       .addStringOption((option) =>
         option
@@ -208,23 +219,26 @@ export const registerCommands = (config: RegisterCommandsArgs) => {
               value: camelCase(k.type),
             }))
           )
+      )
+      .addBooleanOption((option: Discord.SlashCommandBooleanOption) =>
+        option
+          .setName(KudosOption.public)
+          .setDescription(
+            "By default the kudos you send are anonymous. Choose true to let them know it was you."
+          )
+          .setRequired(false)
       ),
+
     command("list_kudos"),
     command("sync_guild_users"),
   ].map((command) => command.toJSON());
 
-  const rest = new REST({ version: "10" }).setToken(config.DISCORD_BOT_TOKEN);
+  const rest = new REST({ version: "10" }).setToken(env.DISCORD_BOT_TOKEN);
 
   rest
-    .put(
-      Routes.applicationGuildCommands(
-        config.DISCORD_CLIENT_ID,
-        config.GUILD_ID
-      ),
-      {
-        body: commands,
-      }
-    )
+    .put(Routes.applicationGuildCommands(env.DISCORD_CLIENT_ID, env.GUILD_ID), {
+      body: commands,
+    })
     .then(() => {
       logger.console.discord({
         level: "info",
@@ -489,7 +503,7 @@ export const commandReactions = async ({
     publish: async () => {
       const { options, user } = interaction;
       const releasesNotesChannel = getTextChannel(guild, {
-        name: GuildChannelName.releasesNotes,
+        name: GuildChannelName.releases,
       });
       const guildUser = getUserById(guild, user.id);
       const guildDevRole = getRole(guild, { name: GuildRoles.dev });
@@ -537,14 +551,36 @@ export const commandReactions = async ({
         response: undefined,
       };
     },
-    open: async () => {
-      const { channelId } = interaction;
+    assign: async () => {
+      const { channelId, user, options } = interaction;
 
       const currentChannel = getThreadChannel(guild, { id: channelId });
+      const guildUser = getUserById(guild, user.id);
+      const guildDevRole = getRole(guild, { name: GuildRoles.dev });
+      const userHasDevRole = hasRole(guildUser, guildDevRole);
+
+      const validAssignee = derive(() => {
+        const assigneeOption =
+          options.getUser(AssignOption.assignee) ?? undefined;
+        if (assigneeOption) {
+          const assigneeUser = getUserById(guild, assigneeOption.id);
+          const assigneeHasDevRole = hasRole(assigneeUser, guildDevRole);
+          if (assigneeHasDevRole) {
+            return { assignee: assigneeOption, assigneeUser };
+          }
+        }
+      });
 
       if (!currentChannel?.isThread()) {
         await interaction.reply({
-          content: "/open command must be executed inside threads",
+          content: "/assign command must be executed inside threads",
+          ephemeral: true,
+        });
+
+        return undefined;
+      } else if (!userHasDevRole) {
+        await interaction.reply({
+          content: "/assign command should be executed by CF Devs only",
           ephemeral: true,
         });
 
@@ -552,13 +588,19 @@ export const commandReactions = async ({
       }
 
       await interaction.reply({
-        content: "Done!",
+        content: `Great! I'll assign this to ${
+          validAssignee?.assignee
+            ? validAssignee?.assigneeUser?.displayName
+            : "you"
+        }.`,
       });
 
       return {
-        name: "open",
+        name: "assign",
         response: {
           thread: currentChannel,
+          user,
+          assignee: validAssignee?.assignee,
         },
       };
     },
@@ -601,6 +643,7 @@ export const commandReactions = async ({
 
       const kudosRecipient = options.getUser(KudosOption.to, true);
       const kudosType = options.getString(KudosOption.type, true);
+      const publicOption = options.getBoolean(KudosOption.public);
 
       if (user.id === kudosRecipient.id) {
         await interaction.reply({
@@ -614,6 +657,34 @@ export const commandReactions = async ({
       await interaction.reply({
         content: "Thank you! https://next-cf.up.railway.app/kudos",
         ephemeral: true,
+      });
+
+      const kudosAnnouncementMessage = derive(() => {
+        if (publicOption) {
+          return `Hey ${userMention(kudosRecipient.id)}! ${userMention(
+            user.id
+          )} thinks you're ${kudosType}.`;
+        }
+
+        return `Hey ${userMention(
+          kudosRecipient.id
+        )}! Someone thinks you're ${kudosType}.`;
+      });
+
+      BotLog.publicLog(guild, () => {
+        return {
+          embeds: [
+            Embed({
+              title: "Kudos",
+              url: "https://next-cf.up.railway.app/kudos",
+              description: kudosAnnouncementMessage,
+
+              footer: {
+                text: "React to this message to let them know you appreciate this.",
+              },
+            }),
+          ],
+        };
       });
 
       return {
@@ -676,6 +747,8 @@ export const commandReactions = async ({
             }))
           ),
           avatarURL: user.avatarURL({ extension: "png" }),
+          notionUserId: null,
+          azureUserId: null,
         })
       );
 

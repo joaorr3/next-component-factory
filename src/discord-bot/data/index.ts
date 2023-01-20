@@ -229,11 +229,13 @@ export const startPrisma = ({ start }: { start: boolean }) => {
         },
       });
       if (user) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { notionUserId, id, azureUserId, ...restData } = user;
         await prisma.guildUser.update({
           where: {
             id: user.id,
           },
-          data,
+          data: restData,
         });
       } else {
         await prisma.guildUser.create({
@@ -265,6 +267,27 @@ export const startPrisma = ({ start }: { start: boolean }) => {
     }
   };
 
+  const getNotionUserIdByGuildUserId = async (userId: string) => {
+    try {
+      const user = await prisma.guildUser.findUnique({
+        where: {
+          id: userId,
+        },
+        include: {
+          notionUser: true,
+        },
+      });
+
+      if (user) {
+        return user.notionUser?.notionUserId;
+      }
+
+      return undefined;
+    } catch (error) {
+      console.log("prisma:error:getGuildUser: ", error);
+    }
+  };
+
   return {
     createIssue,
     updateIssue,
@@ -278,5 +301,6 @@ export const startPrisma = ({ start }: { start: boolean }) => {
     getKudos,
     updateGuildUser,
     replicateIssueTimestamp,
+    getNotionUserIdByGuildUserId,
   };
 };

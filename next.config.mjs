@@ -5,6 +5,10 @@
  */
 // !process.env.SKIP_ENV_VALIDATION && (await import("./src/env/server.mjs"));
 
+import removeImports from "next-remove-imports";
+
+const withRemoveImports = removeImports();
+
 /** @type {import("next").NextConfig} */
 const config = {
   reactStrictMode: true,
@@ -19,6 +23,10 @@ const config = {
         protocol: "https",
         hostname: "cdn.discordapp.com",
       },
+      {
+        protocol: "https",
+        hostname: "component-factory-s3-bucket.s3.eu-west-2.amazonaws.com",
+      },
     ],
   },
   compiler: {
@@ -32,6 +40,10 @@ const config = {
       "@react-slip-and-slide/web",
       "@react-slip-and-slide/utils",
     ],
+    fontLoaders: [
+      { loader: "@next/font/google", options: { subsets: ["latin"] } },
+    ],
   },
 };
-export default config;
+
+export default withRemoveImports(config);

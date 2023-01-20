@@ -59,7 +59,6 @@ export class PrismaTransport extends Transport {
 }
 
 type Level = "info" | "error" | "debug" | "warn";
-console.log();
 
 const createScopedLog = (scope: LogScopes, logger: winston.Logger) => {
   return ({ level, message }: { level: Level; message: string }) => {
