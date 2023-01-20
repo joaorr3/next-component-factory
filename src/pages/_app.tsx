@@ -17,6 +17,7 @@ import { GlobalStyle } from "../styles/GlobalStyles";
 import ThemeProvider from "../styles/ThemeProvider";
 import { GlobalStateProvider } from "../utils/GlobalState/GlobalStateProvider";
 import { trpc } from "../utils/trpc";
+import { HomeButton } from "../components/HomeButton";
 
 const montserrat = Montserrat({
   weight: "variable",
@@ -38,6 +39,8 @@ const MyApp: AppType<{ session: Session | null }> = ({
 
             <main className={montserrat.className}>
               <NavBar>
+                <HomeButton />
+
                 <NavBarContent />
 
                 <NavBarActionContainer>

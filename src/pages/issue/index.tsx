@@ -1,5 +1,3 @@
-import { type Issue } from "@prisma/client";
-import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import Router from "next/router";
@@ -21,7 +19,7 @@ import { trpc } from "../../utils/trpc";
 
 const routeInfo = routes.IssueOpen;
 
-const Issue: NextPage = () => {
+export default withRoles("Issue", () => {
   const {
     state: {
       issues: { searchFilters },
@@ -85,6 +83,4 @@ const Issue: NextPage = () => {
       </main>
     </React.Fragment>
   );
-};
-
-export default withRoles(Issue, "Issue");
+});

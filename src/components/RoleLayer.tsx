@@ -10,7 +10,7 @@ export const RoleLayer = ({ roles, children }: RoleLayerProps): JSX.Element => {
   const { valid } = useRoles(roles);
 
   if (!valid) {
-    return <UnauthorizedPage />;
+    return <UnauthorizedPage reason="insufficientRoles" />;
   }
   return <React.Fragment>{children}</React.Fragment>;
 };

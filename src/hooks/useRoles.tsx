@@ -35,7 +35,7 @@ export const useRoles = (props?: UseRoles) => {
   const hasAnyOf = getHasAnyOf(roles, anyOf);
   const hasAllOf = getHasAllOf(roles, allOf);
 
-  if (anyOf && allOf) {
+  if (!!anyOf?.length && !!allOf?.length) {
     return {
       valid: hasAnyOf && hasAllOf,
       hasAnyOf,
@@ -68,7 +68,7 @@ const hasRolesMap = (userRoles?: Role[], roles?: RolesKeys[]) => {
 };
 
 const getHasAnyOf = (userRoles?: Role[], anyOfRoles?: RolesKeys[]) => {
-  if (!anyOfRoles) return false;
+  if (!anyOfRoles?.length) return false;
   const hasRoles = hasRolesMap(userRoles, anyOfRoles);
 
   // The user need to have at least one of the necessary roles.
@@ -77,7 +77,7 @@ const getHasAnyOf = (userRoles?: Role[], anyOfRoles?: RolesKeys[]) => {
 };
 
 const getHasAllOf = (userRoles?: Role[], allOfRoles?: RolesKeys[]) => {
-  if (!allOfRoles) return false;
+  if (!allOfRoles?.length) return false;
   const rolesMap = hasRolesMap(userRoles, allOfRoles);
 
   // If the user has all the roles necessary, this value should be zero.

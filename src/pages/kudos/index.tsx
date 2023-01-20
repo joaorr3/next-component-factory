@@ -18,7 +18,6 @@ import type { ParsedKudos } from "../../shared/dataUtils";
 import { useTheme } from "../../styles/ThemeProvider";
 import { useLoading } from "../../utils/GlobalState/GlobalStateProvider";
 import { trpc } from "../../utils/trpc";
-// import { withRoles } from "../../utils/hoc";
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip);
 
@@ -270,4 +269,3 @@ const Spider = ({ kudos }: ParsedKudos) => {
 };
 
 export default Kudos;
-// export default withRoles(Kudos, { cf: true });

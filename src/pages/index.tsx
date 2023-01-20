@@ -1,9 +1,8 @@
-import { type NextPage } from "next";
 import Head from "next/head";
 import React from "react";
 import { withRoles } from "../utils/hoc";
 
-const Home: NextPage = () => {
+export default withRoles("Home", () => {
   return (
     <React.Fragment>
       <Head>
@@ -11,11 +10,9 @@ const Home: NextPage = () => {
       </Head>
       <main>
         <div>
-          <h1>Home</h1>
+          <h1>...</h1>
         </div>
       </main>
     </React.Fragment>
   );
-};
-
-export default withRoles(Home, "Home");
+});

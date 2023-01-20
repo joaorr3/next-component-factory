@@ -2,7 +2,7 @@ import Head from "next/head";
 import React from "react";
 import { withRoles } from "../../utils/hoc";
 
-export const Faqs = (): JSX.Element => {
+export default withRoles("FAQs", () => {
   return (
     <React.Fragment>
       <Head>
@@ -12,6 +12,4 @@ export const Faqs = (): JSX.Element => {
       <div>FAQs</div>
     </React.Fragment>
   );
-};
-
-export default withRoles(Faqs, "FAQs");
+});

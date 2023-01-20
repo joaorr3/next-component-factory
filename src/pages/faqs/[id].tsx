@@ -5,7 +5,7 @@ import MarkdownEditor from "../../components/MarkdownEditor";
 import { useTheme } from "../../styles/ThemeProvider";
 import { withRoles } from "../../utils/hoc";
 
-export const Faq = (): JSX.Element => {
+export default withRoles("FAQs", () => {
   const router = useRouter();
   const { id } = router.query;
 
@@ -31,6 +31,4 @@ export const Faq = (): JSX.Element => {
       />
     </React.Fragment>
   );
-};
-
-export default withRoles(Faq, "FAQs");
+});

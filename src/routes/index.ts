@@ -27,10 +27,6 @@ export const routes: Routes = {
   Home: {
     label: "Home",
     path: "/",
-    // navBar: true,
-    roles: {
-      allOf: ["admin"],
-    },
   },
   Kudos: {
     label: "Kudos",

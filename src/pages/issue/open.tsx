@@ -16,7 +16,7 @@ const redirect = (path: string) => {
   Router.push(path);
 };
 
-const IssueOpen: NextPage = () => {
+export default withRoles("IssueOpen", () => {
   const { upload } = useFileUpload();
 
   const { mutateAsync: openIssue, isLoading } = trpc.issues.open.useMutation();
@@ -65,6 +65,4 @@ const IssueOpen: NextPage = () => {
       </main>
     </React.Fragment>
   );
-};
-
-export default withRoles(IssueOpen, "IssueOpen");
+});

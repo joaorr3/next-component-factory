@@ -8,7 +8,7 @@ import { useLoading } from "../../utils/GlobalState/GlobalStateProvider";
 import { withRoles } from "../../utils/hoc";
 import { trpc } from "../../utils/trpc";
 
-export const IssueDetails = (): JSX.Element => {
+export default withRoles("IssueDetail", () => {
   const router = useRouter();
   const { id } = router.query;
 
@@ -32,6 +32,4 @@ export const IssueDetails = (): JSX.Element => {
       )}
     </React.Fragment>
   );
-};
-
-export default withRoles(IssueDetails, "FAQs");
+});

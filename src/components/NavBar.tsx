@@ -36,6 +36,7 @@ export const NavBarContentContainer = styled.div`
   height: 100%;
   align-items: center;
   padding: 0px 16px;
+  padding-left: 0px;
 `;
 
 export const NavBarContent = (): JSX.Element => {
