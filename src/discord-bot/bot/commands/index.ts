@@ -4,6 +4,7 @@ import Discord, { roleMention, Routes, userMention } from "discord.js";
 import { camelCase } from "lodash";
 import { env } from "../../../env/server";
 import { derive } from "../../../shared/utils";
+import { transformGuildMemberData } from "../../data/utils";
 import { randomInt } from "../../utils";
 import { logger } from "../../utils/logger";
 import { getTextChannel, getThreadChannel } from "../channels";
@@ -733,27 +734,11 @@ export const commandReactions = async ({
 
       const rawMembersData = await guild.members.fetch();
       const guildUsers: GuildUser[] = rawMembersData.map(
-        ({ id, user, displayName, roles, displayHexColor }) => ({
-          id,
-          isBot: user.bot,
-          username: user.username,
-          friendlyName: displayName,
-          color: displayHexColor,
-          roles: JSON.stringify(
-            roles.cache.map(({ id, name, hexColor }) => ({
-              id,
-              name,
-              hexColor,
-            }))
-          ),
-          avatarURL: user.avatarURL({ extension: "png" }),
-          notionUserId: null,
-          azureUserId: null,
-        })
+        transformGuildMemberData
       );
 
       await interaction.reply({
-        content: "Processing",
+        content: `Processing ${guildUsers.length} members.`,
         ephemeral: true,
       });
 

@@ -230,17 +230,27 @@ export const startPrisma = ({ start }: { start: boolean }) => {
       });
       if (user) {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { notionUserId, id, azureUserId, ...restData } = user;
-        await prisma.guildUser.update({
+        const { notionUserId, id, azureUserId, ...restData } = data;
+        const guildUser = await prisma.guildUser.update({
           where: {
             id: user.id,
           },
           data: restData,
         });
+
+        return {
+          action: "updated",
+          guildUser,
+        } as const;
       } else {
-        await prisma.guildUser.create({
+        const guildUser = await prisma.guildUser.create({
           data,
         });
+
+        return {
+          action: "created",
+          guildUser,
+        } as const;
       }
     } catch (error) {
       console.log("prisma:error:updateGuildUser: ", error);

@@ -1,3 +1,5 @@
+import { type GuildUser } from "@prisma/client";
+import { type GuildMember } from "discord.js";
 import type { startPrisma } from "../data";
 import type { startNotion } from "../notion";
 import { sleep } from "../utils";
@@ -82,4 +84,26 @@ export const notionSyncCreatedDate = async (
       await sleep(200);
     }
   }
+};
+
+export const transformGuildMemberData = (member: GuildMember): GuildUser => {
+  const { id, user, displayName, roles, displayHexColor } = member;
+
+  return {
+    id,
+    isBot: user.bot,
+    username: user.username,
+    friendlyName: displayName,
+    color: displayHexColor,
+    roles: JSON.stringify(
+      roles.cache.map(({ id, name, hexColor }) => ({
+        id,
+        name,
+        hexColor,
+      }))
+    ),
+    avatarURL: user.avatarURL({ extension: "png" }),
+    notionUserId: null,
+    azureUserId: null,
+  };
 };

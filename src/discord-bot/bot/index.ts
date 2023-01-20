@@ -1,6 +1,5 @@
 import Discord, {
   codeBlock,
-  FormattingPatterns,
   GatewayIntentBits,
   Partials,
   userMention,
@@ -9,16 +8,14 @@ import { env } from "../../env/server";
 import { parseKudos } from "../../shared/dataUtils";
 import { WebhookType } from "../../shared/webhookType";
 import type { startPrisma } from "../data";
-import { notionBatchUpdate } from "../data/utils";
+import { notionBatchUpdate, transformGuildMemberData } from "../data/utils";
 import type { startNotion } from "../notion";
 import { logInteraction, sleep } from "../utils";
 import { logger } from "../utils/logger";
-import { getTextChannel, getThreadChannel } from "./channels";
+import { getTextChannel } from "./channels";
 import { commandReactions, registerCommands } from "./commands";
 import { RoleAction } from "./commands/enums";
-import { Emojis, GuildChannelName, GuildRoles } from "./constants";
 import { Embed } from "./messages";
-import { hasRoleByName } from "./roles";
 import type { CommandName } from "./types";
 import { getUserById } from "./users";
 import { BotLog, getGuild, visitorRole } from "./utils";
@@ -247,102 +244,6 @@ export const startBot = ({
       }
     });
 
-    client.on(
-      Discord.Events.MessageReactionAdd,
-      async ({ message, emoji }, user) => {
-        const guild = getGuild(client);
-
-        if (guild) {
-          const issueTrackingChannel = getTextChannel(guild, {
-            name: GuildChannelName.issueTracking,
-          });
-
-          const guildUser = getUserById(guild, user.id);
-          const hasDevRole = hasRoleByName(guildUser, GuildRoles.dev);
-
-          const reactionMessage = message.partial
-            ? await message.fetch()
-            : message;
-
-          if (
-            reactionMessage.channelId === issueTrackingChannel?.id &&
-            guildUser &&
-            hasDevRole
-          ) {
-            try {
-              const threadMention = reactionMessage.embeds[0]?.fields[0]?.value;
-
-              const channelRegEx = new RegExp(FormattingPatterns.Channel, "g");
-              const parsedChannel = threadMention?.matchAll(channelRegEx).next()
-                .value as string[];
-              const channelId = parsedChannel[1] ?? undefined;
-
-              const guildThread = getThreadChannel(guild, { id: channelId });
-
-              switch (emoji.name) {
-                case Emojis.check:
-                  await guildThread?.send({
-                    content: `${userMention(
-                      guildUser?.id
-                    )} has marked this issue as resolved.`,
-                  });
-
-                  await guildThread?.send({
-                    content: "This thread will be auto archived in 1 hour.",
-                  });
-
-                  guildThread?.setAutoArchiveDuration(
-                    Discord.ThreadAutoArchiveDuration.OneHour
-                  );
-
-                  break;
-                case Emojis.eyes:
-                  await guildThread?.send({
-                    content: `${userMention(
-                      guildUser?.id
-                    )} has seen this issue.`,
-                  });
-                  break;
-                case Emojis.question:
-                  await guildThread?.send({
-                    content: `${userMention(
-                      guildUser?.id
-                    )} has some questions on this issue.`,
-                  });
-                  break;
-                case Emojis.inprogress:
-                  await guildThread?.send({
-                    content: `${userMention(
-                      guildUser?.id
-                    )} has started working on this issue.`,
-                  });
-                  break;
-                case Emojis.one:
-                case Emojis.two:
-                case Emojis.three:
-                case Emojis.four:
-                case Emojis.five:
-                case Emojis.six:
-                case Emojis.seven:
-                case Emojis.eight:
-                  await guildThread?.send({
-                    content: `${userMention(
-                      guildUser?.id
-                    )} gave an estimation of ${emoji.name} hours.`,
-                  });
-                  break;
-              }
-            } catch (error) {
-              console.error(
-                "Catch: Discord.Events.MessageReactionAdd: ",
-                error
-              );
-            }
-          }
-        }
-      }
-    );
-
     client.on(Discord.Events.GuildMemberAdd, async (member) => {
       const guild = getGuild(client);
       if (guild) {
@@ -365,41 +266,68 @@ export const startBot = ({
     });
 
     client.on(Discord.Events.GuildMemberUpdate, async (member) => {
-      console.log(member.id);
+      try {
+        const cachedGuildMember = getUserById(member.guild, member.id);
+        if (cachedGuildMember) {
+          const guildMember = await cachedGuildMember.fetch();
+          const guildUser = transformGuildMemberData(guildMember);
+          const response = await prismaActions?.updateGuildUser(guildUser);
+          if (response) {
+            logger.db.discord({
+              level: "info",
+              message: `[GuildMemberUpdate(${
+                response.action
+              })] -> ${JSON.stringify(response.guildUser)}`,
+            });
+          }
+        }
+      } catch (error) {
+        logger.db.discord({
+          level: "error",
+          message: `[GuildMemberUpdate] -> ${JSON.stringify(error)}`,
+        });
+      }
     });
 
     client.on(Discord.Events.MessageCreate, async (message) => {
-      const guild = message.guild;
-      if (guild) {
-        if (message.webhookId) {
-          const whs = await guild?.fetchWebhooks();
-          const c18_wh = whs?.find(
-            (wh) => wh.id === env.DISCORD_WEBHOOK_C18_ID
-          );
-          const wh_message = await c18_wh?.fetchMessage(message.id);
+      try {
+        const guild = message.guild;
+        if (guild) {
+          if (message.webhookId) {
+            const whs = await guild?.fetchWebhooks();
+            const c18_wh = whs?.find(
+              (wh) => wh.id === env.DISCORD_WEBHOOK_C18_ID
+            );
+            const wh_message = await c18_wh?.fetchMessage(message.id);
 
-          if (c18_wh && wh_message) {
-            console.log("message: ", JSON.stringify(message));
-            // message from a webhook
-            switch (wh_message.content) {
-              case WebhookType.BUILD:
-                BotLog.buildLog(guild, () => {
-                  return { embeds: wh_message.embeds };
-                });
-                break;
-              case WebhookType.PR:
-                BotLog.prLog(guild, () => {
-                  return { embeds: wh_message.embeds };
-                });
-                break;
-              case WebhookType.WORK_ITEM:
-                BotLog.workItemLog(guild, () => {
-                  return { embeds: wh_message.embeds };
-                });
-                break;
+            if (c18_wh && wh_message) {
+              console.log("message: ", JSON.stringify(message));
+              // message from a webhook
+              switch (wh_message.content) {
+                case WebhookType.BUILD:
+                  BotLog.buildLog(guild, () => {
+                    return { embeds: wh_message.embeds };
+                  });
+                  break;
+                case WebhookType.PR:
+                  BotLog.prLog(guild, () => {
+                    return { embeds: wh_message.embeds };
+                  });
+                  break;
+                case WebhookType.WORK_ITEM:
+                  BotLog.workItemLog(guild, () => {
+                    return { embeds: wh_message.embeds };
+                  });
+                  break;
+              }
             }
           }
         }
+      } catch (error) {
+        logger.db.discord({
+          level: "error",
+          message: `MessageCreate: ${error}`,
+        });
       }
     });
 
