@@ -247,7 +247,7 @@ export const registerCommands = () => {
           .setDescription("Announcement URL")
           .setRequired(false)
       )
-      .addStringOption((option) =>
+      .addAttachmentOption((option) =>
         option
           .setName(Announce.attachment)
           .setDescription("Attachment")
