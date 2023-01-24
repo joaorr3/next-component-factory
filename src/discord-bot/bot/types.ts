@@ -55,7 +55,8 @@ export type CommandName =
   | "notion_batch_update"
   | "kudos"
   | "list_kudos"
-  | "sync_guild_users";
+  | "sync_guild_users"
+  | "announce";
 
 type IssueCommandModel = {
   thread?: Discord.ThreadChannel<boolean>;
@@ -160,6 +161,13 @@ type SyncGuildUsersCommand =
     }
   | undefined;
 
+type AnnounceCommand =
+  | {
+      name: "announce";
+      response: undefined;
+    }
+  | undefined;
+
 export type DiscordCommandObject = {
   ping: () => Promise<PingCommand>;
   gif: () => Promise<GifCommand>;
@@ -174,6 +182,7 @@ export type DiscordCommandObject = {
   kudos: () => Promise<KudosCommand>;
   list_kudos: () => Promise<ListKudosCommand>;
   sync_guild_users: () => Promise<SyncGuildUsersCommand>;
+  announce: () => Promise<AnnounceCommand>;
 };
 
 export type CommandReactionsArgs = {
@@ -200,6 +209,7 @@ export type CommandsResponse = Promise<
   | KudosCommand
   | ListKudosCommand
   | SyncGuildUsersCommand
+  | AnnounceCommand
 >;
 
 export type KudosType = {

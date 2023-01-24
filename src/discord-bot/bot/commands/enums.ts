@@ -76,3 +76,10 @@ export enum KudosOption {
 export enum AssignOption {
   assignee = "assignee",
 }
+
+export enum Announce {
+  title = "title",
+  announcement = "announcement",
+  url = "url",
+  attachment = "attachment",
+}

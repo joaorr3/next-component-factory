@@ -40,6 +40,7 @@ import {
 } from "./builders";
 import { versionHint } from "./constants";
 import {
+  Announce,
   AssignOption,
   BatchOptions,
   IssueCommandOptions,
@@ -53,6 +54,7 @@ import {
 import { issueCommand } from "./issue/issue-command";
 import { getArtifactUrl, getPrUrl, npmInstallHint } from "./utils";
 
+//region Command Register
 export const registerCommands = () => {
   const commands = [
     command("ping"),
@@ -232,6 +234,25 @@ export const registerCommands = () => {
 
     command("list_kudos"),
     command("sync_guild_users"),
+    command("announce")
+      .addStringOption((option) =>
+        option.setName(Announce.title).setDescription("Announcement title")
+      )
+      .addStringOption((option) =>
+        option.setName(Announce.announcement).setDescription("Text body")
+      )
+      .addStringOption((option) =>
+        option
+          .setName(Announce.url)
+          .setDescription("Announcement URL")
+          .setRequired(false)
+      )
+      .addStringOption((option) =>
+        option
+          .setName(Announce.attachment)
+          .setDescription("Attachment")
+          .setRequired(false)
+      ),
   ].map((command) => command.toJSON());
 
   const rest = new REST({ version: "10" }).setToken(env.DISCORD_BOT_TOKEN);
@@ -249,6 +270,9 @@ export const registerCommands = () => {
     .catch(console.error);
 };
 
+//endregion
+
+//region Command Reactions
 export const commandReactions = async ({
   client,
   interaction,
@@ -749,7 +773,54 @@ export const commandReactions = async ({
         },
       };
     },
+    announce: async () => {
+      const { user, options, channel } = interaction;
+
+      const guildUser = getUserById(guild, user.id);
+      const guildAdminRole = getRole(guild, {
+        name: GuildRoles.admin,
+      });
+
+      const userHasAdminRole = hasRole(guildUser, guildAdminRole);
+
+      if (userHasAdminRole) {
+        const title = options.getString(Announce.title, true);
+        const description = options.getString(Announce.announcement, true);
+        const url = options.getString(Announce.url) || undefined;
+        const attachment = options.getAttachment(Announce.attachment);
+
+        const issueSummary = Embed({
+          title,
+          description,
+          url,
+          image: {
+            url: attachment?.url || "",
+          },
+        });
+
+        await interaction.reply({
+          content: `Done.`,
+          ephemeral: true,
+        });
+
+        await channel?.send({
+          embeds: [issueSummary],
+        });
+
+        return {
+          name: "announce",
+          response: undefined,
+        };
+      }
+
+      await interaction.reply({
+        content: "Can't do that..",
+        ephemeral: true,
+      });
+    },
   };
 
   return await commands[commandName]();
 };
+
+//endregion
