@@ -1,18 +1,17 @@
 import type { LinkProps } from "next/link";
 import Link from "next/link";
-import { useRouter } from "next/router";
 import React from "react";
 import styled, { css } from "styled-components";
 import { Bold } from "../components/base";
+import { usePathMatch } from "../hooks/usePathMatch";
 import { useRoles, type UseRoles } from "../hooks/useRoles";
-import type { RouteData } from "../routes";
 import { navBarRouteEntries } from "../routes";
 
 const NavBarContainer = styled.div`
   height: 64px;
   position: relative;
   width: 100%;
-  box-shadow: 0px 4px 20px 4px #18181813;
+  /* box-shadow: 0px 4px 20px 4px #18181813; */
   position: fixed;
   z-index: 100;
   display: flex;
@@ -40,23 +39,12 @@ export const NavBarContentContainer = styled.div`
 `;
 
 export const NavBarContent = (): JSX.Element => {
-  const { pathname } = useRouter();
-
-  const handleIsActive = React.useCallback(
-    ({ path, match }: Pick<RouteData, "path" | "match">) => {
-      if (match) {
-        return match.includes(pathname);
-      }
-
-      return pathname === path;
-    },
-    [pathname]
-  );
+  const { matchPath } = usePathMatch();
 
   return (
     <NavBarContentContainer>
       {navBarRouteEntries.map(([_, { label, path, match, roles }]) => {
-        const active = handleIsActive({ path, match });
+        const active = matchPath({ path, match });
 
         return (
           <NavBarItem

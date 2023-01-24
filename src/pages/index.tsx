@@ -9,9 +9,7 @@ export default withRoles("Home", () => {
         <title>Home</title>
       </Head>
       <main>
-        <div>
-          <h1>...</h1>
-        </div>
+        <div>...</div>
       </main>
     </React.Fragment>
   );

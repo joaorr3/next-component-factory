@@ -1,9 +1,9 @@
 import Head from "next/head";
 import { useRouter } from "next/router";
 import React from "react";
-import MarkdownEditor from "../../components/MarkdownEditor";
-import { useTheme } from "../../styles/ThemeProvider";
-import { withRoles } from "../../utils/hoc";
+import MarkdownEditor from "../../../components/MarkdownEditor";
+import { useTheme } from "../../../styles/ThemeProvider";
+import { withRoles } from "../../../utils/hoc";
 
 export default withRoles("FAQs", () => {
   const router = useRouter();

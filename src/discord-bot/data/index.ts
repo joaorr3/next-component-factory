@@ -15,7 +15,9 @@ export const startPrisma = ({ start }: { start: boolean }) => {
     console.log("Prisma: ready");
   }
 
-  const createIssue = async (issue: Omit<Issue, "id" | "timestamp">) => {
+  const createIssue = async (
+    issue: Omit<Issue, "id" | "timestamp" | "platform">
+  ) => {
     try {
       return await prisma.issue.create({
         data: issue,

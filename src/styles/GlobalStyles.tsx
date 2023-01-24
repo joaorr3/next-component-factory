@@ -136,7 +136,7 @@ export const normalize = css`
 
 //endregion
 
-const customScrollBar = css`
+export const customScrollBar = css`
   &::-webkit-scrollbar {
     width: 8px;
   }
@@ -155,19 +155,16 @@ export const GlobalStyle = createGlobalStyle<{ theme: ThemeModel }>`
   ${normalize}
   
   html {
-    height: 100%;
-    width: 100%;
-    overflow-x: hidden;
     font-size: 100%;
-    ${customScrollBar}
   }
   
   body {
+    overflow-x: hidden;
+    overflow-y: scroll;
+    ${customScrollBar} 
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    min-height: 100%;
     position: relative;
-    overflow: hidden;
     font-family: 'Lato', sans-serif;
     background-color: var(--color-bg);
     color: var(--color-fg);

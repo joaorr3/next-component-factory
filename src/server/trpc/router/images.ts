@@ -28,7 +28,7 @@ const s3Response = async (key: string) =>
           key,
         },
         Conditions: [
-          ["starts-with", "$Content-Type", "image/"],
+          ["starts-with", "$Content-Type", ""],
           ["content-length-range", 0, UPLOAD_MAX_FILE_SIZE],
         ],
         Expires: UPLOADING_TIME_LIMIT,

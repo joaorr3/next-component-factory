@@ -31,7 +31,7 @@ export const Property = ({
         </Link>
       ) : (
         <p className="max-w-xl overflow-hidden overflow-ellipsis text-sm">
-          {value}
+          {value || "N.A"}
         </p>
       )}
     </div>
@@ -113,6 +113,8 @@ export const IssueDetail: React.FC<{
         <Property label="Check Design" value={String(issue?.checkDesign)} />
 
         <Property label="Scope" value={issue?.scope} />
+
+        <Property label="Platform" value={issue?.platform} />
       </div>
 
       <div className="mb-4 flex rounded-xl bg-neutral-900 bg-opacity-30 p-4">

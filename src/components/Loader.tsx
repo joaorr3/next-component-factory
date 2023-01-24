@@ -62,11 +62,7 @@ const size = 100;
 
 export const Loading = (): JSX.Element => {
   return (
-    <LoadingStyled
-      xmlns="http://www.w3.org/2000/svg"
-      height={size}
-      width={size}
-    >
+    <LoadingStyled height={size} width={size}>
       <circle className="circle electrons electron1" cx={80} cy={50} r={5} />
       <circle className="circle atom" cx={50} cy={50} r={20} />
       <circle className="circle electrons electron2" cx={20} cy={50} r={5} />

@@ -12,10 +12,6 @@ import { setColorsByTheme } from "../theme";
 export function MagicScriptTag() {
   const boundFn = String(setColorsByTheme);
   const iif = `(${boundFn})()`;
-
-  // calledFunction = Terser.minify(calledFunction).code;
-
-  // eslint-disable-next-line react/no-danger
   return <script dangerouslySetInnerHTML={{ __html: iif }} />;
 }
 

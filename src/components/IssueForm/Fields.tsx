@@ -1,11 +1,11 @@
 import { remove } from "lodash";
-import Image from "next/image";
 import React, { type CSSProperties } from "react";
 import { useDropzone } from "react-dropzone";
 import { type FieldError, type UseFormRegisterReturn } from "react-hook-form";
 import Switch from "react-switch";
 import tw from "tailwind-styled-components";
-import { type FormSchema } from "./models";
+import { ImageFallback } from "../ImageFallback";
+import Modal from "../Modal";
 import { type CustomFile } from "./validator";
 
 //region Button
@@ -19,7 +19,6 @@ export const Button = tw.button`
   py-2
   px-4
   text-sm
-  font-medium
   text-white
   shadow-sm
   hover:bg-indigo-700
@@ -30,6 +29,7 @@ export const Button = tw.button`
   cursor-pointer
   self-end
   w-40
+  font-bold
 `;
 
 //endregion
@@ -55,7 +55,7 @@ export type BaseFieldProps = {
   placeholder?: string;
   description?: string;
   error?: FieldError;
-  register: UseFormRegisterReturn<keyof FormSchema>;
+  register: UseFormRegisterReturn;
 };
 
 export type FieldWrapProps = React.PropsWithChildren<
@@ -173,29 +173,26 @@ export const Area = ({
 //endregion
 
 //region Select
-type SelectProps = Omit<BaseFieldProps, "placeholder"> & {
-  options: string[];
+type SelectProps<O extends string> = Omit<BaseFieldProps, "placeholder"> & {
+  options: O[];
 };
 
 export const TwSelect = tw.select`
   ${baseField}
 `;
 
-export const Select = ({
+export const Select = <O extends string>({
   label,
   description,
   options,
   disabled,
   error,
   register,
-}: SelectProps): JSX.Element => {
-  const ref = React.useRef<HTMLSelectElement>(null);
-
-  ref.current?.selectedIndex;
+}: SelectProps<O>): JSX.Element => {
   return (
     <BaseField label={label} description={description} error={error}>
       {/* @ts-ignore */}
-      <TwSelect ref={ref} defaultValue="" disabled={disabled} {...register}>
+      <TwSelect defaultValue="" disabled={disabled} {...register}>
         <option value="" disabled>
           -- select an option --
         </option>
@@ -380,7 +377,7 @@ export const Dropzone = ({
       <RemoveButton onPress={() => removePreview(file.name)} />
 
       <div className="">
-        <Image
+        <ImageFallback
           alt=""
           src={file.preview}
           onLoad={() => {
@@ -414,6 +411,47 @@ export const Dropzone = ({
       <ErrorMessage error={error} />
       <div className="flex">{thumbs}</div>
     </React.Fragment>
+  );
+};
+
+//endregion
+
+//region ModalSelect
+export type ModalSelectProps = Omit<BaseFieldProps, "register"> & {
+  value?: string;
+  children: (props: {
+    setIsOpen: (status: boolean) => void;
+  }) => React.ReactNode;
+};
+
+export const TwFakeField = tw.div`
+  ${baseField}
+  items-center
+  flex
+`;
+
+export const ModalSelect = ({
+  value,
+  label,
+  description,
+  placeholder,
+  error,
+  children,
+}: ModalSelectProps): JSX.Element => {
+  const [isOpen, setIsOpen] = React.useState<boolean>(false);
+
+  return (
+    <BaseField label={label} description={description} error={error}>
+      <TwFakeField className="cursor-pointer" onClick={() => setIsOpen(true)}>
+        <span className={value ? "" : "opacity-20"}>
+          {value || placeholder}
+        </span>
+      </TwFakeField>
+
+      <Modal isOpen={isOpen} onChange={(status) => setIsOpen(status)}>
+        {children({ setIsOpen })}
+      </Modal>
+    </BaseField>
   );
 };
 

@@ -16,8 +16,9 @@ const Wrapper = styled.span<
   Omit<DelayVisibilityProps, "children"> & { isMounted: boolean }
 >`
   opacity: ${({ isMounted }) => (isMounted ? 1 : 0)};
-  transition: opacity ${({ transitionTime }) => transitionTime}ms ease-in;
+  transition: opacity ${({ transitionTime }) => transitionTime}ms;
   transition-delay: ${({ delayTime }) => delayTime}ms;
+  transition-timing-function: cubic-bezier(0.83, -0.81, 0.3, 1.94);
 `;
 
 export const DelayVisibility = ({

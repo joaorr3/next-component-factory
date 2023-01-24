@@ -1,15 +1,17 @@
 import Head from "next/head";
 import React from "react";
+
 import { withRoles } from "../../utils/hoc";
 
-export default withRoles("FAQs", () => {
+export default withRoles("Manage", () => {
   return (
     <React.Fragment>
       <Head>
-        <title>FAQs</title>
+        <title>Manage</title>
       </Head>
-
-      <div>FAQs</div>
+      <main>
+        <p>Manage</p>
+      </main>
     </React.Fragment>
   );
 });

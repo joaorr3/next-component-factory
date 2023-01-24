@@ -19,6 +19,8 @@ type Routes = {
   Issue: RouteData;
   IssueDetail: RouteDataWithDynamicPath;
   IssueOpen: RouteData;
+  Manage: RouteData;
+  ManageComponents: RouteData;
 };
 
 export type RoutesKeys = keyof Routes;
@@ -59,19 +61,39 @@ export const routes: Routes = {
   },
   FAQs: {
     label: "FAQs",
-    path: "/faqs",
-    // navBar: true,
-    match: ["/faqs", "/faqs/[id]"],
+    path: "/manage/faqs",
+    match: ["/manage/faqs", "/manage/faqs/[id]"],
     roles: {
       allOf: ["admin"],
     },
   },
   FAQDetail: {
     label: "FAQ Detail",
-    path: "/faqs/[id]",
-    dynamicPath: (param) => `/faqs/${param}`,
+    path: "/manage/faqs/[id]",
+    dynamicPath: (param) => `/manage/faqs/${param}`,
     roles: {
       allOf: ["admin"],
+    },
+  },
+  Manage: {
+    label: "Manage",
+    path: "/manage",
+    match: [
+      "/manage",
+      "/manage/faqs",
+      "/manage/faqs/[id]",
+      "/manage/components",
+      "/manage/components/[id]",
+    ],
+    roles: {
+      anyOf: ["cf", "dev"],
+    },
+  },
+  ManageComponents: {
+    label: "Components",
+    path: "/manage/components",
+    roles: {
+      anyOf: ["cf", "dev"],
     },
   },
 };

@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { useLoading } from "../../utils/GlobalState/GlobalStateProvider";
+import { ComponentList } from "../ComponentList";
 import * as Fields from "./Fields";
 import {
   type FormSchemaKeys,
@@ -20,6 +21,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
     setValue,
     getFieldState,
     handleSubmit,
+    watch,
     reset,
   } = useForm<FormSchema>({
     resolver: zodResolver(issueFormSchema),
@@ -114,6 +116,14 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
           register={register("type")}
         />
 
+        <Fields.Select
+          label="Platform"
+          options={["WEB", "NATIVE", "CROSS"]}
+          disabled={formState.isSubmitting}
+          error={getError("platform")}
+          register={register("platform")}
+        />
+
         <Fields.Area
           label="Steps To Reproduce"
           placeholder={`Ex:\n 1. Dis this; \n 2. Did that;`}
@@ -123,14 +133,24 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
           register={register("stepsToReproduce")}
         />
 
-        <Fields.Text
+        <Fields.ModalSelect
           label="Component Name"
-          description="Must be an exact match: AccountCard ✅, [accountCard, account card, Account Card, account-card] ❌"
-          placeholder="Ex: AccountCard"
           disabled={formState.isSubmitting}
+          placeholder="Ex: AccountCard"
+          value={watch("component")}
           error={getError("component")}
-          register={register("component")}
-        />
+        >
+          {({ setIsOpen }) => (
+            <ComponentList
+              selectedComponentName={watch("component")}
+              onItemPress={({ name }) => {
+                console.log("name: ", name);
+                setValue("component", name);
+                setIsOpen(false);
+              }}
+            />
+          )}
+        </Fields.ModalSelect>
 
         <Fields.Select
           label="Severity"
@@ -159,7 +179,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
 
         <div className="flex">
           <Fields.Toggle
-            label="Check Tech Lead"
+            label="Checked With Tech Lead"
             checked={getValues("checkTechLead")}
             onChange={(checked) => setValue("checkTechLead", checked)}
             disabled={formState.isSubmitting}
@@ -168,7 +188,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
           />
 
           <Fields.Toggle
-            label="Check Design"
+            label="Checked With Design"
             checked={getValues("checkDesign")}
             onChange={(checked) => setValue("checkDesign", checked)}
             disabled={formState.isSubmitting}

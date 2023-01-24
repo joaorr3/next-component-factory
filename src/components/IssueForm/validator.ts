@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { type ImageResponseModel } from "../../hooks/useFileUpload";
+import { notEmptyString } from "../../utils/validators";
 
 export type CustomFile = File & { preview: string };
 
@@ -19,7 +20,7 @@ const validateFiles = <T extends keyof Pick<CustomFile, "size" | "type">>(
   return !fst;
 };
 
-const acceptedFileTypes = ["image/png", "image/jpeg", "image/gif"];
+const acceptedFileTypes = ["image/png", "image/jpeg", "image/gif", "video/mp4"];
 
 const fileValidator = z
   .array(z.custom<CustomFile>())
@@ -47,18 +48,14 @@ const fileValidator = z
     { message: "File size must be less than or equal to 10MB" }
   );
 
-const notEmpty = z.string().refine((string) => string !== "", {
-  message: "Required field",
-});
-
 const baseIssueSchema = z.object({
-  title: notEmpty,
+  title: notEmptyString,
   description: z.string().min(10),
-  lab: notEmpty,
-  version: notEmpty,
+  lab: notEmptyString,
+  version: notEmptyString,
   type: z.enum(["bug", "help", "feat", "cr"]),
-  stepsToReproduce: notEmpty,
-  component: notEmpty,
+  stepsToReproduce: notEmptyString,
+  component: notEmptyString,
   severity: z.enum(["high", "medium", "low"]),
   specs: z.string().url(),
   codeSnippet: z.string().url(),
@@ -66,6 +63,7 @@ const baseIssueSchema = z.object({
   checkDesign: z.boolean(),
   scope: z.enum(["dev", "design", "both"]),
   azureWorkItem: z.string().nullable(),
+  platform: z.enum(["WEB", "NATIVE", "CROSS"]),
 });
 
 export const issueFormSchema = baseIssueSchema.merge(

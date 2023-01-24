@@ -90,6 +90,12 @@ enum IssueStatus {
   CLOSED
 }
 
+enum Platform {
+  WEB
+  NATIVE
+  CROSS
+}
+
 model Issue {
   id               Int            @id @default(autoincrement())
   issueMapping     IssueIdMapping @relation(fields: [issueIdMappingId], references: [id])
@@ -113,6 +119,7 @@ model Issue {
   attachment       String?        @db.Text
   attachment2      String?        @db.Text
   azureWorkItem    String?        @db.Text
+  platform         Platform?
   timestamp        DateTime       @default(now()) @db.Timestamp(0)
   createdAt        DateTime?
 
@@ -175,4 +182,18 @@ model Image {
   id  String @id @default(cuid())
   key String
   url String
+}
+
+enum ComponentCategory {
+  BASE
+  ATOMS
+  MOLECULES
+  ORGANISMS
+}
+
+model Component {
+  id          String            @id @default(cuid())
+  name        String
+  category    ComponentCategory
+  description String?
 }

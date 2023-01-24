@@ -100,6 +100,7 @@ export const issuesRouter = router({
         timestamp: new Date(),
         status: "TODO",
         discordThreadId: null,
+        platform: input.platform,
       };
 
       const issueResponse = await ctx.prisma.issue.create({

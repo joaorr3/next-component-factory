@@ -1,5 +1,4 @@
-import Link from "next/link";
-import React from "react";
+import { InteractionElement } from "./InteractionElement";
 
 export type BackButtonProps = {
   href: string;
@@ -7,10 +6,8 @@ export type BackButtonProps = {
 
 export const BackButton = ({ href }: BackButtonProps): JSX.Element => {
   return (
-    <Link href={href} className="max-w-max">
-      <div className="mb-3 max-w-max cursor-pointer rounded-2xl bg-neutral-600 bg-opacity-40 p-3 font-bold hover:bg-opacity-50">
-        back
-      </div>
-    </Link>
+    <div className="mb-3">
+      <InteractionElement text="Back" href={href} />
+    </div>
   );
 };

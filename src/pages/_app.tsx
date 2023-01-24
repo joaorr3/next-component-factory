@@ -5,8 +5,10 @@ import { SessionProvider } from "next-auth/react";
 import { type AppType } from "next/app";
 import React from "react";
 import { AppContainer } from "../components/AppContainer";
+import { HomeButton } from "../components/HomeButton";
 import Loader from "../components/Loader";
 import { LoginButton } from "../components/LoginButton";
+import { ManageMenu } from "../components/ManageMenu";
 import NavBar, {
   NavBarActionContainer,
   NavBarContent,
@@ -17,7 +19,6 @@ import { GlobalStyle } from "../styles/GlobalStyles";
 import ThemeProvider from "../styles/ThemeProvider";
 import { GlobalStateProvider } from "../utils/GlobalState/GlobalStateProvider";
 import { trpc } from "../utils/trpc";
-import { HomeButton } from "../components/HomeButton";
 
 const montserrat = Montserrat({
   weight: "variable",
@@ -44,6 +45,8 @@ const MyApp: AppType<{ session: Session | null }> = ({
                 <NavBarContent />
 
                 <NavBarActionContainer>
+                  <ManageMenu />
+
                   <UserAvatar />
                   <LoginButton />
                   <ThemeSwitcher />

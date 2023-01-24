@@ -28,7 +28,7 @@ export default withRoles("Issue", () => {
   } = useGlobalState();
 
   const issues = trpc.issues.search.useQuery(searchFilters, {
-    staleTime: 300000,
+    // staleTime: 1000 * 60 * 2, // 2 min
   });
 
   useLoading(issues.isLoading && issues.fetchStatus !== "idle");

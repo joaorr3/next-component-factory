@@ -1,5 +1,6 @@
 import { router } from "../trpc";
 import { authRouter } from "./auth";
+import { componentsRouter } from "./components";
 import { discordRouter } from "./discord";
 import { exampleRouter } from "./example";
 import { imagesRouter } from "./images";
@@ -17,6 +18,7 @@ export const appRouter = router({
   user: userRouter,
   roles: rolesRouter,
   images: imagesRouter,
+  components: componentsRouter,
 });
 
 // export type definition of API
