@@ -1,5 +1,6 @@
 import { animated, type SpringValue } from "@react-spring/web";
 import React from "react";
+import { useKeyPress } from "../hooks/useKeyPress";
 import { usePathMatch } from "../hooks/usePathMatch";
 import { useRoles } from "../hooks/useRoles";
 import { useSpringPopup } from "../hooks/useSpringPopup";
@@ -13,6 +14,8 @@ export const ManageMenu = (): JSX.Element => {
   const { value, isVisible, close } = useSpringPopup(isOpen, (s) =>
     setIsOpen(s)
   );
+
+  useKeyPress("Escape", close);
 
   const { valid } = useRoles(routes.Manage.roles);
 

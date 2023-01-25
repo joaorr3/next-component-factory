@@ -2,27 +2,43 @@ import React from "react";
 import { ImageFallback } from "./ImageFallback";
 
 export type MediaPreviewProps = {
-  url: string;
+  url?: string;
   contentType: string;
   onLoad?: () => void;
+  width?: number;
+  height?: number;
+  isLink?: boolean;
+  className?: string;
+  onPress?: () => void;
 };
 
 export const MediaPreview = ({
   url,
   contentType,
+  width = 200,
+  height = 200,
+  isLink,
+  className,
+  onPress,
   onLoad,
 }: MediaPreviewProps): JSX.Element => {
+  if (!url) {
+    return <React.Fragment />;
+  }
+
   if (contentType.includes("image")) {
     return (
       <ImageFallback
         alt=""
+        isLink={isLink}
         src={url}
-        className="m-3"
+        className={className}
+        width={width}
+        height={height}
+        onClick={onPress}
         onLoad={onLoad}
-        width={200}
-        height={200}
         style={{
-          maxWidth: 100,
+          maxWidth: width,
           width: "100%",
           height: "auto",
         }}
@@ -33,12 +49,13 @@ export const MediaPreview = ({
       <video
         src={url}
         controls
+        className={className}
+        width={width * 2}
+        height={height * 2}
+        onClick={onPress}
         onLoad={onLoad}
-        className="m-3"
-        width={400}
-        height={400}
         style={{
-          maxWidth: 200,
+          maxWidth: width,
           width: "100%",
           height: "auto",
         }}

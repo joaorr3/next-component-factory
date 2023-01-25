@@ -1,15 +1,18 @@
 import { animated } from "@react-spring/web";
 import React from "react";
+import { useKeyPress } from "../hooks/useKeyPress";
 import { useSpringPopup } from "../hooks/useSpringPopup";
 import { InteractionElement } from "./InteractionElement";
 
-type ModalProps = React.PropsWithChildren<{
+export type ModalProps = React.PropsWithChildren<{
   isOpen?: boolean;
   onChange?: (status: boolean) => void;
 }>;
 
 const Modal = ({ isOpen, onChange, children }: ModalProps) => {
   const { value, isVisible, close } = useSpringPopup(isOpen, onChange);
+
+  useKeyPress("Escape", close);
 
   if (!isVisible) {
     return <React.Fragment />;

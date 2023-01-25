@@ -376,7 +376,12 @@ export const Dropzone = ({
     <div className="relative" key={file.name}>
       <RemoveButton onPress={() => removePreview(file.name)} />
 
-      <MediaPreview url={file.preview} contentType={file.type} />
+      <MediaPreview
+        isLink={false}
+        url={file.preview}
+        contentType={file.type}
+        className="m-3"
+      />
     </div>
   ));
 
@@ -392,7 +397,7 @@ export const Dropzone = ({
         <p>{label}</p>
       </div>
       <ErrorMessage error={error} />
-      <div className="flex">{thumbs}</div>
+      <div className="flex flex-wrap">{thumbs}</div>
     </React.Fragment>
   );
 };

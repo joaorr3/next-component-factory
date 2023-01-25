@@ -18,9 +18,9 @@ const redirect = (path: string) => {
 export default withRoles("IssueOpen", () => {
   const { upload } = useFileUpload("ISSUE");
 
-  const { mutateAsync: openIssue, isLoading } = trpc.issues.open.useMutation();
+  const { mutateAsync: openIssue } = trpc.issues.open.useMutation();
 
-  useLoading(isLoading);
+  const { setLoading } = useLoading();
 
   const handleFilesUpload = React.useCallback(
     async (files: CustomFile[], issueId: number) => {
@@ -43,8 +43,9 @@ export default withRoles("IssueOpen", () => {
         await handleFilesUpload(data.files, issue.id);
         redirect(routes.IssueDetail.dynamicPath(String(issue.id)));
       }
+      setLoading(false);
     },
-    [handleFilesUpload, openIssue]
+    [handleFilesUpload, openIssue, setLoading]
   );
 
   return (
