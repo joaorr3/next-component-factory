@@ -4,7 +4,7 @@ import { useDropzone } from "react-dropzone";
 import { type FieldError, type UseFormRegisterReturn } from "react-hook-form";
 import Switch from "react-switch";
 import tw from "tailwind-styled-components";
-import { ImageFallback } from "../ImageFallback";
+import { MediaPreview } from "../MediaPreview";
 import Modal from "../Modal";
 import { type CustomFile } from "./validator";
 
@@ -376,24 +376,7 @@ export const Dropzone = ({
     <div className="relative" key={file.name}>
       <RemoveButton onPress={() => removePreview(file.name)} />
 
-      <div className="">
-        <ImageFallback
-          alt=""
-          src={file.preview}
-          onLoad={() => {
-            URL.revokeObjectURL(file.preview);
-          }}
-          className="m-3"
-          width={400}
-          height={200}
-          style={{
-            objectFit: "cover",
-            maxWidth: 100,
-            width: "100%",
-            height: 100,
-          }}
-        />
-      </div>
+      <MediaPreview url={file.preview} contentType={file.type} />
     </div>
   ));
 

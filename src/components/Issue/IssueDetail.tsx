@@ -1,9 +1,10 @@
-import { type Issue } from "@prisma/client";
+import { IssuesMedia, type Issue } from "@prisma/client";
 import dayjs from "dayjs";
 import Link from "next/link";
 import React from "react";
 import { ImageFallback } from "../ImageFallback";
 import { type FormSchema } from "../IssueForm/models";
+import { MediaPreview } from "../MediaPreview";
 import { Tag } from "../Tag";
 
 export type PropertyProps = {
@@ -38,32 +39,30 @@ export const Property = ({
   );
 };
 
+type IssuesWithMedia = Issue & {
+  IssuesMedia: IssuesMedia[];
+};
+
+const processMediaData = (issue: IssuesWithMedia) => {
+  const fallbackToOldSchema: Pick<IssuesMedia, "url" | "contentType">[] = [
+    { url: issue?.attachment || "", contentType: "image" },
+    { url: issue?.attachment2 || "", contentType: "image" },
+  ];
+
+  const media = issue.IssuesMedia.length
+    ? issue.IssuesMedia
+    : fallbackToOldSchema;
+
+  return media;
+};
+
 export const IssueDetail: React.FC<{
-  issue: Issue | null | undefined;
+  issue: IssuesWithMedia;
   onPress?: (id?: number) => void;
 }> = ({ issue, onPress }) => {
-  const thumbs = [issue?.attachment, issue?.attachment2].map((url, index) => {
+  const thumbs = processMediaData(issue).map(({ url, contentType }, index) => {
     if (url) {
-      return (
-        <div key={index} className="">
-          <ImageFallback
-            alt=""
-            src={url}
-            className="m-3"
-            width={200}
-            height={200}
-            style={{
-              maxWidth: 100,
-              width: "100%",
-              height: "auto",
-              // objectFit: "cover",
-              // height: 100,
-              // width: "100%",
-              // objectPosition: "left top",
-            }}
-          />
-        </div>
-      );
+      return <MediaPreview key={index} url={url} contentType={contentType} />;
     }
     return <React.Fragment key={index} />;
   });

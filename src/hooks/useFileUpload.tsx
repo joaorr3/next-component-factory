@@ -1,3 +1,4 @@
+import { type MediaType } from "@prisma/client";
 import React from "react";
 import { trpc } from "../utils/trpc";
 
@@ -7,13 +8,21 @@ export type ImageResponseModel = {
   url: string;
 };
 
-export const useFileUpload = () => {
-  const { mutateAsync: createPresignedUrl } =
-    trpc.images.createPresignedUrl.useMutation();
+export const useFileUpload = (mediaType: MediaType) => {
+  const { mutateAsync: issue_createPresignedUrl } =
+    trpc.media.uploadIssueMedia.useMutation();
+
+  const { mutateAsync: generic_createPresignedUrl } =
+    trpc.media.uploadGenericMedia.useMutation();
+
+  const createPresignedUrl =
+    mediaType === "ISSUE"
+      ? issue_createPresignedUrl
+      : generic_createPresignedUrl;
 
   const upload = React.useCallback(
-    async (file?: File): Promise<ImageResponseModel> => {
-      if (!file) {
+    async (file?: File, issueId?: number): Promise<ImageResponseModel> => {
+      if (!file || !issueId) {
         return {
           ok: false,
           imageId: "",
@@ -24,7 +33,11 @@ export const useFileUpload = () => {
       const {
         image,
         presignedPost: { url, fields },
-      } = await createPresignedUrl();
+      } = await createPresignedUrl({
+        contentType: file.type,
+        issueId,
+        name: file.name,
+      });
 
       if (url && fields && image) {
         const formData = new FormData();

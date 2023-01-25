@@ -20,6 +20,9 @@ export const issuesRouter = router({
         where: {
           id: Number(id),
         },
+        include: {
+          IssuesMedia: true,
+        },
       });
     }),
   search: protectedProcedure

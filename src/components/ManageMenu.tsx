@@ -45,6 +45,12 @@ export const ManageMenu = (): JSX.Element => {
           href={routes.FAQs.path}
           onPress={() => close()}
         />
+        <InteractionElement
+          className="mb-3"
+          text={"LABS"}
+          href={""}
+          onPress={() => close()}
+        />
       </PopUpMenu>
     </div>
   );

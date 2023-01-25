@@ -16,29 +16,31 @@ const redirect = (path: string) => {
 };
 
 export default withRoles("IssueOpen", () => {
-  const { upload } = useFileUpload();
+  const { upload } = useFileUpload("ISSUE");
 
   const { mutateAsync: openIssue, isLoading } = trpc.issues.open.useMutation();
 
   useLoading(isLoading);
 
   const handleFilesUpload = React.useCallback(
-    async (files: CustomFile[]) => {
-      return Promise.all(files.map((file) => upload(file))).then((images) => {
-        return images;
-      });
+    async (files: CustomFile[], issueId: number) => {
+      return Promise.all(files.map((file) => upload(file, issueId))).then(
+        (images) => {
+          return images;
+        }
+      );
     },
     [upload]
   );
 
   const handleOnSubmit = React.useCallback(
     async (data: FormSchema) => {
-      const images = await handleFilesUpload(data.files);
       const issue = await openIssue({
         ...data,
-        files: images,
+        files: [],
       });
       if (issue.id) {
+        await handleFilesUpload(data.files, issue.id);
         redirect(routes.IssueDetail.dynamicPath(String(issue.id)));
       }
     },

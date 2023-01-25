@@ -122,6 +122,7 @@ model Issue {
   platform         Platform?
   timestamp        DateTime       @default(now()) @db.Timestamp(0)
   createdAt        DateTime?
+  IssuesMedia      IssuesMedia[]
 
   @@index([issueIdMappingId])
 }
@@ -178,10 +179,48 @@ model FAQ {
   markdown String @db.LongText
 }
 
-model Image {
-  id  String @id @default(cuid())
-  key String
-  url String
+enum MediaType {
+  ISSUE
+  GENERIC
+}
+
+model Media {
+  id String @id @default(cuid())
+
+  media_id   String
+  media_type MediaType
+
+  IssuesMedia  IssuesMedia?  @relation("IssuesMediaRelation", fields: [media_id], references: [id], map: "media_issue_id")
+  GenericMedia GenericMedia? @relation("GenericMediaRelation", fields: [media_id], references: [id], map: "media_generic_id")
+
+  @@index([media_id])
+}
+
+model IssuesMedia {
+  id          String   @id @default(cuid())
+  key         String
+  url         String
+  contentType String
+  name        String
+  meta        String?
+  timestamp   DateTime @default(now()) @db.Timestamp(0)
+
+  issue   Issue   @relation(fields: [issueId], references: [id])
+  issueId Int
+  Media   Media[] @relation("IssuesMediaRelation")
+
+  @@index([issueId])
+}
+
+model GenericMedia {
+  id          String   @id @default(cuid())
+  key         String
+  url         String
+  contentType String
+  name        String
+  meta        String?
+  timestamp   DateTime @default(now()) @db.Timestamp(0)
+  Media       Media[]  @relation("GenericMediaRelation")
 }
 
 enum ComponentCategory {

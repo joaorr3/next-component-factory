@@ -1,6 +1,7 @@
 import { animated } from "@react-spring/web";
 import React from "react";
 import { useSpringPopup } from "../hooks/useSpringPopup";
+import { InteractionElement } from "./InteractionElement";
 
 type ModalProps = React.PropsWithChildren<{
   isOpen?: boolean;
@@ -40,11 +41,8 @@ const Modal = ({ isOpen, onChange, children }: ModalProps) => {
           className="relative m-3 flex w-full max-w-2xl flex-col justify-center rounded-xl bg-neutral-800"
           onClick={(e) => e.stopPropagation()}
         >
-          <div
-            onClick={close}
-            className="absolute -top-14 right-0 cursor-pointer rounded-2xl bg-neutral-700 p-3 font-bold"
-          >
-            close
+          <div className="absolute -top-14 right-0">
+            <InteractionElement text="Close" onPress={close} />
           </div>
 
           {children}

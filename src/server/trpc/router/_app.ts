@@ -3,7 +3,7 @@ import { authRouter } from "./auth";
 import { componentsRouter } from "./components";
 import { discordRouter } from "./discord";
 import { exampleRouter } from "./example";
-import { imagesRouter } from "./images";
+import { mediaRouter } from "./media";
 import { issuesRouter } from "./issues";
 import { kudosRouter } from "./kudos";
 import { rolesRouter } from "./roles";
@@ -17,7 +17,7 @@ export const appRouter = router({
   discord: discordRouter,
   user: userRouter,
   roles: rolesRouter,
-  images: imagesRouter,
+  media: mediaRouter,
   components: componentsRouter,
 });
 
