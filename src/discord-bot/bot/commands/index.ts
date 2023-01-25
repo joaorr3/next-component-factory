@@ -794,7 +794,8 @@ export const commandReactions = async ({
 
       if (userHasAdminRole) {
         const title = options.getString(Announce.title, true);
-        const description = options.getString(Announce.announcement, true);
+        const description =
+          options.getString(Announce.announcement) || undefined;
         const url = options.getString(Announce.url) || undefined;
         const attachment = options.getAttachment(Announce.attachment);
         const role = options.getRole(Announce.mention) as Discord.Role;
@@ -814,7 +815,7 @@ export const commandReactions = async ({
         });
 
         await channel?.send({
-          content: `${roleMention(role.id)}`,
+          content: role ? `${roleMention(role.id)}` : undefined,
           embeds: [issueSummary],
         });
 
