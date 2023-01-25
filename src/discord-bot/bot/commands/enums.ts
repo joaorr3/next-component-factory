@@ -82,4 +82,5 @@ export enum Announce {
   announcement = "announcement",
   url = "url",
   attachment = "attachment",
+  mention = "mention",
 }

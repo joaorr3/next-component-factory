@@ -239,7 +239,16 @@ export const registerCommands = () => {
         option.setName(Announce.title).setDescription("Announcement title")
       )
       .addStringOption((option) =>
-        option.setName(Announce.announcement).setDescription("Text body")
+        option
+          .setName(Announce.announcement)
+          .setDescription("Text body")
+          .setRequired(false)
+      )
+      .addRoleOption((option) =>
+        option
+          .setName(Announce.mention)
+          .setDescription("Announcement role to mention.")
+          .setRequired(false)
       )
       .addStringOption((option) =>
         option
@@ -788,6 +797,7 @@ export const commandReactions = async ({
         const description = options.getString(Announce.announcement, true);
         const url = options.getString(Announce.url) || undefined;
         const attachment = options.getAttachment(Announce.attachment);
+        const role = options.getRole(Announce.mention) as Discord.Role;
 
         const issueSummary = Embed({
           title,
@@ -804,6 +814,7 @@ export const commandReactions = async ({
         });
 
         await channel?.send({
+          content: `${roleMention(role.id)}`,
           embeds: [issueSummary],
         });
 
