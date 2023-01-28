@@ -6,6 +6,8 @@ import Discord, {
 } from "discord.js";
 import { env } from "../../env/server";
 import { parseKudos } from "../../shared/dataUtils";
+import AzureDiscord from "../azure/controllers/discord";
+import AzureMail from "../azure/controllers/mail";
 import { WebhookType } from "../../shared/webhookType";
 import type { startPrisma } from "../data";
 import { notionBatchUpdate, transformGuildMemberData } from "../data/utils";
@@ -59,6 +61,10 @@ export const startBot = ({
 
         registerCommands();
       }
+
+      const azureDiscord = new AzureDiscord(client)
+      const azureMail = new AzureMail({ autoReconnect: true })
+      azureMail.on("mail", (mail) => azureDiscord.processMail(mail))
     });
 
     client.on(Discord.Events.InteractionCreate, async (interaction) => {
