@@ -7,7 +7,7 @@ import {
   type FiltersModel,
 } from "../../components/Issue/Filters";
 import { IssueCard } from "../../components/Issue/IssueCard";
-import { Button } from "../../components/IssueForm/Fields";
+import { Button } from "../../components/Form/Fields";
 import { useHandler } from "../../hooks/useHandler";
 import { routes } from "../../routes";
 import {

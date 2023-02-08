@@ -1,11 +1,7 @@
 import Discord from "discord.js";
+import { IssueScope } from "../../../shared/enums";
 import type { CommandName } from "../types";
-import {
-  IssueCommandOptions,
-  IssueScope,
-  IssueSeverityLevel,
-  IssueType,
-} from "./enums";
+import { IssueCommandOptions, IssueSeverityLevel, IssueType } from "./enums";
 
 export const command = (name: CommandName) =>
   new Discord.SlashCommandBuilder()

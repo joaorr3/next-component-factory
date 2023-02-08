@@ -48,6 +48,8 @@ export const serverSchema = z.object({
   AWS_S3_ACCESS_KEY: z.string(),
   AWS_S3_SECRET_KEY: z.string(),
   AWS_S3_PUBLIC_URL: z.string().url(),
+
+  NEXT_PROD_URL: z.string().url(),
 });
 
 /**

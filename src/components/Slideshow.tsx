@@ -8,7 +8,7 @@ import { MediaPreview } from "./MediaPreview";
 import Modal, { type ModalProps } from "./Modal";
 
 export type SlideshowProps = {
-  data: Pick<IssuesMedia, "url" | "contentType">[];
+  data: Pick<IssuesMedia, "url" | "fileType">[];
   isOpen?: boolean;
 } & Pick<ModalProps, "onChange">;
 
@@ -33,7 +33,7 @@ export const Slideshow = React.forwardRef(
                   <div className="flex w-full justify-center">
                     <MediaPreview
                       url={item.url}
-                      contentType={item.contentType}
+                      contentType={item.fileType}
                       width={590}
                       height={590}
                     />

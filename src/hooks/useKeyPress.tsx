@@ -1,6 +1,14 @@
 import React from "react";
 
-export const useKeyPress = (targetKey: string, cb: () => void) => {
+export const useKeyPress = ({
+  targetKey,
+  attach,
+  cb,
+}: {
+  targetKey: string;
+  cb: () => void;
+  attach?: boolean;
+}) => {
   const handleKeyPress = React.useCallback(
     ({ key }: KeyboardEvent) => {
       if (key === targetKey) {
@@ -11,9 +19,13 @@ export const useKeyPress = (targetKey: string, cb: () => void) => {
   );
 
   React.useEffect(() => {
-    document.addEventListener("keydown", handleKeyPress);
-    return () => {
+    if (attach) {
+      document.addEventListener("keydown", handleKeyPress);
+      return () => {
+        document.removeEventListener("keydown", handleKeyPress);
+      };
+    } else {
       document.removeEventListener("keydown", handleKeyPress);
-    };
-  }, [handleKeyPress]);
+    }
+  }, [handleKeyPress, attach]);
 };

@@ -1,5 +1,7 @@
 import Image from "next/image";
+import Link from "next/link";
 import styled from "styled-components";
+import { routes } from "../routes";
 import { useGlobalState } from "../utils/GlobalState/GlobalStateProvider";
 import { Bold } from "./base";
 
@@ -20,19 +22,21 @@ export const UserAvatar = (): JSX.Element => {
   } = useGlobalState();
 
   return (
-    <Container show={!!profile}>
-      <Bold style={{ marginRight: 12 }}>{profile?.friendlyName}</Bold>
+    <Link href={routes.User.path}>
+      <Container show={!!profile}>
+        <Bold style={{ marginRight: 12 }}>{profile?.friendlyName}</Bold>
 
-      {profile?.avatarURL && (
-        <div style={{ borderRadius: 80, overflow: "hidden" }}>
-          <Image
-            src={profile.avatarURL}
-            width={24}
-            height={24}
-            alt="user image"
-          />
-        </div>
-      )}
-    </Container>
+        {profile?.avatarURL && (
+          <div style={{ borderRadius: 80, overflow: "hidden" }}>
+            <Image
+              src={profile.avatarURL}
+              width={24}
+              height={24}
+              alt="user image"
+            />
+          </div>
+        )}
+      </Container>
+    </Link>
   );
 };

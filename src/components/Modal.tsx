@@ -12,7 +12,7 @@ export type ModalProps = React.PropsWithChildren<{
 const Modal = ({ isOpen, onChange, children }: ModalProps) => {
   const { value, isVisible, close } = useSpringPopup(isOpen, onChange);
 
-  useKeyPress("Escape", close);
+  useKeyPress({ targetKey: "Escape", cb: close, attach: isVisible });
 
   if (!isVisible) {
     return <React.Fragment />;

@@ -1,21 +1,15 @@
-import dynamic from "next/dynamic";
-import "@uiw/react-markdown-editor/markdown-editor.css";
+import "@uiw/react-md-editor/markdown-editor.css";
 import "@uiw/react-markdown-preview/markdown.css";
-import type { IMarkdownEditor } from "@uiw/react-markdown-editor";
+import dynamic from "next/dynamic";
+import type { MDEditorProps } from "@uiw/react-md-editor";
+import { useTheme } from "../styles/ThemeProvider";
 
-const MarkdownEditorComponent = dynamic(
-  () => import("@uiw/react-markdown-editor").then((mod) => mod.default),
-  { ssr: false }
-);
+const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
 
-type IMarkdownEditorProps = IMarkdownEditor;
+function MarkdownEditor(props: MDEditorProps) {
+  const { themeName } = useTheme();
 
-function MarkdownEditor(props: IMarkdownEditorProps) {
-  return (
-    <div>
-      <MarkdownEditorComponent {...props} />
-    </div>
-  );
+  return <MDEditor {...props} data-color-mode={themeName} />;
 }
 
 export default MarkdownEditor;

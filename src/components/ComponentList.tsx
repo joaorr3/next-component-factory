@@ -6,7 +6,7 @@ import { customScrollBar } from "../styles/GlobalStyles";
 import { cn } from "../styles/utils";
 import { useLoading } from "../utils/GlobalState/GlobalStateProvider";
 import { trpc } from "../utils/trpc";
-import { TwTextField } from "./IssueForm/Fields";
+import { TwTextField } from "./Form/Fields";
 
 const ScrollView = styled.div`
   ${customScrollBar}

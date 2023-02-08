@@ -20,7 +20,7 @@ import ThemeProvider from "../styles/ThemeProvider";
 import { GlobalStateProvider } from "../utils/GlobalState/GlobalStateProvider";
 import { trpc } from "../utils/trpc";
 
-const montserrat = Montserrat({
+export const montserrat = Montserrat({
   weight: "variable",
   subsets: ["latin"],
   preload: true,

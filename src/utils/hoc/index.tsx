@@ -11,11 +11,11 @@ export function withRoles<P extends object>(
   return (props: P): JSX.Element => {
     const { data } = useSession();
 
-    if (!data?.user) {
+    const routeRoles = routes[route].roles;
+
+    if (routeRoles && !data?.user) {
       return <UnauthorizedPage reason="loggedOut" />;
     }
-
-    const routeRoles = routes[route].roles;
 
     return (
       <RoleLayer roles={routeRoles}>

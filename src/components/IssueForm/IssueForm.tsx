@@ -1,9 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
 import { useForm } from "react-hook-form";
+import { useDefaultUserLab } from "../../hooks/useDefaultUserLab";
 import { useLoading } from "../../utils/GlobalState/GlobalStateProvider";
 import { ComponentList } from "../ComponentList";
-import * as Fields from "./Fields";
+import * as Fields from "../Form/Fields";
+import { LabList } from "../LabList";
 import {
   type FormSchemaKeys,
   type FormSchema,
@@ -13,6 +15,8 @@ import { issueFormSchema } from "./validator";
 
 export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
   const formRef = React.useRef<HTMLFormElement>(null);
+
+  const { defaultUserLab } = useDefaultUserLab();
 
   const {
     formState,
@@ -25,21 +29,12 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
     reset,
   } = useForm<FormSchema>({
     resolver: zodResolver(issueFormSchema),
-    // defaultValues: {
-    //   title: "Issue Title",
-    //   description: "Lorem Ipsum Sit Dolor",
-    //   lab: "Lab X",
-    //   version: "Version 123456",
-    //   type: "feat",
-    //   stepsToReproduce: "Steps to reproduce",
-    //   component: "Component X",
-    //   severity: "medium",
-    //   codeSnippet: "https://www.npmjs.com/package/react-switch",
-    //   specs: "https://www.npmjs.com/package/react-switch",
-    //   checkDesign: true,
-    //   checkTechLead: true,
-    //   scope: "dev",
-    // },
+    defaultValues: {
+      lab: {
+        id: defaultUserLab?.id,
+        name: defaultUserLab?.displayName || defaultUserLab?.name,
+      },
+    },
   });
 
   const { setLoading } = useLoading();
@@ -92,13 +87,23 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
           register={register("description")}
         />
 
-        <Fields.Text
+        <Fields.ModalSelect
           label="Lab"
-          placeholder="LAB"
           disabled={formState.isSubmitting}
+          placeholder="Ex: M2030"
+          value={watch("lab")?.name}
           error={getError("lab")}
-          register={register("lab")}
-        />
+        >
+          {({ setIsOpen }) => (
+            <LabList
+              selectedLab={watch("lab")}
+              onItemPress={(lab) => {
+                setValue("lab", lab);
+                setIsOpen(false);
+              }}
+            />
+          )}
+        </Fields.ModalSelect>
 
         <Fields.Text
           label="Package Version"

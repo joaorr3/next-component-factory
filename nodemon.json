@@ -1,5 +1,5 @@
 {
-  "watch": ["src/discord-bot/**/*.ts"],
+  "watch": ["src/discord-bot/**/*.ts", "src/shared/*.ts"],
   "ext": "ts",
   "ignore": ["node_modules"],
   "exec": "ts-node --project ./tsconfig.bot.json ./src/discord-bot/startup.ts"

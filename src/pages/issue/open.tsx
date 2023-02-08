@@ -4,12 +4,12 @@ import React from "react";
 import { BackButton } from "../../components/BackButton";
 import { IssueForm } from "../../components/IssueForm/IssueForm";
 import { type FormSchema } from "../../components/IssueForm/models";
-import { type CustomFile } from "../../components/IssueForm/validator";
 import { useFileUpload } from "../../hooks/useFileUpload";
 import { routes } from "../../routes";
 import { useLoading } from "../../utils/GlobalState/GlobalStateProvider";
 import { withRoles } from "../../utils/hoc";
 import { trpc } from "../../utils/trpc";
+import type { CustomFile } from "../../utils/validators/media";
 
 const redirect = (path: string) => {
   Router.push(path);
@@ -24,7 +24,7 @@ export default withRoles("IssueOpen", () => {
 
   const handleFilesUpload = React.useCallback(
     async (files: CustomFile[], issueId: number) => {
-      return Promise.all(files.map((file) => upload(file, issueId))).then(
+      return Promise.all(files.map((file) => upload(file, { issueId }))).then(
         (images) => {
           return images;
         }
@@ -34,9 +34,11 @@ export default withRoles("IssueOpen", () => {
   );
 
   const handleOnSubmit = React.useCallback(
-    async (data: FormSchema) => {
+    async ({ lab, ...data }: FormSchema) => {
       const issue = await openIssue({
         ...data,
+        lab: lab.name,
+        labId: lab.id,
         files: [],
       });
       if (issue.id) {
@@ -56,7 +58,7 @@ export default withRoles("IssueOpen", () => {
 
       <main className="mb-40">
         <div className="mb-6">
-          <BackButton href={routes.Issue.path} />
+          <BackButton />
         </div>
 
         <div className="mb-8">

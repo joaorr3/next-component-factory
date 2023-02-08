@@ -32,7 +32,7 @@
     "@trpc/next": "10.0.0-rc.4",
     "@trpc/react-query": "10.0.0-rc.4",
     "@trpc/server": "10.0.0-rc.4",
-    "@uiw/react-markdown-editor": "^5.11.1",
+    "@uiw/react-md-editor": "^3.20.2",
     "aws-sdk": "^2.1295.0",
     "clsx": "^1.2.1",
     "dayjs": "^1.11.7",
@@ -87,5 +87,27 @@
   },
   "ct3aMetadata": {
     "initVersion": "6.10.1"
+  },
+  "madge": {
+    "fontSize": "16px",
+    "fileExtensions": [
+      "ts"
+    ],
+    "backgroundColor": "#ffffff",
+    "noDependencyColor": "#249bc7",
+    "nodeColor": "#c78024",
+    "cyclicNodeColor": "#ff0000",
+    "edgeColor": "#7b24c7",
+    "detectiveOptions": {
+      "ts": {
+        "mixedImports": true,
+        "skipTypeImports": true
+      }
+    },
+    "graphVizOptions": {
+      "G": {
+        "rankdir": "LR"
+      }
+    }
   }
 }

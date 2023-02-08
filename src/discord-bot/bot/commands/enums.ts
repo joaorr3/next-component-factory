@@ -56,12 +56,6 @@ export enum ThreadArchiveOptionChoices {
   "1d" = "1d",
 }
 
-export enum IssueScope {
-  dev = "dev",
-  design = "design",
-  both = "both",
-}
-
 export enum BatchOptions {
   start_date = "start_date",
   end_date = "end_date",

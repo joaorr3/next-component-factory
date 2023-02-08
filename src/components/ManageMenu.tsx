@@ -1,11 +1,11 @@
 import { animated, type SpringValue } from "@react-spring/web";
 import React from "react";
+import { useClickOutside } from "../hooks/useClickOutside";
 import { useKeyPress } from "../hooks/useKeyPress";
 import { usePathMatch } from "../hooks/usePathMatch";
 import { useRoles } from "../hooks/useRoles";
 import { useSpringPopup } from "../hooks/useSpringPopup";
 import { routes } from "../routes";
-import { cn } from "../styles/utils";
 import { InteractionElement } from "./InteractionElement";
 
 export const ManageMenu = (): JSX.Element => {
@@ -15,7 +15,7 @@ export const ManageMenu = (): JSX.Element => {
     setIsOpen(s)
   );
 
-  useKeyPress("Escape", close);
+  useKeyPress({ targetKey: "Escape", cb: close, attach: isOpen });
 
   const { valid } = useRoles(routes.Manage.roles);
 
@@ -45,13 +45,25 @@ export const ManageMenu = (): JSX.Element => {
         <InteractionElement
           className="mb-3"
           text={"FAQs"}
-          href={routes.FAQs.path}
+          href={routes.ManageFAQs.path}
           onPress={() => close()}
         />
         <InteractionElement
           className="mb-3"
           text={"LABS"}
-          href={""}
+          href={routes.ManageLabs.path}
+          onPress={() => close()}
+        />
+        <InteractionElement
+          className="mb-3"
+          text={"Users"}
+          href={routes.ManageUsers.path}
+          onPress={() => close()}
+        />
+        <InteractionElement
+          className="mb-3"
+          text={"Media"}
+          href={routes.ManageMedia.path}
           onPress={() => close()}
         />
       </PopUpMenu>
@@ -65,27 +77,21 @@ export type PopUpMenuProps = React.PropsWithChildren<{
   onPressOutside?: () => void;
 }>;
 
-const base = /*tw*/ `
-  flex
-  flex-col
-  rounded-2xl
-  absolute
-  right-0
-  top-14
-  p-5
-  items-end
-`;
-
 export const PopUpMenu = ({
   isOpen,
   value,
   onPressOutside,
   children,
 }: PopUpMenuProps): JSX.Element => {
+  const ref = React.useRef<HTMLDivElement>(null);
+
+  useClickOutside({ ref, attach: isOpen, callback: onPressOutside });
+
   if (isOpen) {
     return (
       <React.Fragment>
         <animated.div
+          ref={ref}
           style={{
             opacity: value,
             zIndex: 120,
@@ -93,20 +99,10 @@ export const PopUpMenu = ({
             translateY: value.to([0, 1], [-20, 0], "clamp"),
             backgroundColor: "rgb(28, 28, 28)",
           }}
-          className={cn(base)}
+          className="absolute right-0 top-14 flex flex-col items-end rounded-2xl border-2 border-solid border-neutral-800 p-5"
         >
           {children}
         </animated.div>
-
-        <animated.div
-          className="fixed inset-0 flex h-screen items-center justify-center"
-          style={{
-            zIndex: 110,
-            // backgroundColor: "rgba(24, 24, 24, 0.3)",
-            opacity: value,
-          }}
-          onClick={onPressOutside}
-        />
       </React.Fragment>
     );
   }

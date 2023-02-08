@@ -77,12 +77,6 @@ const Kudos = () => {
             />
           </div>
         )}
-
-        {/* <div style={{ display: "flex", flexWrap: "wrap" }}>
-        {kudos.data?.map((data, i) => {
-          return <KudosCard key={i} {...data} />;
-        })}
-      </div> */}
       </div>
     </React.Fragment>
   );

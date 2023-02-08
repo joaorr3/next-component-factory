@@ -123,8 +123,10 @@ model Issue {
   timestamp        DateTime       @default(now()) @db.Timestamp(0)
   createdAt        DateTime?
   IssuesMedia      IssuesMedia[]
+  Lab              Lab?           @relation(fields: [labId], references: [id])
+  labId            String?
 
-  @@index([issueIdMappingId])
+  @@index([issueIdMappingId, labId])
 }
 
 model Kudos {
@@ -152,10 +154,12 @@ model GuildUser {
   color        String?  @db.Text
   from         Kudos[]  @relation("from")
   to           Kudos[]  @relation("to")
+  defaultLabId String?
 
-  notionUser  NotionUser?   @relation(fields: [notionUserId], references: [id])
-  PullRequest PullRequest[]
-  User        User?
+  notionUser   NotionUser?    @relation(fields: [notionUserId], references: [id])
+  PullRequest  PullRequest[]
+  User         User?
+  LabGuildUser LabGuildUser[]
 }
 
 model NotionUser {
@@ -169,14 +173,19 @@ model PullRequest {
   id               Int       @id @default(autoincrement())
   pullRequestId    String    @unique
   webhookMessageId String    @unique
-  guildUserId      String
   guildUser        GuildUser @relation(fields: [guildUserId], references: [id])
+  guildUserId      String
+
+  @@index([guildUserId])
 }
 
 model FAQ {
-  id       Int    @id @default(autoincrement())
-  type     String
-  markdown String @db.LongText
+  id        Int      @id @default(autoincrement())
+  label     String
+  type      String?
+  markdown  String   @db.LongText
+  createdBy String?
+  timestamp DateTime @default(now()) @db.Timestamp(0)
 }
 
 enum MediaType {
@@ -187,23 +196,24 @@ enum MediaType {
 model Media {
   id String @id @default(cuid())
 
-  media_id   String
+  media_id   String    @unique
   media_type MediaType
+  s3_key     String    @unique
 
-  IssuesMedia  IssuesMedia?  @relation("IssuesMediaRelation", fields: [media_id], references: [id], map: "media_issue_id")
-  GenericMedia GenericMedia? @relation("GenericMediaRelation", fields: [media_id], references: [id], map: "media_generic_id")
+  IssuesMedia  IssuesMedia?  @relation("IssuesMediaRelation", fields: [media_id], references: [id], map: "media_issue_id", onDelete: Cascade)
+  GenericMedia GenericMedia? @relation("GenericMediaRelation", fields: [media_id], references: [id], map: "media_generic_id", onDelete: Cascade)
 
-  @@index([media_id])
+  @@index([media_id, s3_key])
 }
 
 model IssuesMedia {
-  id          String   @id @default(cuid())
-  key         String
-  url         String
-  contentType String
-  name        String
-  meta        String?
-  timestamp   DateTime @default(now()) @db.Timestamp(0)
+  id        String   @id @default(cuid())
+  key       String
+  url       String
+  fileType  String
+  fileName  String
+  meta      String?
+  timestamp DateTime @default(now()) @db.Timestamp(0)
 
   issue   Issue   @relation(fields: [issueId], references: [id])
   issueId Int
@@ -213,14 +223,14 @@ model IssuesMedia {
 }
 
 model GenericMedia {
-  id          String   @id @default(cuid())
-  key         String
-  url         String
-  contentType String
-  name        String
-  meta        String?
-  timestamp   DateTime @default(now()) @db.Timestamp(0)
-  Media       Media[]  @relation("GenericMediaRelation")
+  id        String   @id @default(cuid())
+  key       String
+  url       String
+  fileType  String
+  fileName  String
+  meta      String?
+  timestamp DateTime @default(now()) @db.Timestamp(0)
+  Media     Media[]  @relation("GenericMediaRelation")
 }
 
 enum ComponentCategory {
@@ -235,4 +245,33 @@ model Component {
   name        String
   category    ComponentCategory
   description String?
+}
+
+model GuildRole {
+  id               String  @id
+  name             String
+  isAutoAssignable Boolean @default(false)
+  lab              Lab?
+}
+
+model Lab {
+  id          String  @id @default(cuid())
+  name        String
+  displayName String?
+  channelId   String? @unique
+  channelName String? @unique
+
+  GuildRole    GuildRole?     @relation(fields: [guildRoleId], references: [id])
+  guildRoleId  String?        @unique
+  LabGuildUser LabGuildUser[]
+  Issue        Issue[]
+}
+
+model LabGuildUser {
+  Lab         Lab       @relation(fields: [labId], references: [id])
+  labId       String
+  GuildUser   GuildUser @relation(fields: [guildUserId], references: [id])
+  guildUserId String
+
+  @@id([labId, guildUserId])
 }

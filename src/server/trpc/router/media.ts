@@ -1,7 +1,12 @@
+import { MediaType } from "@prisma/client";
 import S3 from "aws-sdk/clients/s3";
 import { uuid } from "uuidv4";
 import { z } from "zod";
 import { env } from "../../../env/server";
+import {
+  genericMediaSchemaValidator,
+  issueMediaSchemaValidator,
+} from "../../../utils/validators/media";
 
 import { protectedProcedure, publicProcedure, router } from "../trpc";
 
@@ -21,8 +26,23 @@ const BUCKET_NAME = env.AWS_S3_BUCKET;
 const UPLOADING_TIME_LIMIT = 60;
 const UPLOAD_MAX_FILE_SIZE = 10000000;
 
-const s3Response = async (key: string) =>
-  new Promise<S3.PresignedPost>((resolve, reject) => {
+const s3DeleteObject = async (key: string) => {
+  return new Promise<S3.DeleteObjectOutput>((resolve, reject) => {
+    s3.deleteObject(
+      {
+        Bucket: BUCKET_NAME,
+        Key: key,
+      },
+      (err, out) => {
+        if (err) return reject(err);
+        resolve(out);
+      }
+    );
+  });
+};
+
+const s3Response = async (key: string) => {
+  return new Promise<S3.PresignedPost>((resolve, reject) => {
     s3.createPresignedPost(
       {
         Fields: {
@@ -41,19 +61,22 @@ const s3Response = async (key: string) =>
       }
     );
   });
+};
 
 export const mediaRouter = router({
-  getAll: publicProcedure.query(async ({ ctx }) => {
-    const images = await ctx.prisma.issuesMedia.findMany();
-    return images;
+  getAllGeneric: publicProcedure.query(async ({ ctx }) => {
+    const images = await ctx.prisma.media.findMany({
+      include: {
+        GenericMedia: true,
+      },
+    });
+    return images.map((m) => m.GenericMedia);
   }),
   uploadGenericMedia: protectedProcedure
-    .input(z.object({ contentType: z.string(), name: z.string() }))
-    .mutation(async ({ ctx, input: { contentType, name } }) => {
-      const userId = ctx.session.user.id;
-
+    .input(genericMediaSchemaValidator)
+    .mutation(async ({ ctx, input: { fileType, fileName, metadata } }) => {
       const imageId = uuid();
-      const key = `${userId}/${imageId}`;
+      const key = `generic/${imageId}__${fileName}`;
 
       const presignedPost = await s3Response(key);
 
@@ -62,10 +85,11 @@ export const mediaRouter = router({
           id: imageId,
           key,
           url: getS3Url(key),
-          contentType,
-          name,
+          fileType,
+          fileName,
+          meta: JSON.stringify(metadata),
           Media: {
-            create: [{ media_type: "GENERIC" }],
+            create: [{ media_type: "GENERIC", s3_key: key }],
           },
         },
       });
@@ -73,18 +97,10 @@ export const mediaRouter = router({
       return { image, presignedPost };
     }),
   uploadIssueMedia: protectedProcedure
-    .input(
-      z.object({
-        contentType: z.string(),
-        issueId: z.number(),
-        name: z.string(),
-      })
-    )
-    .mutation(async ({ ctx, input: { contentType, issueId, name } }) => {
-      const userId = ctx.session.user.id;
-
+    .input(issueMediaSchemaValidator)
+    .mutation(async ({ ctx, input: { fileType, fileName, metadata } }) => {
       const imageId = uuid();
-      const key = `${userId}/${imageId}`;
+      const key = `issues/${metadata.issueId}/${imageId}`;
 
       const presignedPost = await s3Response(key);
 
@@ -93,15 +109,41 @@ export const mediaRouter = router({
           id: imageId,
           key,
           url: getS3Url(key),
-          contentType,
-          issueId,
-          name,
+          fileType,
+          fileName,
+          issueId: metadata.issueId,
+          meta: JSON.stringify(metadata),
           Media: {
-            create: [{ media_type: "ISSUE" }],
+            create: [{ media_type: "ISSUE", s3_key: key }],
           },
         },
       });
 
       return { image, presignedPost };
+    }),
+  deleteMedia: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        type: z.enum([MediaType.GENERIC, MediaType.ISSUE]),
+        s3Key: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input: { id, type, s3Key } }) => {
+      await ctx.prisma.media.update({
+        where: {
+          media_id: id,
+        },
+        data: {
+          GenericMedia: {
+            delete: type === "GENERIC",
+          },
+          IssuesMedia: {
+            delete: type === "ISSUE",
+          },
+        },
+      });
+
+      await s3DeleteObject(s3Key);
     }),
 });

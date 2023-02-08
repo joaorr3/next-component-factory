@@ -6,7 +6,8 @@ import Switch from "react-switch";
 import tw from "tailwind-styled-components";
 import { MediaPreview } from "../MediaPreview";
 import Modal from "../Modal";
-import { type CustomFile } from "./validator";
+import { cn } from "../../styles/utils";
+import type { CustomFile } from "../../utils/validators/media";
 
 //region Button
 export const Button = tw.button`    
@@ -412,12 +413,6 @@ export type ModalSelectProps = Omit<BaseFieldProps, "register"> & {
   }) => React.ReactNode;
 };
 
-export const TwFakeField = tw.div`
-  ${baseField}
-  items-center
-  flex
-`;
-
 export const ModalSelect = ({
   value,
   label,
@@ -430,16 +425,36 @@ export const ModalSelect = ({
 
   return (
     <BaseField label={label} description={description} error={error}>
-      <TwFakeField className="cursor-pointer" onClick={() => setIsOpen(true)}>
-        <span className={value ? "" : "opacity-20"}>
+      <div
+        className={cn(baseField(), "flex cursor-pointer items-center")}
+        onClick={() => setIsOpen(true)}
+      >
+        <span className={cn("flex-1", value ? "" : "opacity-20")}>
           {value || placeholder}
         </span>
-      </TwFakeField>
+
+        <Plus />
+      </div>
 
       <Modal isOpen={isOpen} onChange={(status) => setIsOpen(status)}>
         {children({ setIsOpen })}
       </Modal>
     </BaseField>
+  );
+};
+
+export const Plus = (): JSX.Element => {
+  return (
+    <div className="h-8 w-8">
+      <svg
+        className="fill-neutral-300"
+        viewBox="0 0 48 48"
+        height="32"
+        width="32"
+      >
+        <path d="M22.5 38V25.5H10v-3h12.5V10h3v12.5H38v3H25.5V38Z" />
+      </svg>
+    </div>
   );
 };
 

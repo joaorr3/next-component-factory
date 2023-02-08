@@ -55,7 +55,7 @@ export const MediaPreview = ({
         onClick={onPress}
         onLoad={onLoad}
         style={{
-          maxWidth: width,
+          maxWidth: width * 2,
           width: "100%",
           height: "auto",
         }}

@@ -3,42 +3,11 @@ import { type ReactSlipAndSlideRef } from "@react-slip-and-slide/web";
 import dayjs from "dayjs";
 import Link from "next/link";
 import React from "react";
+import { DataDisplay } from "../DataDisplay";
 import { type FormSchema } from "../IssueForm/models";
 import { MediaPreview } from "../MediaPreview";
 import { Slideshow } from "../Slideshow";
 import { Tag } from "../Tag";
-
-export type PropertyProps = {
-  label?: string;
-  value?: string | null;
-  type?: "url";
-};
-
-export const Property = ({
-  label,
-  value,
-  type,
-}: PropertyProps): JSX.Element => {
-  return (
-    <div className="mb-3 mr-4 flex max-w-sm shrink-0 flex-col justify-center rounded-xl bg-neutral-900 bg-opacity-30 p-5">
-      <p className="mb-1 text-sm font-bold">{label}</p>
-
-      {type === "url" ? (
-        <Link
-          target="_blank"
-          className="text-sm text-blue-700 underline underline-offset-4"
-          href={value || ""}
-        >
-          Link
-        </Link>
-      ) : (
-        <p className="max-w-xl overflow-hidden overflow-ellipsis text-sm">
-          {value || "N.A"}
-        </p>
-      )}
-    </div>
-  );
-};
 
 type IssuesWithMedia = Issue & {
   IssuesMedia: IssuesMedia[];
@@ -49,7 +18,7 @@ const processMediaData = (issue: IssuesWithMedia) => {
     .filter((a) => a)
     .map(() => ({
       url: issue?.attachment || "",
-      contentType: "image",
+      fileType: "image",
     }));
 
   const media = issue.IssuesMedia.length
@@ -67,14 +36,14 @@ export const IssueDetail: React.FC<{
 
   const slideshowRef = React.useRef<ReactSlipAndSlideRef>(null);
 
-  const thumbs = processMediaData(issue).map(({ url, contentType }, index) => {
+  const thumbs = processMediaData(issue).map(({ url, fileType }, index) => {
     if (url) {
       return (
         <MediaPreview
           className="m-3 cursor-pointer"
           key={index}
           url={url}
-          contentType={contentType}
+          contentType={fileType}
           isLink={false}
           onPress={() => {
             setIsOpen(true);
@@ -114,30 +83,67 @@ export const IssueDetail: React.FC<{
 
         <p className="mb-8 text-sm">{issue?.description}</p>
 
-        <div className="flex flex-wrap">
-          <Property label="Version" value={issue?.version} />
-
-          <Property label="Steps" value={issue?.stepsToReproduce} />
-
-          <Property label="Component" value={issue?.component} />
-
-          <Property label="Severity" value={issue?.severity} />
-
-          <Property label="Specs" value={issue?.specs} type="url" />
-
-          <Property label="Code" value={issue?.codeSnippet} type="url" />
-
-          <Property
-            label="Check Tech Lead"
-            value={String(issue?.checkTechLead)}
-          />
-
-          <Property label="Check Design" value={String(issue?.checkDesign)} />
-
-          <Property label="Scope" value={issue?.scope} />
-
-          <Property label="Platform" value={issue?.platform} />
-        </div>
+        <DataDisplay
+          nude
+          data={[
+            {
+              label: "Version",
+              value: issue?.version,
+            },
+            {
+              label: "Steps",
+              value: issue?.stepsToReproduce,
+            },
+            {
+              label: "Component",
+              value: issue?.component,
+            },
+            {
+              label: "Severity",
+              value: issue?.severity,
+            },
+            {
+              label: "Specs",
+              element: (
+                <Link
+                  target="_blank"
+                  className="text-sm text-blue-700 underline underline-offset-4"
+                  href={issue?.specs || ""}
+                >
+                  Link
+                </Link>
+              ),
+            },
+            {
+              label: "Code",
+              element: (
+                <Link
+                  target="_blank"
+                  className="text-sm text-blue-700 underline underline-offset-4"
+                  href={issue?.codeSnippet || ""}
+                >
+                  Link
+                </Link>
+              ),
+            },
+            {
+              label: "Check Tech Lead",
+              value: String(issue?.checkTechLead),
+            },
+            {
+              label: "Check Design",
+              value: String(issue?.checkDesign),
+            },
+            {
+              label: "Scope",
+              value: issue?.scope,
+            },
+            {
+              label: "Platform",
+              value: issue?.platform,
+            },
+          ]}
+        />
 
         <div className="mb-4 flex flex-wrap rounded-xl bg-neutral-900 bg-opacity-30 p-4">
           {thumbs}

@@ -1,34 +1,113 @@
 import Head from "next/head";
-import { useRouter } from "next/router";
+import Router, { useRouter } from "next/router";
 import React from "react";
-import MarkdownEditor from "../../../components/MarkdownEditor";
-import { useTheme } from "../../../styles/ThemeProvider";
+import { BackButton } from "../../../components/BackButton";
+import { ContextMenu } from "../../../components/ContextMenu";
+import type { FaqFormModel } from "../../../components/FaqForm/FaqForm";
+import { FaqForm } from "../../../components/FaqForm/FaqForm";
+import { routes } from "../../../routes";
+import {
+  useGlobalState,
+  useLoading,
+} from "../../../utils/GlobalState/GlobalStateProvider";
 import { withRoles } from "../../../utils/hoc";
+import { trpc } from "../../../utils/trpc";
 
-export default withRoles("FAQs", () => {
+export default withRoles("ManageFAQDetail", () => {
   const router = useRouter();
-  const { id } = router.query;
+  const { id: _id } = router.query;
 
-  const [mdString, setMdString] = React.useState<string>("");
-  console.log("mdString: ", mdString);
-  const { themeName } = useTheme();
+  const id = typeof _id === "string" ? _id : "";
+
+  const {
+    state: { user },
+  } = useGlobalState();
+
+  const {
+    data: faq,
+    isLoading: isLoadingFaq,
+    fetchStatus,
+    refetch,
+  } = trpc.faq.read.useQuery({
+    id,
+  });
+
+  const { mutateAsync: updateFaq } = trpc.faq.update.useMutation();
+  const { mutateAsync: deleteFaq } = trpc.faq.delete.useMutation();
+
+  const { setLoading } = useLoading(isLoadingFaq && fetchStatus !== "idle");
+
+  const handleOnSubmit = React.useCallback(
+    async ({ label, type, markdown }: FaqFormModel) => {
+      setLoading(true);
+      await updateFaq({
+        id,
+        faq: {
+          label,
+          type: type || null,
+          markdown,
+          timestamp: new Date(),
+          createdBy:
+            user.profile?.friendlyName || user.profile?.username || null,
+        },
+      });
+      await refetch();
+      setLoading(false);
+
+      Router.push(routes.ManageFAQs.path);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  const handleDeleteFaq = React.useCallback(async () => {
+    if (faq?.id) {
+      setLoading(true);
+      await deleteFaq({ id: String(faq.id) });
+      await refetch();
+      setLoading(false);
+      router.push(routes.ManageFAQs.path);
+    }
+  }, [deleteFaq, faq?.id, refetch, router, setLoading]);
 
   return (
     <React.Fragment>
       <Head>
-        <title>FAQ: {id}</title>
+        <title>FAQ {faq?.label}</title>
       </Head>
 
-      <div>FAQ: {id}</div>
+      <main>
+        <div className="mb-12">
+          <BackButton />
+        </div>
 
-      <MarkdownEditor
-        visible
-        height="500px"
-        value={mdString}
-        enableScroll
-        onChange={(value) => setMdString(value)}
-        theme={themeName}
-      />
+        <div className="relative">
+          <div className="absolute right-0 -top-12">
+            <ContextMenu
+              triggerLabel="Delete"
+              menuDirectionRow
+              menuItems={[
+                {
+                  label: "no",
+                  closeOnly: true,
+                },
+                {
+                  label: "yup",
+                  action: () => handleDeleteFaq(),
+                },
+              ]}
+            />
+          </div>
+
+          {faq && (
+            <FaqForm
+              initialData={faq}
+              onSubmit={handleOnSubmit}
+              buttonLabel="Update"
+            />
+          )}
+        </div>
+      </main>
     </React.Fragment>
   );
 });

@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-
+import Prisma from "../../shared/prisma";
 import { env } from "../../env/server";
 
 declare global {
@@ -18,3 +18,5 @@ export const prisma =
 if (env.NODE_ENV !== "production") {
   global.prisma = prisma;
 }
+
+export const prismaNext = Prisma.Instance;

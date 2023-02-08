@@ -9,7 +9,7 @@ import {
   type ComponentListRef,
 } from "../../../components/ComponentList";
 import { InteractionElement } from "../../../components/InteractionElement";
-import * as Fields from "../../../components/IssueForm/Fields";
+import * as Fields from "../../../components/Form/Fields";
 import Modal from "../../../components/Modal";
 import { useLoading } from "../../../utils/GlobalState/GlobalStateProvider";
 import { withRoles } from "../../../utils/hoc";
@@ -55,7 +55,7 @@ export default withRoles("ManageComponents", () => {
   return (
     <React.Fragment>
       <Head>
-        <title>Components</title>
+        <title>Manage / Components</title>
       </Head>
       <main>
         <p className="m-3 mb-8 text-xl font-bold">Components</p>
@@ -70,6 +70,7 @@ export default withRoles("ManageComponents", () => {
               }}
             />
           </div>
+
           <ComponentList
             ref={componentListRef}
             selectedComponentName={selectedComponent?.name}

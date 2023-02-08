@@ -6,6 +6,7 @@ import {
   buildValidator,
   workItemValidator,
 } from "../../../../utils/validators/discord";
+import { discordNext } from "../../../discord/client";
 import { publicProcedure, router } from "../../trpc";
 import { prRouter } from "./pr";
 
@@ -44,46 +45,11 @@ export const discordRouter = router({
     return "OK";
   }),
   pr: prRouter,
-  workItem: publicProcedure
-    .input(workItemValidator)
-    .query(async ({ input }) => {
-      c18WebhookClient.send({
-        isWebhook: true,
-        content: `${WebhookType.WORK_ITEM}`,
-        embeds: [
-          {
-            author: {
-              name: input.resource.fields["System.CreatedBy"],
-            },
-            description: input.message.markdown,
-            title: input.resource.fields["System.Title"],
-            fields: [
-              {
-                name: "AreaPath",
-                value: input.resource.fields["System.AreaPath"],
-                inline: true,
-              },
-              {
-                name: "WorkItemType",
-                value: input.resource.fields["System.WorkItemType"],
-                inline: true,
-              },
-              {
-                name: "State",
-                value: input.resource.fields["System.State"],
-                inline: true,
-              },
-              {
-                name: "Reason",
-                value: input.resource.fields["System.Reason"],
-                inline: true,
-              },
-            ],
-            url: input.resource.url,
-          },
-        ],
-      });
+  workItem: publicProcedure.input(workItemValidator).query(async () => {
+    const msg = await discordNext.channel("webhookLogs")?.send({
+      content: "Hi from Nextjs. 6",
+    });
 
-      return "OK";
-    }),
+    return msg ? "OK" : "Error";
+  }),
 });

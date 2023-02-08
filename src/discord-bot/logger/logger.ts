@@ -1,8 +1,9 @@
 import winston from "winston";
-
 import type { Logs, PrismaClient } from "@prisma/client";
 import Transport, { type TransportStreamOptions } from "winston-transport";
-import { prisma } from "../data";
+import Prisma from "../../shared/prisma/client";
+
+const prisma = Prisma.Instance;
 
 enum LogEnvs {
   db = "db",
@@ -15,11 +16,11 @@ enum LogScopes {
   Server = "Server",
 }
 
-export interface PrismaTransporterOptions extends TransportStreamOptions {
+interface PrismaTransporterOptions extends TransportStreamOptions {
   prisma: PrismaClient;
 }
 
-export class PrismaTransport extends Transport {
+class PrismaTransport extends Transport {
   private prisma: PrismaClient;
 
   constructor(options: PrismaTransporterOptions) {
@@ -87,7 +88,7 @@ winston.loggers.add(LogEnvs.db, {
   transports: [
     new PrismaTransport({
       level: "http",
-      prisma,
+      prisma: prisma.client,
     }),
   ],
 });
@@ -101,7 +102,7 @@ winston.loggers.add(LogEnvs.console, {
   ],
 });
 
-export const createPrismaLogger = () => {
+const createPrismaLogger = () => {
   const logger = winston.loggers.get(LogEnvs.db);
 
   const discord = createScopedLog(LogScopes.Discord, logger);
@@ -115,7 +116,7 @@ export const createPrismaLogger = () => {
   };
 };
 
-export const createConsoleLogger = () => {
+const createConsoleLogger = () => {
   const logger = winston.loggers.get(LogEnvs.console);
 
   const discord = createScopedLog(LogScopes.Discord, logger);
@@ -129,9 +130,9 @@ export const createConsoleLogger = () => {
   };
 };
 
-export const logger = {
+const logger = {
   db: createPrismaLogger(),
   console: createConsoleLogger(),
-};
+} as const;
 
-// logger.db.discord({ level: "info", message: "" });
+export default logger;

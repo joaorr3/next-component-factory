@@ -3,7 +3,6 @@ import { useRouter } from "next/router";
 import React from "react";
 import { BackButton } from "../../components/BackButton";
 import { IssueDetail } from "../../components/Issue/IssueDetail";
-import { routes } from "../../routes";
 import { useLoading } from "../../utils/GlobalState/GlobalStateProvider";
 import { withRoles } from "../../utils/hoc";
 import { trpc } from "../../utils/trpc";
@@ -26,7 +25,7 @@ export default withRoles("IssueDetail", () => {
 
       {issue.data && (
         <div className="flex flex-col">
-          <BackButton href={routes.Issue.path} />
+          <BackButton />
           <IssueDetail issue={issue.data} />
         </div>
       )}

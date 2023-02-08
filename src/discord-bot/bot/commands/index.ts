@@ -4,25 +4,16 @@ import Discord, { roleMention, Routes, userMention } from "discord.js";
 import { camelCase } from "lodash";
 import { env } from "../../../env/server";
 import { derive } from "../../../shared/utils";
-import { transformGuildMemberData } from "../../data/utils";
+import { DataUtils } from "../../data";
+import logger from "../../logger";
 import { randomInt } from "../../utils";
-import { logger } from "../../utils/logger";
-import { getTextChannel, getThreadChannel } from "../channels";
-import {
-  autoAssignableRole,
-  GuildChannelName,
-  GuildRoles,
-  kudosTypes,
-} from "../constants";
-import { Embed } from "../messages";
-import { getRole, hasRole } from "../roles";
+import discord from "../client";
+import { kudosTypes } from "../constants";
 import type {
   CommandReactionsArgs,
   CommandsResponse,
   DiscordCommandObject,
-  Roles,
 } from "../types";
-import { getUserById } from "../users";
 import { BotLog, getGuild, visitorRole } from "../utils";
 import { c18Gif, tenor } from "../utils/gifs";
 import { c18Quotes } from "../utils/quotes";
@@ -320,20 +311,18 @@ export const commandReactions = async ({
         response: undefined,
       };
     },
-    issue: async () => await issueCommand({ interaction, guild }),
+    issue: async () => await issueCommand({ interaction }),
     roles: async () => {
       const { options, user, channel } = interaction;
       const action = options.getString("action") as RoleAction;
-      const guildUser = getUserById(guild, user.id);
+      const guildUser = discord.member(user.id);
       const role = options.getRole("role") as Discord.Role;
-      const guildAdminRole = getRole(guild, { name: GuildRoles.admin });
+      const guildAdminRole = discord.role("admin");
 
-      const hasAlreadyThisRole = hasRole(guildUser, role);
+      const hasAlreadyThisRole = discord.hasRoleById(guildUser?.id, role.id);
 
       try {
-        const isAutoAssignable = autoAssignableRole.includes(
-          role?.name as Roles
-        );
+        const isAutoAssignable = discord.roleIsAutoAssignable(role?.name);
 
         if (isAutoAssignable && guildUser) {
           if (action === RoleAction.give) {
@@ -354,7 +343,6 @@ export const commandReactions = async ({
             await visitorRole({
               action: RoleAction.remove,
               userId: user.id,
-              guild,
             });
 
             logger.db.discord({
@@ -415,10 +403,9 @@ export const commandReactions = async ({
     pr: async () => {
       const { options, user } = interaction;
 
-      const prChannel = getTextChannel(guild, { name: GuildChannelName.pr });
-      const guildUser = getUserById(guild, user.id);
-      const guildDevRole = getRole(guild, { name: GuildRoles.dev });
-      const userHasDevRole = hasRole(guildUser, guildDevRole);
+      const prChannel = discord.channel("pr");
+      const guildDevRole = discord.role("dev");
+      const userHasDevRole = discord.hasRole(user.id, "dev");
 
       if (prChannel?.isThread()) {
         await interaction.reply({
@@ -462,7 +449,7 @@ export const commandReactions = async ({
         reason: fullTitle,
       });
 
-      const issueSummary = Embed({
+      const issueSummary = discord.embed({
         title,
         url: prUrl,
         author: {
@@ -487,7 +474,7 @@ export const commandReactions = async ({
     archive: async () => {
       const { channelId, options } = interaction;
 
-      const currentThread = getThreadChannel(guild, { id: channelId });
+      const currentThread = discord.threadById(channelId);
 
       const isThread = currentThread?.isThread();
 
@@ -536,17 +523,13 @@ export const commandReactions = async ({
     },
     publish: async () => {
       const { options, user } = interaction;
-      const releasesNotesChannel = getTextChannel(guild, {
-        name: GuildChannelName.releases,
-      });
-      const guildUser = getUserById(guild, user.id);
-      const guildDevRole = getRole(guild, { name: GuildRoles.dev });
-      const guildLabsRole = getRole(guild, { name: GuildRoles.labs });
-      const userHasDevRole = hasRole(guildUser, guildDevRole);
+
+      const guildLabsRole = discord.role("labs");
+      const userHasDevRole = discord.hasRole(user.id, "dev");
 
       if (!userHasDevRole) {
         await interaction.reply({
-          content: `Sorry, only CF dev's can create publish.`,
+          content: `Sorry, only CF dev's can publish.`,
           ephemeral: true,
         });
         return undefined;
@@ -555,7 +538,7 @@ export const commandReactions = async ({
       const version =
         options.getString(IssueCommandOptions.version) ?? undefined;
 
-      const packageVersionSummary = Embed({
+      const packageVersionSummary = discord.embed({
         title: version ?? "latest",
         url: getArtifactUrl(version),
         author: {
@@ -568,7 +551,7 @@ export const commandReactions = async ({
         },
       });
 
-      releasesNotesChannel?.send({
+      discord.channel("releases")?.send({
         content: `Hey ${roleMention(
           guildLabsRole?.id ?? ""
         )}, the team has released a new version.`,
@@ -588,24 +571,25 @@ export const commandReactions = async ({
     assign: async () => {
       const { channelId, user, options } = interaction;
 
-      const currentChannel = getThreadChannel(guild, { id: channelId });
-      const guildUser = getUserById(guild, user.id);
-      const guildDevRole = getRole(guild, { name: GuildRoles.dev });
-      const userHasDevRole = hasRole(guildUser, guildDevRole);
+      const currentChannel = discord.threadById(channelId);
+
+      const userHasDevRole = discord.hasRole(user.id, "dev");
 
       const validAssignee = derive(() => {
         const assigneeOption =
-          options.getUser(AssignOption.assignee) ?? undefined;
+          options.getUser(AssignOption.assignee) || undefined;
+
         if (assigneeOption) {
-          const assigneeUser = getUserById(guild, assigneeOption.id);
-          const assigneeHasDevRole = hasRole(assigneeUser, guildDevRole);
+          const assigneeUser = discord.member(assigneeOption.id);
+
+          const assigneeHasDevRole = discord.hasRole(assigneeUser?.id, "dev");
           if (assigneeHasDevRole) {
             return { assignee: assigneeOption, assigneeUser };
           }
         }
       });
 
-      if (!currentChannel?.isThread()) {
+      if (!currentChannel) {
         await interaction.reply({
           content: "/assign command must be executed inside threads",
           ephemeral: true,
@@ -640,9 +624,9 @@ export const commandReactions = async ({
     },
     notion_batch_update: async () => {
       const { user, options } = interaction;
-      const guildUser = getUserById(guild, user.id);
-      const guildAdminRole = getRole(guild, { name: GuildRoles.admin });
-      const userHasAdminRole = hasRole(guildUser, guildAdminRole);
+
+      const guildAdminRole = discord.role("admin");
+      const userHasAdminRole = discord.hasRole(user.id, "admin");
 
       const mention = guildAdminRole
         ? roleMention(guildAdminRole?.id)
@@ -650,7 +634,7 @@ export const commandReactions = async ({
 
       await interaction.reply({
         content: userHasAdminRole
-          ? "Processing"
+          ? "Processing..."
           : `Sorry, can't do that. Ask an ${mention}.`,
         ephemeral: true,
       });
@@ -705,10 +689,10 @@ export const commandReactions = async ({
         )}! Someone thinks you're ${kudosType}.`;
       });
 
-      BotLog.publicLog(guild, () => {
+      BotLog.publicLog(() => {
         return {
           embeds: [
-            Embed({
+            discord.embed({
               title: "Kudos",
               url: "https://next-cf.up.railway.app/kudos",
               description: kudosAnnouncementMessage,
@@ -733,7 +717,7 @@ export const commandReactions = async ({
     list_kudos: async () => {
       const { channelId } = interaction;
 
-      const currentChannel = getTextChannel(guild, { id: channelId });
+      const currentChannel = discord.channelById(channelId);
 
       interaction.reply({
         content:
@@ -750,9 +734,8 @@ export const commandReactions = async ({
     },
     sync_guild_users: async () => {
       const { user } = interaction;
-      const guildUser = getUserById(guild, user.id);
-      const guildAdminRole = getRole(guild, { name: GuildRoles.admin });
-      const userHasAdminRole = hasRole(guildUser, guildAdminRole);
+      const guildAdminRole = discord.role("admin");
+      const userHasAdminRole = discord.hasRole(user.id, "admin");
 
       if (!userHasAdminRole) {
         const mention = guildAdminRole
@@ -767,7 +750,7 @@ export const commandReactions = async ({
 
       const rawMembersData = await guild.members.fetch();
       const guildUsers: GuildUser[] = rawMembersData.map(
-        transformGuildMemberData
+        DataUtils.transformGuildMemberData
       );
 
       await interaction.reply({
@@ -785,12 +768,7 @@ export const commandReactions = async ({
     announce: async () => {
       const { user, options, channel } = interaction;
 
-      const guildUser = getUserById(guild, user.id);
-      const guildAdminRole = getRole(guild, {
-        name: GuildRoles.admin,
-      });
-
-      const userHasAdminRole = hasRole(guildUser, guildAdminRole);
+      const userHasAdminRole = discord.hasRole(user.id, "admin");
 
       if (userHasAdminRole) {
         const title = options.getString(Announce.title, true);
@@ -800,7 +778,7 @@ export const commandReactions = async ({
         const attachment = options.getAttachment(Announce.attachment);
         const role = options.getRole(Announce.mention) as Discord.Role;
 
-        const issueSummary = Embed({
+        const issueSummary = discord.embed({
           title,
           description,
           url,

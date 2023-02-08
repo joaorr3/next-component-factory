@@ -24,6 +24,7 @@ export enum ActionTypes {
   SET_THEME_NAME = "SET_THEME_NAME",
   SET_LOADING = "SET_LOADING",
   SET_USER = "SET_USER",
+  SET_DEFAULT_USER_LAB = "SET_DEFAULT_USER_LAB",
   REMOVE_USER = "REMOVE_USER",
   SET_ISSUE_FILTERS = "SET_ISSUE_FILTERS",
 }
@@ -48,6 +49,11 @@ type SetUserActionType = {
   payload: Partial<ContextModel["user"]>;
 };
 
+type SetDefaultUserLabType = {
+  type: ActionTypes.SET_DEFAULT_USER_LAB;
+  payload: string;
+};
+
 type RemoveUserActionType = {
   type: ActionTypes.REMOVE_USER;
   payload: undefined;
@@ -63,6 +69,7 @@ type Actions =
   | SetThemeNameActionType
   | SetLoadingActionType
   | SetUserActionType
+  | SetDefaultUserLabType
   | RemoveUserActionType
   | SetIssueFiltersActionType;
 
@@ -76,6 +83,7 @@ export interface ContextHandlers {
     setThemeName: ActionHandler<SetThemeNameActionType["payload"]>;
     setLoading: ActionHandler<SetLoadingActionType["payload"]>;
     setUser: ActionHandler<SetUserActionType["payload"]>;
+    setDefaultUserLab: ActionHandler<SetDefaultUserLabType["payload"]>;
     removeUser: () => void;
     setIssueFilters: ActionHandler<SetIssueFiltersActionType["payload"]>;
   };
@@ -101,6 +109,11 @@ const GlobalStateProducer = produce<Reducer<ContextModel, Actions>>(
       case ActionTypes.SET_USER:
         draft.user.profile = action.payload?.profile;
         draft.user.roles = action.payload?.roles;
+        break;
+      case ActionTypes.SET_DEFAULT_USER_LAB:
+        if (draft.user.profile) {
+          draft.user.profile.defaultLabId = action.payload;
+        }
         break;
       case ActionTypes.REMOVE_USER:
         draft.user.profile = undefined;
@@ -162,6 +175,10 @@ export function GlobalStateProvider({
       },
       setUser: (payload, fx) => {
         dispatch({ type: ActionTypes.SET_USER, payload });
+        fx?.(payload);
+      },
+      setDefaultUserLab: (payload, fx) => {
+        dispatch({ type: ActionTypes.SET_DEFAULT_USER_LAB, payload });
         fx?.(payload);
       },
       removeUser: () => {

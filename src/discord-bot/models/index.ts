@@ -1,6 +1,6 @@
 import type { Attachment } from "discord.js";
 import { type IssueModel } from "../../shared/models";
-export * as Notion from "./notion";
+export * as NotionModels from "../notion/models";
 
 export type IssueDetailsModel = Omit<IssueModel, "platform">;
 
@@ -8,6 +8,7 @@ export type OptionsDataExtractorModel = Omit<
   IssueDetailsModel,
   | "author"
   | "lab"
+  | "labId"
   | "discordThreadId"
   | "attachment"
   | "attachment2"

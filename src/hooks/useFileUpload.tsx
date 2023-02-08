@@ -1,6 +1,8 @@
 import { type MediaType } from "@prisma/client";
 import React from "react";
+import { derive } from "../shared/utils";
 import { trpc } from "../utils/trpc";
+import type { MediaSchema } from "../utils/validators/media";
 
 export type ImageResponseModel = {
   ok: boolean;
@@ -15,14 +17,12 @@ export const useFileUpload = (mediaType: MediaType) => {
   const { mutateAsync: generic_createPresignedUrl } =
     trpc.media.uploadGenericMedia.useMutation();
 
-  const createPresignedUrl =
-    mediaType === "ISSUE"
-      ? issue_createPresignedUrl
-      : generic_createPresignedUrl;
-
   const upload = React.useCallback(
-    async (file?: File, issueId?: number): Promise<ImageResponseModel> => {
-      if (!file || !issueId) {
+    async (
+      file?: File,
+      metadata?: MediaSchema["metadata"]
+    ): Promise<ImageResponseModel> => {
+      if (!file) {
         return {
           ok: false,
           imageId: "",
@@ -33,10 +33,27 @@ export const useFileUpload = (mediaType: MediaType) => {
       const {
         image,
         presignedPost: { url, fields },
-      } = await createPresignedUrl({
-        contentType: file.type,
-        issueId,
-        name: file.name,
+      } = await derive(async () => {
+        if (mediaType === "ISSUE" && metadata?.issueId) {
+          return await issue_createPresignedUrl({
+            fileType: file.type,
+            fileName: file.name,
+            metadata: {
+              ...metadata,
+              fileSize: file.size,
+              issueId: metadata.issueId,
+            },
+          });
+        } else {
+          return await generic_createPresignedUrl({
+            fileType: file.type,
+            fileName: file.name,
+            metadata: {
+              ...metadata,
+              fileSize: file.size,
+            },
+          });
+        }
       });
 
       if (url && fields && image) {
@@ -74,7 +91,7 @@ export const useFileUpload = (mediaType: MediaType) => {
         url: "",
       };
     },
-    [createPresignedUrl]
+    [generic_createPresignedUrl, issue_createPresignedUrl, mediaType]
   );
 
   return {

@@ -1,7 +1,7 @@
 import { debounce } from "lodash";
 import React from "react";
 import { useForm } from "react-hook-form";
-import * as Fields from "../IssueForm/Fields";
+import * as Fields from "../Form/Fields";
 
 export type FiltersModel = {
   id?: string;

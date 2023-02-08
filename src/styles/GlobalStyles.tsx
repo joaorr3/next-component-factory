@@ -151,8 +151,47 @@ export const customScrollBar = css`
   }
 `;
 
+export const reactMdEditor = css`
+  .w-md-editor {
+    box-shadow: none;
+    background-color: transparent;
+  }
+
+  .w-md-editor-fullscreen {
+    background-color: rgba(33, 33, 33) !important;
+  }
+
+  .md-edit {
+    background-color: rgba(64, 64, 64, 0.2);
+    border-radius: 12px;
+
+    .wmde-markdown {
+      box-shadow: none;
+      background-color: transparent;
+    }
+
+    .w-md-editor-bar {
+      opacity: 0.2;
+    }
+
+    .w-md-editor-toolbar {
+      background-color: transparent;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      padding: 12px;
+    }
+  }
+
+  .wmde-markdown.md-preview {
+    box-shadow: none;
+    background-color: transparent;
+    color: var(--color-fg);
+  }
+`;
+
 export const GlobalStyle = createGlobalStyle<{ theme: ThemeModel }>`  
   ${normalize}
+  ${reactMdEditor}
   
   html {
     font-size: 100%;
