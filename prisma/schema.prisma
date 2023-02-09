@@ -63,13 +63,15 @@ model VerificationToken {
 // --
 
 model IssueIdMapping {
-  id                Int      @id @default(autoincrement())
-  notion_page_id    String?  @unique
-  discord_thread_id String?  @unique
-  author            String?  @db.Text
-  title             String?  @db.Text
-  createdAt         DateTime @default(now())
-  Issue             Issue?
+  id                 Int      @id @default(autoincrement())
+  notion_page_id     String?  @unique
+  notion_page_url    String?
+  discord_thread_id  String?  @unique
+  discord_thread_url String?
+  author             String?  @db.Text
+  title              String?  @db.Text
+  createdAt          DateTime @default(now())
+  Issue              Issue?
 
   @@index([notion_page_id, discord_thread_id])
 }
@@ -98,7 +100,7 @@ enum Platform {
 
 model Issue {
   id               Int            @id @default(autoincrement())
-  issueMapping     IssueIdMapping @relation(fields: [issueIdMappingId], references: [id])
+  IssueMapping     IssueIdMapping @relation(fields: [issueIdMappingId], references: [id])
   issueIdMappingId Int            @unique
   title            String?        @db.Text
   description      String?        @db.Text
@@ -181,6 +183,7 @@ model PullRequest {
 
 model FAQ {
   id        Int      @id @default(autoincrement())
+  slug      String   @unique
   label     String
   type      String?
   markdown  String   @db.LongText

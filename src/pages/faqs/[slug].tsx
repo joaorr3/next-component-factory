@@ -10,15 +10,17 @@ import { trpc } from "../../utils/trpc";
 
 export default withRoles("FAQDetail", () => {
   const router = useRouter();
-  const { id: _id } = router.query;
+  const { slug: _slug } = router.query;
 
-  const id = typeof _id === "string" ? _id : "";
+  const slug = typeof _slug === "string" ? _slug : "";
 
   const {
     data: faqDetail,
     isLoading,
     fetchStatus,
-  } = trpc.faq.read.useQuery({ id });
+  } = trpc.faq.readBySlug.useQuery({
+    slug,
+  });
 
   useLoading(isLoading && fetchStatus !== "idle");
 

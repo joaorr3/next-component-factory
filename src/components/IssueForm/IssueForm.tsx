@@ -37,6 +37,13 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
     },
   });
 
+  React.useEffect(() => {
+    if (defaultUserLab) {
+      setValue("lab", defaultUserLab);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultUserLab]);
+
   const { setLoading } = useLoading();
 
   const resetForm = React.useCallback(() => {
@@ -108,6 +115,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
         <Fields.Text
           label="Package Version"
           placeholder="Ex: 3.3.0-1.0.332128"
+          description="In you terminal run: npm list @bcp-nextgen-dx-component-factory/accolade-design-system --depth=0"
           disabled={formState.isSubmitting}
           error={getError("version")}
           register={register("version")}

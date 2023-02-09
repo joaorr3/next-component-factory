@@ -7,8 +7,8 @@ import { useLoading } from "../../utils/GlobalState/GlobalStateProvider";
 import { withRoles } from "../../utils/hoc";
 import { trpc } from "../../utils/trpc";
 
-const handleOnPress = (id: number) => {
-  Router.push(routes.FAQDetail.dynamicPath(String(id)));
+const handleOnPress = (slug: string) => {
+  Router.push(routes.FAQDetail.dynamicPath(slug));
 };
 
 export default withRoles("FAQs", () => {
@@ -24,13 +24,13 @@ export default withRoles("FAQs", () => {
 
       <main>
         <div className="flex flex-col">
-          {faqs?.map(({ id, label, timestamp }, index) => {
+          {faqs?.map(({ slug, label, timestamp }, index) => {
             return (
               <ListItem
                 key={index}
                 title={label}
                 footer={timestamp}
-                onPress={() => handleOnPress(id)}
+                onPress={() => handleOnPress(slug)}
               />
             );
           })}

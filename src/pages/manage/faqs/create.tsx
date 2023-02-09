@@ -45,7 +45,7 @@ export default withRoles("ManageFAQCreate", () => {
   return (
     <React.Fragment>
       <Head>
-        <title>Add FAQ</title>
+        <title>Create FAQ</title>
       </Head>
 
       <main>

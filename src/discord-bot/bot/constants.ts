@@ -1,4 +1,4 @@
-import type { KudosType, Roles } from "./types";
+import type { KudosType } from "./types";
 
 export const Emojis = {
   check: "✅",
@@ -14,9 +14,6 @@ export const Emojis = {
   seven: "7️⃣",
   eight: "8️⃣",
 } as const;
-
-export const c18Avatar =
-  "https://cdn.discordapp.com/avatars/1000309925643309127/b40e96bd5967560f43a4762379c086f6";
 
 export const kudosTypes: KudosType[] = [
   // {

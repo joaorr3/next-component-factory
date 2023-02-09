@@ -15,9 +15,9 @@ import { trpc } from "../../../utils/trpc";
 
 export default withRoles("ManageFAQDetail", () => {
   const router = useRouter();
-  const { id: _id } = router.query;
+  const { slug: _slug } = router.query;
 
-  const id = typeof _id === "string" ? _id : "";
+  const slug = typeof _slug === "string" ? _slug : "";
 
   const {
     state: { user },
@@ -28,8 +28,8 @@ export default withRoles("ManageFAQDetail", () => {
     isLoading: isLoadingFaq,
     fetchStatus,
     refetch,
-  } = trpc.faq.read.useQuery({
-    id,
+  } = trpc.faq.readBySlug.useQuery({
+    slug,
   });
 
   const { mutateAsync: updateFaq } = trpc.faq.update.useMutation();
@@ -39,25 +39,33 @@ export default withRoles("ManageFAQDetail", () => {
 
   const handleOnSubmit = React.useCallback(
     async ({ label, type, markdown }: FaqFormModel) => {
-      setLoading(true);
-      await updateFaq({
-        id,
-        faq: {
-          label,
-          type: type || null,
-          markdown,
-          timestamp: new Date(),
-          createdBy:
-            user.profile?.friendlyName || user.profile?.username || null,
-        },
-      });
-      await refetch();
-      setLoading(false);
+      if (faq?.id) {
+        setLoading(true);
+        await updateFaq({
+          id: String(faq.id),
+          faq: {
+            label,
+            type: type || null,
+            markdown,
+            timestamp: new Date(),
+            createdBy:
+              user.profile?.friendlyName || user.profile?.username || null,
+          },
+        });
+        await refetch();
+        setLoading(false);
 
-      Router.push(routes.ManageFAQs.path);
+        Router.push(routes.ManageFAQs.path);
+      }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [
+      faq?.id,
+      refetch,
+      setLoading,
+      updateFaq,
+      user.profile?.friendlyName,
+      user.profile?.username,
+    ]
   );
 
   const handleDeleteFaq = React.useCallback(async () => {

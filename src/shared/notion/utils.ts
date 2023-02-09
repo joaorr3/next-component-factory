@@ -1,7 +1,6 @@
 import { range } from "lodash";
-import { IssueScope } from "../../shared/enums";
-import { IssueSeverityLevel } from "../bot/commands/enums";
-import { type NotionModels } from "../models";
+import type * as NotionModels from "./models";
+import { IssueScope, IssueSeverityLevel } from "../../shared/enums";
 
 export const guildChannelUrl = (id: string) =>
   `https://discord.com/channels/973878486739591208/${id}`;

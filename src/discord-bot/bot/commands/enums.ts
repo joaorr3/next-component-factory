@@ -24,12 +24,6 @@ export enum IssueType {
   help_v2 = "help_v2",
 }
 
-export enum IssueSeverityLevel {
-  high = "high",
-  medium = "medium",
-  low = "low",
-}
-
 export enum RoleAction {
   give = "give",
   remove = "remove",

@@ -2,8 +2,8 @@ import { type GuildUser } from "@prisma/client";
 import { type GuildMember } from "discord.js";
 import Prisma from "../../shared/prisma";
 import { wait } from "../../shared/utils";
-import logger from "../logger";
-import { notion } from "../notion";
+import logger from "../../shared/logger";
+import notion from "../../shared/notion";
 
 const prisma = Prisma.Instance;
 

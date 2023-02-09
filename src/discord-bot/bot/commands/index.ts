@@ -5,7 +5,7 @@ import { camelCase } from "lodash";
 import { env } from "../../../env/server";
 import { derive } from "../../../shared/utils";
 import { DataUtils } from "../../data";
-import logger from "../../logger";
+import logger from "../../../shared/logger";
 import { randomInt } from "../../utils";
 import discord from "../client";
 import { kudosTypes } from "../constants";

@@ -199,7 +199,7 @@ export const userRouter = router({
       });
       await discordNext.sendMessage("roles", {
         content:
-          "https://component-factory-s3-bucket.s3.eu-west-2.amazonaws.com/faqs/how_to_roles_cmd.gif",
+          "https://component-factory-s3-bucket.s3.eu-west-2.amazonaws.com/generic/d5dd03cc-27c9-4aca-851a-36d85cbd0d14__how_to_roles_cmd.gif",
       });
     }),
   tempBatchUpdateUserLabs: protectedProcedure.mutation(async ({ ctx }) => {

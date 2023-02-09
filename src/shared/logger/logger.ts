@@ -1,7 +1,7 @@
 import winston from "winston";
 import type { Logs, PrismaClient } from "@prisma/client";
 import Transport, { type TransportStreamOptions } from "winston-transport";
-import Prisma from "../../shared/prisma/client";
+import Prisma from "../prisma/client";
 
 const prisma = Prisma.Instance;
 

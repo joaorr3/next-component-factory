@@ -1,6 +1,6 @@
 import { type GuildMember, type PartialGuildMember } from "discord.js";
 import prisma, { DataUtils } from "../../data";
-import logger from "../../logger";
+import logger from "../../../shared/logger";
 import discord from "../client";
 
 export const guildMemberUpdateHandler = async (

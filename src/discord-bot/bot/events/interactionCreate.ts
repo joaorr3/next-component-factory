@@ -1,12 +1,12 @@
 import { codeBlock, type CacheType, type Interaction } from "discord.js";
 import { parseKudos } from "../../../shared/dataUtils";
 import prisma, { DataUtils } from "../../data";
-import logger from "../../logger";
-import { notion } from "../../notion";
+import logger from "../../../shared/logger";
 import { logInteraction } from "../utils/logs";
 import { commandReactions } from "../commands";
 import { type CommandName } from "../types";
 import { wait } from "../../../shared/utils";
+import notion from "../../../shared/notion";
 
 export const interactionCreateHandler = async (
   interaction: Interaction<CacheType>

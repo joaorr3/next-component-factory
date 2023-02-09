@@ -1,7 +1,7 @@
 import type { GuildUser } from "@prisma/client";
 import type Discord from "discord.js";
-import type { IssueDetailsModel } from "../models";
-import type { IssueSeverityLevel } from "./commands/enums";
+import type { IssueSeverityLevel } from "../../shared/enums";
+import type { IssueDetailsModel } from "../../shared/models";
 
 export type ChannelType =
   | Discord.ChannelType.GuildText

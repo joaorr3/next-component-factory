@@ -1,7 +1,7 @@
 import { Client } from "@notionhq/client";
 import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 import { env } from "../../env/server";
-import { c18Avatar } from "../bot/constants";
+import { c18Avatar } from "../dataUtils";
 import logger from "../logger";
 import type { IssueDetailsModel } from "../models";
 
@@ -301,4 +301,4 @@ class Notion {
   }
 }
 
-export const notion = Notion.Instance;
+export default Notion;

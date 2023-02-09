@@ -53,12 +53,12 @@ export const routes: Routes = {
   FAQs: {
     label: "FAQs",
     path: "/faqs",
-    match: ["/faqs", "/faqs/[id]"],
+    match: ["/faqs", "/faqs/[slug]"],
     navBar: true,
   },
   FAQDetail: {
     label: "FAQ Detail",
-    path: "/faqs/[id]",
+    path: "/faqs/[slug]",
     dynamicPath: (param) => `/faqs/${param}`,
   },
   Issue: {
@@ -94,7 +94,7 @@ export const routes: Routes = {
       "/manage/media/upload",
       "/manage/faqs",
       "/manage/faqs/create",
-      "/manage/faqs/[id]",
+      "/manage/faqs/[slug]",
       "/manage/components",
       "/manage/components/[id]",
       "/manage/labs",
@@ -134,7 +134,7 @@ export const routes: Routes = {
   },
   ManageFAQDetail: {
     label: "FAQ Detail",
-    path: "/manage/faqs/[id]",
+    path: "/manage/faqs/[slug]",
     dynamicPath: (param) => `/manage/faqs/${param}`,
     roles: {
       anyOf: ["cf"],

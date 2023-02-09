@@ -1,5 +1,5 @@
 import { type CacheType, type Interaction } from "discord.js";
-import logger from "../../logger";
+import logger from "../../../shared/logger";
 import discord from "../client";
 import { type CommandName } from "../types";
 

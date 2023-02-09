@@ -1,6 +1,8 @@
+import type { IssueIdMapping } from "@prisma/client";
 import { type Issue, type IssuesMedia } from "@prisma/client";
 import { type ReactSlipAndSlideRef } from "@react-slip-and-slide/web";
 import dayjs from "dayjs";
+import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { DataDisplay } from "../DataDisplay";
@@ -11,6 +13,7 @@ import { Tag } from "../Tag";
 
 type IssuesWithMedia = Issue & {
   IssuesMedia: IssuesMedia[];
+  IssueMapping: IssueIdMapping;
 };
 
 const processMediaData = (issue: IssuesWithMedia) => {
@@ -107,7 +110,7 @@ export const IssueDetail: React.FC<{
               element: (
                 <Link
                   target="_blank"
-                  className="text-sm text-blue-700 underline underline-offset-4"
+                  className="text-sm text-blue-400 underline underline-offset-4"
                   href={issue?.specs || ""}
                 >
                   Link
@@ -119,7 +122,7 @@ export const IssueDetail: React.FC<{
               element: (
                 <Link
                   target="_blank"
-                  className="text-sm text-blue-700 underline underline-offset-4"
+                  className="text-sm text-blue-400 underline underline-offset-4"
                   href={issue?.codeSnippet || ""}
                 >
                   Link
@@ -142,6 +145,26 @@ export const IssueDetail: React.FC<{
               label: "Platform",
               value: issue?.platform,
             },
+            {
+              label: "Discord Thread",
+              element: (
+                <IntegrationLink
+                  url={issue?.IssueMapping.discord_thread_url}
+                  service="discord"
+                />
+              ),
+              visible: !!issue?.IssueMapping.discord_thread_url,
+            },
+            {
+              label: "Notion Item",
+              element: (
+                <IntegrationLink
+                  url={issue?.IssueMapping.notion_page_url}
+                  service="notion"
+                />
+              ),
+              visible: !!issue?.IssueMapping.notion_page_url,
+            },
           ]}
         />
 
@@ -162,4 +185,32 @@ export const IssueDetail: React.FC<{
       />
     </React.Fragment>
   );
+};
+
+export const IntegrationLink = ({
+  url,
+  service,
+}: {
+  url?: string | null;
+  service: "discord" | "notion";
+}): JSX.Element => {
+  if (url) {
+    const asset = {
+      discord: "/discord_logo_comp.png",
+      notion: "/notion_logo_comp.png",
+    } as const;
+
+    return (
+      <Link
+        target="_blank"
+        className="flex text-sm text-blue-400 underline underline-offset-4"
+        href={url || ""}
+      >
+        <Image height={24} width={24} alt="" src={asset[service]} />
+        <p className="ml-3">Link</p>
+      </Link>
+    );
+  }
+
+  return <React.Fragment />;
 };

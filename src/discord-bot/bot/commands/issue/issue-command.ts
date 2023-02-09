@@ -1,5 +1,5 @@
 import Discord, { channelMention, userMention } from "discord.js";
-import logger from "../../../logger";
+import logger from "../../../../shared/logger";
 import { csvToNumberedList, isValidURL, randomInt } from "../../../utils";
 import discord from "../../client";
 import type { IssueCommand } from "../../types";

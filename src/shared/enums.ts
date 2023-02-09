@@ -3,3 +3,9 @@ export enum IssueScope {
   design = "design",
   both = "both",
 }
+
+export enum IssueSeverityLevel {
+  high = "high",
+  medium = "medium",
+  low = "low",
+}

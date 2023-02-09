@@ -7,12 +7,13 @@ import {
   userMention,
   type Role,
 } from "discord.js";
-import { isNaN } from "lodash";
+import { isNaN, truncate } from "lodash";
 import { z } from "zod";
 import { type FiltersModel } from "../../../components/Issue/Filters";
 import { issueProcedureSchema } from "../../../components/IssueForm/validator";
 import { env } from "../../../env/server";
 import { IssueScope } from "../../../shared/enums";
+import notion from "../../../shared/notion";
 import { derive } from "../../../shared/utils";
 import { prismaNext } from "../../db/client";
 import { discordNext } from "../../discord/client";
@@ -34,6 +35,7 @@ export const issuesRouter = router({
         },
         include: {
           IssuesMedia: true,
+          IssueMapping: true,
         },
       });
     }),
@@ -89,8 +91,6 @@ export const issuesRouter = router({
 
       const mapping = await ctx.prisma.issueIdMapping.create({
         data: {
-          notion_page_id: null,
-          discord_thread_id: null,
           author: user?.name,
           title: input.title,
         },
@@ -130,15 +130,23 @@ export const issuesRouter = router({
         data: prepareData,
       });
 
-      const threadId = await createIssueThread(issueResponse, user?.GuildUser);
+      const thread = await createIssueThread(issueResponse, user?.GuildUser);
+      const page_id = await notion?.addIssue(issueResponse);
 
-      if (threadId) {
-        await ctx.prisma.issue.update({
+      if (thread && page_id) {
+        const pageUrl = await notion?.getPageUrl(page_id);
+
+        await ctx.prisma.issueIdMapping.update({
           where: {
-            id: issueResponse.id,
+            id: mapping.id,
           },
           data: {
-            discordThreadId: threadId,
+            notion_page_id: page_id,
+            notion_page_url: pageUrl,
+            discord_thread_id: thread.id,
+            discord_thread_url: thread.url,
+            author: issueResponse.author,
+            title: issueResponse.title,
           },
         });
       }
@@ -157,9 +165,11 @@ const createIssueThread = async (issue: Issue, user?: GuildUser | null) => {
       if (lab?.channelId) {
         const channel = discordNext.channelById(lab?.channelId);
         const thread = await channel?.threads.create({
-          name: fullTitle,
+          name: truncate(fullTitle, {
+            length: 99,
+          }),
           autoArchiveDuration: ThreadAutoArchiveDuration.OneWeek,
-          reason: fullTitle,
+          reason: `Issue: ${title}`,
         });
 
         if (thread) {
@@ -187,7 +197,10 @@ const createIssueThread = async (issue: Issue, user?: GuildUser | null) => {
             ],
           });
 
-          return thread.id;
+          return {
+            id: thread.id,
+            url: thread.url,
+          };
         }
       }
     }

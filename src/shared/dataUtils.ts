@@ -68,3 +68,6 @@ export const getArtifactUrl = (id?: string) =>
 
 export const npmInstallHint = (version?: string) =>
   `npm install @bcp-nextgen-dx-component-factory/accolade-design-system@${version}`;
+
+export const c18Avatar =
+  "https://cdn.discordapp.com/avatars/1000309925643309127/b40e96bd5967560f43a4762379c086f6";

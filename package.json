@@ -51,6 +51,7 @@
     "react-hook-form": "^7.42.1",
     "react-switch": "^7.0.0",
     "react-toggle-dark-mode": "^1.1.1",
+    "slugify": "^1.6.5",
     "styled-components": "^5.3.6",
     "superjson": "1.9.1",
     "tailwind-merge": "^1.8.1",

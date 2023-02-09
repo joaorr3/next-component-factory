@@ -14,8 +14,8 @@ export default withRoles("ManageFAQs", () => {
 
   useLoading(isLoading && fetchStatus !== "idle");
 
-  const handleOnPress = (id: number) => {
-    Router.push(routes.ManageFAQDetail.dynamicPath(String(id)));
+  const handleOnPress = (slug: string) => {
+    Router.push(routes.ManageFAQDetail.dynamicPath(slug));
   };
 
   const addFaq = () => {
@@ -45,14 +45,14 @@ export default withRoles("ManageFAQs", () => {
           </div>
 
           <div className="flex flex-col">
-            {faqs?.map(({ id, label, createdBy, timestamp }, index) => {
+            {faqs?.map(({ slug, label, createdBy, timestamp }, index) => {
               return (
                 <ListItem
                   key={index}
                   title={label}
                   footer={timestamp}
                   author={createdBy}
-                  onPress={() => handleOnPress(id)}
+                  onPress={() => handleOnPress(slug)}
                 />
               );
             })}

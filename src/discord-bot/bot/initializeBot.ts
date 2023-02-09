@@ -1,5 +1,5 @@
 import Discord from "discord.js";
-import logger from "../logger";
+import logger from "../../shared/logger";
 import discord from "./client";
 import { registerCommands } from "./commands";
 import {

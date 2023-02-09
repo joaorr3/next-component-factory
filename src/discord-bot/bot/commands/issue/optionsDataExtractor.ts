@@ -1,5 +1,6 @@
 import type Discord from "discord.js";
-import type { OptionsDataExtractorModel } from "../../../models";
+import type { OptionsDataExtractorModel } from "../../../../shared/models";
+
 import { IssueCommandOptions } from "../enums";
 
 export const optionsDataExtractor = (
