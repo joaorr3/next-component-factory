@@ -187,7 +187,7 @@ model FAQ {
   label           String
   type            String?
   markdown        String   @db.LongText
-  publish         Boolean  @default(true)
+  publish         Boolean  @default(false)
   sortingPriority Int?     @default(0)
   createdBy       String?
   timestamp       DateTime @default(now()) @db.Timestamp(0)
