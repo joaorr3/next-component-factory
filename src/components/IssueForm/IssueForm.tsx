@@ -88,7 +88,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
 
         <Fields.Area
           label="Description"
-          description="Try to be concise in you description"
+          description="Try to be concise in your description"
           placeholder="Issue Description"
           disabled={formState.isSubmitting}
           error={getError("description")}
