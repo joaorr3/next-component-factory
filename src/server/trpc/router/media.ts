@@ -66,6 +66,11 @@ const s3Response = async (key: string) => {
 export const mediaRouter = router({
   getAllGeneric: publicProcedure.query(async ({ ctx }) => {
     const images = await ctx.prisma.media.findMany({
+      orderBy: {
+        GenericMedia: {
+          timestamp: "desc",
+        },
+      },
       include: {
         GenericMedia: true,
       },
