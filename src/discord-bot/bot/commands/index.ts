@@ -235,6 +235,12 @@ export const registerCommands = () => {
           .setDescription("Text body")
           .setRequired(false)
       )
+      .addStringOption((option) =>
+        option
+          .setName(Announce.extra)
+          .setDescription("Content to be sent separately from the embed")
+          .setRequired(false)
+      )
       .addRoleOption((option) =>
         option
           .setName(Announce.mention)
@@ -774,6 +780,7 @@ export const commandReactions = async ({
         const title = options.getString(Announce.title, true);
         const description =
           options.getString(Announce.announcement) || undefined;
+        const extra = options.getString(Announce.extra) || undefined;
         const url = options.getString(Announce.url) || undefined;
         const attachment = options.getAttachment(Announce.attachment);
         const role = options.getRole(Announce.mention) as Discord.Role;
@@ -796,6 +803,12 @@ export const commandReactions = async ({
           content: role ? `${roleMention(role.id)}` : undefined,
           embeds: [issueSummary],
         });
+
+        if (extra) {
+          await channel?.send({
+            content: extra,
+          });
+        }
 
         return {
           name: "announce",

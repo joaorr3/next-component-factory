@@ -68,6 +68,7 @@ export enum AssignOption {
 export enum Announce {
   title = "title",
   announcement = "announcement",
+  extra = "extra",
   url = "url",
   attachment = "attachment",
   mention = "mention",
