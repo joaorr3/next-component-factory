@@ -199,7 +199,7 @@ export const GlobalStyle = createGlobalStyle<{ theme: ThemeModel }>`
   
   body {
     overflow-x: hidden;
-    overflow-y: scroll;
+    overflow-y: auto;
     ${customScrollBar} 
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -210,6 +210,7 @@ export const GlobalStyle = createGlobalStyle<{ theme: ThemeModel }>`
     transition-property: color, background-color;
     transition-duration: 220ms;
     transition-timing-function: ease;
+    min-height: 100vh;
   }
 
   #__next {

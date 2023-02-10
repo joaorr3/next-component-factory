@@ -43,7 +43,7 @@ export const NavBarContent = (): JSX.Element => {
 
   return (
     <NavBarContentContainer>
-      {navBarRouteEntries.map(([_, { label, path, match, roles }]) => {
+      {navBarRouteEntries.map(({ label, path, match, roles }) => {
         const active = matchPath({ path, match });
 
         return (
@@ -63,7 +63,7 @@ export const NavBarContent = (): JSX.Element => {
 export type NavBarItemProps = Pick<LinkProps, "href"> & {
   label: string;
   active?: boolean;
-  roles?: UseRoles;
+  roles: UseRoles;
 };
 
 const NavBarItemContainer = styled.div<{ active?: boolean }>`

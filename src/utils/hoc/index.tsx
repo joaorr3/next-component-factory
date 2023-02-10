@@ -10,17 +10,20 @@ export function withRoles<P extends object>(
 ) {
   return (props: P): JSX.Element => {
     const { data } = useSession();
-
     const routeRoles = routes[route].roles;
 
-    if (routeRoles && !data?.user) {
+    if (routeRoles === "public" || (data?.user && routeRoles === "user")) {
+      return <Component {...props} />;
+    } else if (!data?.user) {
       return <UnauthorizedPage reason="loggedOut" />;
+    } else if (data?.user && typeof routeRoles === "object") {
+      return (
+        <RoleLayer roles={routeRoles}>
+          <Component {...props} />
+        </RoleLayer>
+      );
     }
 
-    return (
-      <RoleLayer roles={routeRoles}>
-        <Component {...props} />
-      </RoleLayer>
-    );
+    return <React.Fragment />;
   };
 }

@@ -1,19 +1,22 @@
 import { type Role, Roles, type RolesKeys } from "../shared/roles";
 import { useGlobalState } from "../utils/GlobalState/GlobalStateProvider";
 
-export type UseRoles = {
-  anyOf?: RolesKeys[]; // needs at least one of the list
-  allOf?: RolesKeys[]; // needs all of the list
-};
+export type UseRoles =
+  | {
+      anyOf?: RolesKeys[]; // needs at least one of the list
+      allOf?: RolesKeys[]; // needs all of the list
+    }
+  | "public"
+  | "user";
 
-export const useRoles = (props?: UseRoles) => {
+export const useRoles = (props: UseRoles) => {
   const {
     state: {
       user: { roles },
     },
   } = useGlobalState();
 
-  if (!props) {
+  if (props === "public" || props === "user") {
     return {
       valid: true,
       hasAnyOf: true,

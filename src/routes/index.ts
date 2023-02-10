@@ -5,7 +5,7 @@ export type RouteData = {
   path: string;
   match?: string[];
   navBar?: boolean;
-  roles?: UseRoles;
+  roles: UseRoles;
 };
 export type RouteDataWithDynamicPath = RouteData & {
   dynamicPath: <T>(param: T) => string;
@@ -39,27 +39,31 @@ export const routes: Routes = {
   Home: {
     label: "Home",
     path: "/",
+    roles: "public",
   },
   User: {
     label: "User",
     path: "/user",
-    roles: {},
+    roles: "user",
   },
   Kudos: {
     label: "Kudos",
     path: "/kudos",
     navBar: true,
+    roles: "public",
   },
   FAQs: {
     label: "FAQs",
     path: "/faqs",
     match: ["/faqs", "/faqs/[slug]"],
     navBar: true,
+    roles: "public",
   },
   FAQDetail: {
     label: "FAQ Detail",
     path: "/faqs/[slug]",
     dynamicPath: (param) => `/faqs/${param}`,
+    roles: "public",
   },
   Issue: {
     label: "Issues",
@@ -171,8 +175,8 @@ export const routes: Routes = {
   },
 };
 
-export const navBarRouteEntries = Object.entries(routes).filter(
-  ([_, { navBar }]) => navBar
-) as [RoutesKeys, RouteData][];
+export const navBarRouteEntries = Object.values(routes).filter(
+  ({ navBar }) => navBar
+) as RouteData[];
 
 export const routeEntries = Object.entries(routes) as [RoutesKeys, RouteData][];

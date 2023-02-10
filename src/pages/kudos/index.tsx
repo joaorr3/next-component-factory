@@ -17,6 +17,7 @@ import { P } from "../../components/base";
 import type { ParsedKudos } from "../../shared/dataUtils";
 import { useTheme } from "../../styles/ThemeProvider";
 import { useLoading } from "../../utils/GlobalState/GlobalStateProvider";
+import { withRoles } from "../../utils/hoc";
 import { trpc } from "../../utils/trpc";
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip);
@@ -37,7 +38,7 @@ const customScrollBarBase = css`
   }
 `;
 
-const Kudos = () => {
+export default withRoles("Kudos", () => {
   const kudos = trpc.kudos.all.useQuery();
 
   useLoading(kudos.isLoading);
@@ -80,7 +81,7 @@ const Kudos = () => {
       </div>
     </React.Fragment>
   );
-};
+});
 
 const KudosCardContainer = styled.div`
   display: flex;
@@ -261,5 +262,3 @@ const Spider = ({ kudos }: ParsedKudos) => {
     </div>
   );
 };
-
-export default Kudos;
