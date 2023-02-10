@@ -82,6 +82,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
           placeholder="Issue Title"
           disabled={formState.isSubmitting}
           error={getError("title")}
+          required
           register={register("title")}
         />
 
@@ -91,6 +92,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
           placeholder="Issue Description"
           disabled={formState.isSubmitting}
           error={getError("description")}
+          required
           register={register("description")}
         />
 
@@ -99,6 +101,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
           disabled={formState.isSubmitting}
           placeholder="Ex: M2030"
           value={watch("lab")?.name}
+          required
           error={getError("lab")}
         >
           {({ setIsOpen }) => (
@@ -118,6 +121,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
           description="In you terminal run: npm list @bcp-nextgen-dx-component-factory/accolade-design-system --depth=0"
           disabled={formState.isSubmitting}
           error={getError("version")}
+          required
           register={register("version")}
         />
 
@@ -126,6 +130,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
           options={["bug", "help", "feat", "cr"]}
           disabled={formState.isSubmitting}
           error={getError("type")}
+          required
           register={register("type")}
         />
 
@@ -134,6 +139,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
           options={["WEB", "NATIVE", "CROSS"]}
           disabled={formState.isSubmitting}
           error={getError("platform")}
+          required
           register={register("platform")}
         />
 
@@ -143,6 +149,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
           height={140}
           disabled={formState.isSubmitting}
           error={getError("stepsToReproduce")}
+          required
           register={register("stepsToReproduce")}
         />
 
@@ -151,6 +158,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
           disabled={formState.isSubmitting}
           placeholder="Ex: AccountCard"
           value={watch("component")}
+          required
           error={getError("component")}
         >
           {({ setIsOpen }) => (
@@ -170,6 +178,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
           options={["high", "medium", "low"]}
           disabled={formState.isSubmitting}
           error={getError("severity")}
+          required
           register={register("severity")}
         />
 
@@ -178,6 +187,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
           placeholder="https://dev.azure.com/ptbcp/IT.Ignite/_git/Project.Repo"
           disabled={formState.isSubmitting}
           error={getError("codeSnippet")}
+          required
           register={register("codeSnippet")}
         />
 
@@ -187,6 +197,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
           description="It's important that you insert a link to a specific frame instead of the whole page."
           disabled={formState.isSubmitting}
           error={getError("specs")}
+          required
           register={register("specs")}
         />
 
@@ -197,6 +208,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
             onChange={(checked) => setValue("checkTechLead", checked)}
             disabled={formState.isSubmitting}
             error={getError("checkTechLead")}
+            required
             register={() => register("checkTechLead")}
           />
 
@@ -206,6 +218,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
             onChange={(checked) => setValue("checkDesign", checked)}
             disabled={formState.isSubmitting}
             error={getError("checkDesign")}
+            required
             register={() => register("checkDesign")}
           />
         </div>
@@ -215,6 +228,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
           options={["dev", "design", "both"]}
           disabled={formState.isSubmitting}
           error={getError("scope")}
+          required
           register={register("scope")}
         />
 
@@ -232,6 +246,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
           disabled={formState.isSubmitting}
           register={() => register("files")}
           error={getError("files")}
+          description="If you don't get a preview after you drop the image, make sure your file has an extension. Ex: my_image.png. Otherwise just use the file dialog by clicking on the drop area."
           onChange={(files) => setValue("files", files)}
         />
 

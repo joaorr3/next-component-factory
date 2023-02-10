@@ -56,11 +56,12 @@ export type BaseFieldProps = {
   placeholder?: string;
   description?: string;
   error?: FieldError;
+  required?: boolean;
   register: UseFormRegisterReturn;
 };
 
 export type FieldWrapProps = React.PropsWithChildren<
-  Pick<BaseFieldProps, "label" | "description" | "error">
+  Pick<BaseFieldProps, "label" | "description" | "error" | "required">
 >;
 
 export const Description = ({
@@ -96,11 +97,12 @@ export const BaseField = ({
   label,
   description,
   error,
+  required,
   children,
 }: FieldWrapProps): JSX.Element => {
   return (
     <div className="mb-3">
-      <p className="m-3 mb-5">{label}</p>
+      <p className="m-3 mb-5">{`${label} ${required ? "*" : ""}`}</p>
       {children}
       <Description description={description} />
       <ErrorMessage error={error} />
@@ -127,10 +129,16 @@ export const Text = ({
   disabled,
   error,
   type = "text",
+  required,
   register,
 }: TextProps): JSX.Element => {
   return (
-    <BaseField label={label} description={description} error={error}>
+    <BaseField
+      required={required}
+      label={label}
+      description={description}
+      error={error}
+    >
       <TwTextField
         id="title"
         placeholder={placeholder}
@@ -160,10 +168,16 @@ export const Area = ({
   height,
   disabled,
   error,
+  required,
   register,
 }: AreaProps): JSX.Element => {
   return (
-    <BaseField label={label} description={description} error={error}>
+    <BaseField
+      required={required}
+      label={label}
+      description={description}
+      error={error}
+    >
       <TwTextArea
         id="title"
         style={{ height }}
@@ -192,10 +206,16 @@ export const Select = <O extends string>({
   options,
   disabled,
   error,
+  required,
   register,
 }: SelectProps<O>): JSX.Element => {
   return (
-    <BaseField label={label} description={description} error={error}>
+    <BaseField
+      required={required}
+      label={label}
+      description={description}
+      error={error}
+    >
       {/* @ts-ignore */}
       <TwSelect defaultValue="" disabled={disabled} {...register}>
         <option value="" disabled>
@@ -234,6 +254,7 @@ export const Toggle = ({
   description,
   checked: _checked,
   disabled,
+  required,
   error,
   onChange,
   register,
@@ -256,7 +277,12 @@ export const Toggle = ({
 
   return (
     <div className="mr-8 mb-3">
-      <BaseField label={label} description={description} error={error}>
+      <BaseField
+        required={required}
+        label={label}
+        description={description}
+        error={error}
+      >
         <div className="ml-3">
           <Switch
             checkedIcon={false}
@@ -283,11 +309,17 @@ export const File = ({
   description,
   placeholder,
   disabled,
+  required,
   error,
   register,
 }: BaseFieldProps): JSX.Element => {
   return (
-    <BaseField label={label} description={description} error={error}>
+    <BaseField
+      required={required}
+      label={label}
+      description={description}
+      error={error}
+    >
       <TwFileField
         {...register}
         id="title"
@@ -326,6 +358,7 @@ export const Dropzone = ({
   label,
   disabled,
   error,
+  description,
   onChange,
   register,
 }: DropzoneProps): JSX.Element => {
@@ -401,6 +434,7 @@ export const Dropzone = ({
         <input {...getInputProps()} />
         <p>{label}</p>
       </div>
+      <Description description={description} />
       <ErrorMessage error={error} />
       <div className="flex flex-wrap">{thumbs}</div>
     </React.Fragment>
@@ -423,6 +457,7 @@ export const ModalSelect = ({
   description,
   placeholder,
   error,
+  required,
   disabled,
   children,
 }: ModalSelectProps): JSX.Element => {
@@ -438,7 +473,12 @@ export const ModalSelect = ({
   );
 
   return (
-    <BaseField label={label} description={description} error={error}>
+    <BaseField
+      required={required}
+      label={label}
+      description={description}
+      error={error}
+    >
       <div
         className={cn(baseField(), "flex cursor-pointer items-center")}
         onClick={() => handleSetIsOpen(true)}
