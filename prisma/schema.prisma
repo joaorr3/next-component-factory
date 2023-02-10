@@ -182,13 +182,15 @@ model PullRequest {
 }
 
 model FAQ {
-  id        Int      @id @default(autoincrement())
-  slug      String   @unique
-  label     String
-  type      String?
-  markdown  String   @db.LongText
-  createdBy String?
-  timestamp DateTime @default(now()) @db.Timestamp(0)
+  id              Int      @id @default(autoincrement())
+  slug            String   @unique
+  label           String
+  type            String?
+  markdown        String   @db.LongText
+  publish         Boolean  @default(true)
+  sortingPriority Int?     @default(0)
+  createdBy       String?
+  timestamp       DateTime @default(now()) @db.Timestamp(0)
 }
 
 enum MediaType {

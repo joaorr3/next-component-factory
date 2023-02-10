@@ -12,7 +12,11 @@ const handleOnPress = (slug: string) => {
 };
 
 export default withRoles("FAQs", () => {
-  const { data: faqs, isLoading, fetchStatus } = trpc.faq.readMany.useQuery();
+  const {
+    data: faqs,
+    isLoading,
+    fetchStatus,
+  } = trpc.faq.readManyPublic.useQuery();
 
   useLoading(isLoading && fetchStatus !== "idle");
 

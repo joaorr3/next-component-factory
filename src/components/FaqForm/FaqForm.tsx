@@ -9,7 +9,9 @@ import MarkdownEditor from "../MarkdownEditor";
 export const faqFormSchema = z.object({
   label: notEmptyString,
   type: z.string().nullable(),
-  markdown: z.string(),
+  markdown: notEmptyString,
+  publish: z.boolean(),
+  sortingPriority: z.string().nullable(),
 });
 
 export type FaqFormModel = z.infer<typeof faqFormSchema>;
@@ -28,6 +30,7 @@ export const FaqForm = ({
   const {
     formState,
     getFieldState,
+    getValues,
     setValue,
     watch,
     handleSubmit,
@@ -64,10 +67,28 @@ export const FaqForm = ({
 
       <Fields.Text
         label="Type"
-        placeholder="Ex: Faq Type XYZ (Optional)"
+        placeholder="Ex: Discord"
         disabled={formState.isSubmitting}
         error={getFieldState("type").error}
         register={register("type")}
+      />
+
+      <Fields.Text
+        label="Sorting Priority (higher appears first)"
+        type="number"
+        placeholder="Ex: 5"
+        disabled={formState.isSubmitting}
+        error={getFieldState("sortingPriority").error}
+        register={register("sortingPriority")}
+      />
+
+      <Fields.Toggle
+        label="Publish?"
+        checked={getValues("publish")}
+        onChange={(checked) => setValue("publish", checked)}
+        disabled={formState.isSubmitting}
+        error={getFieldState("publish").error}
+        register={() => register("publish")}
       />
 
       <Fields.BaseField

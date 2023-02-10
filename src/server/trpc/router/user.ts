@@ -66,11 +66,11 @@ export const userRouter = router({
   updateDefaultUserLab: protectedProcedure
     .input(
       z.object({
-        defaultLabId: z.string().optional(),
+        defaultLabId: z.string().nullable(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      if (input.defaultLabId) {
+      if (input.defaultLabId !== undefined) {
         await ctx.prisma.user.update({
           where: {
             id: ctx.session.user.id,

@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { remove } from "lodash";
 import Head from "next/head";
 import React from "react";
-import { useForm } from "react-hook-form";
+import { useController, useForm } from "react-hook-form";
 import { z } from "zod";
 import { BackButton } from "../../components/BackButton";
 import { DataDisplay } from "../../components/DataDisplay";
@@ -25,14 +25,32 @@ export default withRoles("User", () => {
     actions: { setDefaultUserLab },
   } = useGlobalState();
 
-  const { setLoading } = useLoading();
+  const {
+    data: defaultUserLab,
+    isLoading: isLoadingDefaultUserLab,
+    fetchStatus: defaultUserLabFetchStatus,
+    refetch: refetchDefaultUserLab,
+  } = trpc.labs.read.useQuery({
+    id: user.profile?.defaultLabId || undefined,
+  });
 
-  const { data: defaultUserLab, refetch: refetchDefaultUserLab } =
-    trpc.labs.read.useQuery({
-      id: user.profile?.defaultLabId || undefined,
-    });
+  const {
+    data: userLabs,
+    isLoading: isLoadingUserLabs,
+    fetchStatus: userLabsFetchStatus,
+    refetch: refetchUserLabs,
+  } = trpc.user.userLabs.useQuery();
 
-  const { data: userLabs, refetch } = trpc.user.userLabs.useQuery();
+  const isLoading = derive(() => {
+    return (
+      isLoadingDefaultUserLab &&
+      defaultUserLabFetchStatus !== "idle" &&
+      isLoadingUserLabs &&
+      userLabsFetchStatus !== "idle"
+    );
+  });
+
+  const { setLoading } = useLoading(isLoading);
 
   const { mutateAsync: updateDefaultUserLab } =
     trpc.user.updateDefaultUserLab.useMutation();
@@ -60,7 +78,7 @@ export default withRoles("User", () => {
         if (isDefaultLabStillValid) {
           return defaultLab.id;
         } else {
-          return labs[0].id;
+          return labs[0]?.id || null;
         }
       });
 
@@ -68,7 +86,7 @@ export default withRoles("User", () => {
 
       setDefaultUserLab(nextDefaultLabId);
 
-      await refetch();
+      await refetchUserLabs();
       await refetchDefaultUserLab();
 
       setShowForm(false);
@@ -80,7 +98,7 @@ export default withRoles("User", () => {
       updateUserLabs,
       updateDefaultUserLab,
       setDefaultUserLab,
-      refetch,
+      refetchUserLabs,
       refetchDefaultUserLab,
       defaultUserLab?.id,
     ]
@@ -171,7 +189,7 @@ export const UserForm = ({
 }: UserFormProps): JSX.Element => {
   const { data: labs } = trpc.labs.readMany.useQuery();
 
-  const { formState, getFieldState, handleSubmit, reset, setValue, watch } =
+  const { formState, getFieldState, handleSubmit, reset, control } =
     useForm<UserFormModel>({
       resolver: zodResolver(UserFormSchema),
       defaultValues: initialData,
@@ -189,13 +207,42 @@ export const UserForm = ({
     []
   );
 
-  const selectedLabs = watch("labs");
-  const selectedDefaultLab = watch("defaultLab");
+  const { field: labsField } = useController({
+    name: "labs",
+    control,
+  });
+
+  const { field: defaultLabField } = useController({
+    name: "defaultLab",
+    control,
+  });
+
+  React.useEffect(() => {
+    if (labsField.value.length === 0) {
+      defaultLabField.onChange({
+        id: "",
+        name: "",
+      });
+    }
+
+    const isDefaultLabFieldStillOnSelectedSubset = !!labsField.value.find(
+      (l) => l.id === defaultLabField.value.id
+    );
+
+    if (!isDefaultLabFieldStillOnSelectedSubset) {
+      defaultLabField.onChange({
+        id: "",
+        name: "",
+      });
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [labsField.value]);
 
   const handleOnPress = React.useCallback(
     ({ id, name }: TempSelection) => {
       const lab = { id, name };
-      const copy = [...selectedLabs];
+      const copy = [...labsField.value];
       const has = !!copy.find((item) => item.id === id);
 
       if (has) {
@@ -204,20 +251,17 @@ export const UserForm = ({
         copy.push(lab);
       }
 
-      setValue("labs", copy);
+      labsField.onChange(copy);
     },
-    [selectedLabs, setValue]
+    [labsField]
   );
 
   return (
     <form className="flex flex-col" onSubmit={handleSubmit(handleOnSubmit)}>
       <Fields.ModalSelect
         label="Lab"
-        disabled={formState.isSubmitting}
         placeholder="Ex: M2030"
-        value={watch("labs")
-          .map((l) => l.name)
-          .join(" / ")}
+        value={labsField.value.map((l) => l.name).join(" / ")}
         error={getFieldState("labs").error}
       >
         {({ setIsOpen }) => (
@@ -225,7 +269,7 @@ export const UserForm = ({
             <div className="mb-5 rounded-2xl bg-neutral-900 bg-opacity-50 p-5">
               <div className="flex flex-wrap">
                 {labs?.map((lab) => {
-                  const selected = !!selectedLabs.find(
+                  const selected = !!labsField.value.find(
                     (item) => item.id === lab.id
                   );
                   return (
@@ -263,22 +307,22 @@ export const UserForm = ({
 
       <Fields.ModalSelect
         label="Default Lab"
-        disabled={formState.isSubmitting}
+        disabled={labsField.value?.length === 0}
         placeholder="Default lab"
-        value={watch("defaultLab")?.name}
+        value={defaultLabField.value.name}
         error={getFieldState("defaultLab")?.error}
       >
         {({ setIsOpen }) => (
           <div className="m-0 p-5">
             <div className="mb-5 rounded-2xl bg-neutral-900 bg-opacity-50 p-5">
               <div className="flex flex-wrap">
-                {initialData.labs?.map((lab) => {
-                  const selected = lab.id === selectedDefaultLab.id;
+                {labsField.value?.map((lab) => {
+                  const selected = lab.id === defaultLabField.value.id;
                   return (
                     <div
                       key={lab.id}
                       onClick={() => {
-                        setValue("defaultLab", lab);
+                        defaultLabField.onChange(lab);
                       }}
                       className={cn(
                         "flex select-none items-center justify-center",
@@ -304,11 +348,11 @@ export const UserForm = ({
         )}
       </Fields.ModalSelect>
 
-      <div className="flex justify-end">
-        <Fields.Button type="submit" disabled={formState.isSubmitting}>
-          Update
-        </Fields.Button>
-      </div>
+      {formState.isDirty && (
+        <div className="flex justify-end">
+          <Fields.Button type="submit">Update</Fields.Button>
+        </div>
+      )}
     </form>
   );
 };

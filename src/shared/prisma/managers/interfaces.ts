@@ -47,12 +47,16 @@ export class CrudHandler<T extends { id: string | number }> implements CRUD<T> {
   }
 
   async read(id?: string | number): Promise<T | null> {
-    // @ts-ignore
-    return await this.client[this.entity].findFirst({
-      where: {
-        id,
-      },
-    });
+    if (id) {
+      // @ts-ignore
+      return await this.client[this.entity].findUnique({
+        where: {
+          id,
+        },
+      });
+    }
+
+    return null;
   }
 
   async readMany(): Promise<T[] | null> {

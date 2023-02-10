@@ -24,13 +24,21 @@ export default withRoles("ManageFAQCreate", () => {
   useLoading(isLoading);
 
   const handleOnSubmit = React.useCallback(
-    async ({ label, type, markdown }: FaqFormModel) => {
+    async ({
+      label,
+      type,
+      markdown,
+      publish,
+      sortingPriority,
+    }: FaqFormModel) => {
       await createFaq({
         faq: {
           label,
           type: type || null,
           markdown,
           timestamp: new Date(),
+          publish,
+          sortingPriority: Number(sortingPriority || 0),
           createdBy:
             user.profile?.friendlyName || user.profile?.username || null,
         },

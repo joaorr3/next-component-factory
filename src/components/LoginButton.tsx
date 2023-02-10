@@ -1,7 +1,10 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import React from "react";
 import styled from "styled-components";
-import { useGlobalState } from "../utils/GlobalState/GlobalStateProvider";
+import {
+  useGlobalState,
+  useLoading,
+} from "../utils/GlobalState/GlobalStateProvider";
 
 export type IconProps = {
   onPress?: () => void;
@@ -55,11 +58,16 @@ export const LogoutIcon = ({ onPress }: IconProps): JSX.Element => {
 export const LoginButton = (): JSX.Element => {
   const { data: sessionData } = useSession();
   const { actions } = useGlobalState();
+  const { setLoading } = useLoading();
 
   const handleLogout = React.useCallback(() => {
-    signOut().then(() => {
-      actions.removeUser();
-    });
+    setLoading(true);
+    signOut()
+      .then(() => {
+        actions.removeUser();
+      })
+      .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actions]);
 
   const handleLogin = React.useCallback(() => {

@@ -9,6 +9,8 @@ const faqSchema = z.object({
   type: z.string().nullable(),
   markdown: notEmptyString,
   createdBy: z.string().nullable(),
+  publish: z.boolean(),
+  sortingPriority: z.number().nullable(),
   timestamp: z.date(),
 });
 
@@ -33,8 +35,20 @@ export const faqRouter = router({
         return await prismaNext.faq.read(Number(input.id));
       }
     }),
-  readMany: publicProcedure.query(async () => {
+  readMany: publicProcedure.query(async ({ ctx }) => {
     return await prismaNext.faq.readMany();
+  }),
+  readManyPublic: publicProcedure.query(async ({ ctx }) => {
+    return await ctx.prisma.fAQ.findMany({
+      where: {
+        publish: {
+          equals: true,
+        },
+      },
+      orderBy: {
+        sortingPriority: "desc",
+      },
+    });
   }),
   readBySlug: publicProcedure
     .input(z.object({ slug: z.string().optional() }))

@@ -38,7 +38,13 @@ export default withRoles("ManageFAQDetail", () => {
   const { setLoading } = useLoading(isLoadingFaq && fetchStatus !== "idle");
 
   const handleOnSubmit = React.useCallback(
-    async ({ label, type, markdown }: FaqFormModel) => {
+    async ({
+      label,
+      type,
+      markdown,
+      publish,
+      sortingPriority,
+    }: FaqFormModel) => {
       if (faq?.id) {
         setLoading(true);
         await updateFaq({
@@ -48,6 +54,8 @@ export default withRoles("ManageFAQDetail", () => {
             type: type || null,
             markdown,
             timestamp: new Date(),
+            publish,
+            sortingPriority: Number(sortingPriority || 0),
             createdBy:
               user.profile?.friendlyName || user.profile?.username || null,
           },
@@ -109,7 +117,10 @@ export default withRoles("ManageFAQDetail", () => {
 
           {faq && (
             <FaqForm
-              initialData={faq}
+              initialData={{
+                ...faq,
+                sortingPriority: faq.sortingPriority?.toString() || null,
+              }}
               onSubmit={handleOnSubmit}
               buttonLabel="Update"
             />

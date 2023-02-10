@@ -112,7 +112,9 @@ export const BaseField = ({
 
 //region Text
 
-export type TextProps = BaseFieldProps;
+export type TextProps = BaseFieldProps & {
+  type?: React.HTMLInputTypeAttribute;
+};
 
 export const TwTextField = tw.input`
   ${baseField}
@@ -124,6 +126,7 @@ export const Text = ({
   placeholder,
   disabled,
   error,
+  type = "text",
   register,
 }: TextProps): JSX.Element => {
   return (
@@ -132,6 +135,7 @@ export const Text = ({
         id="title"
         placeholder={placeholder}
         disabled={disabled}
+        type={type}
         {...register}
       />
     </BaseField>
@@ -419,35 +423,45 @@ export const ModalSelect = ({
   description,
   placeholder,
   error,
+  disabled,
   children,
 }: ModalSelectProps): JSX.Element => {
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
+
+  const handleSetIsOpen = React.useCallback(
+    (status: boolean) => {
+      if (!disabled) {
+        setIsOpen(status);
+      }
+    },
+    [disabled]
+  );
 
   return (
     <BaseField label={label} description={description} error={error}>
       <div
         className={cn(baseField(), "flex cursor-pointer items-center")}
-        onClick={() => setIsOpen(true)}
+        onClick={() => handleSetIsOpen(true)}
       >
         <span className={cn("flex-1", value ? "" : "opacity-20")}>
           {value || placeholder}
         </span>
 
-        <Plus />
+        <Plus disabled={disabled} />
       </div>
 
-      <Modal isOpen={isOpen} onChange={(status) => setIsOpen(status)}>
-        {children({ setIsOpen })}
+      <Modal isOpen={isOpen && !disabled} onChange={handleSetIsOpen}>
+        {children({ setIsOpen: handleSetIsOpen })}
       </Modal>
     </BaseField>
   );
 };
 
-export const Plus = (): JSX.Element => {
+export const Plus = ({ disabled }: { disabled?: boolean }): JSX.Element => {
   return (
     <div className="h-8 w-8">
       <svg
-        className="fill-neutral-300"
+        className={cn(disabled ? "fill-neutral-600" : "fill-neutral-300")}
         viewBox="0 0 48 48"
         height="32"
         width="32"

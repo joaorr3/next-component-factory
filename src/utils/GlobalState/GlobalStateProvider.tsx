@@ -1,5 +1,6 @@
 import type { GuildUser } from "@prisma/client";
 import produce from "immer";
+import { debounce } from "lodash";
 import React, { type Reducer } from "react";
 import { type FiltersModel } from "../../components/Issue/Filters";
 import { localStorageActions } from "../../hooks/useLocalStorage";
@@ -51,7 +52,7 @@ type SetUserActionType = {
 
 type SetDefaultUserLabType = {
   type: ActionTypes.SET_DEFAULT_USER_LAB;
-  payload: string;
+  payload: string | null;
 };
 
 type RemoveUserActionType = {
@@ -157,7 +158,6 @@ export function GlobalStateProvider({
     GlobalStateProducer,
     _initialState || initialState
   );
-  // console.log("CONTEXT_STATE: ", state);
 
   const actions = React.useMemo(
     (): ContextHandlers["actions"] => ({
@@ -237,13 +237,25 @@ export const useInitGlobalState = (actions: ContextHandlers["actions"]) => {
 
 export const useLoading = (loading?: boolean) => {
   const { state, actions } = useGlobalState();
+
+  // Make sure we don't dispatch as often.
+  const debouncedSetLoading = React.useMemo(
+    () => debounce(actions.setLoading, 1000, { leading: true, trailing: true }),
+    [actions.setLoading]
+  );
+
   React.useEffect(() => {
-    actions.setLoading(Boolean(loading));
+    debouncedSetLoading(Boolean(loading));
+
+    // If incoming is distinct from state we don't wait for debounce.
+    if (Boolean(loading) !== state.isLoading) {
+      debouncedSetLoading.flush();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading]);
 
   return {
     isLoading: state.isLoading,
-    setLoading: actions.setLoading,
+    setLoading: debouncedSetLoading,
   };
 };
