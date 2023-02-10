@@ -28,6 +28,25 @@ export default withRoles("FAQDetail", () => {
     <React.Fragment>
       <Head>
         <title>FAQ {faqDetail?.label}</title>
+
+        <meta
+          property="og:url"
+          content={`https://next-cf.up.railway.app/faqs/${faqDetail?.slug}`}
+        />
+        <meta property="og:title" content={faqDetail?.label} />
+        <meta property="og:type" content="website" />
+        <meta
+          property="og:description"
+          content={`${faqDetail?.type}: ${faqDetail?.label}`}
+        />
+        <meta
+          property="og:image"
+          content="https://component-factory-s3-bucket.s3.eu-west-2.amazonaws.com/generic/bb163cab-616f-43d6-9950-b23e7ebc88ca__cf-logo.png"
+        />
+        <meta
+          property="og:site_name"
+          content="https://next-cf.up.railway.app"
+        />
       </Head>
       <main>
         <BackButton />
