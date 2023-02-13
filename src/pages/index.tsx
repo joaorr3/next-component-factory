@@ -1,7 +1,7 @@
 import Head from "next/head";
 import React from "react";
+import { Kudos } from "../components/Kudos";
 import { withRoles } from "../utils/hoc";
-import Kudos from "./kudos";
 
 export default withRoles("Home", () => {
   return (
