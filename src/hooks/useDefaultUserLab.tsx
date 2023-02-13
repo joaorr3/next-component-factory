@@ -6,9 +6,13 @@ export const useDefaultUserLab = () => {
     state: { user },
   } = useGlobalState();
 
-  const { data: defaultUserLab } = trpc.labs.read.useQuery({
+  const {
+    data: defaultUserLab,
+    isLoading,
+    fetchStatus,
+  } = trpc.labs.read.useQuery({
     id: user.profile?.defaultLabId || undefined,
   });
 
-  return { defaultUserLab };
+  return { defaultUserLab, isLoading: isLoading && fetchStatus !== "idle" };
 };

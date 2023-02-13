@@ -1,7 +1,7 @@
 import React from "react";
 import styled, { keyframes } from "styled-components";
 import { useLoading } from "../utils/GlobalState/GlobalStateProvider";
-import { Overlay } from "./Overlay";
+import { Overlay, OverlayStyled } from "./Overlay";
 
 const rotate = keyframes`
   to {
@@ -58,15 +58,36 @@ export const LoadingStyled = styled.svg`
   }
 `;
 
-const size = 100;
+const baseSize = 100;
 
-export const Loading = (): JSX.Element => {
+const sizeMap = {
+  xs: 0.2,
+  sm: 0.4,
+  md: 1,
+  lg: 1.5,
+} as const;
+
+type LoadingSize = keyof typeof sizeMap;
+
+export const Loading = ({
+  size = "md",
+  zIndex = 0,
+}: {
+  size?: LoadingSize;
+  zIndex?: number;
+}): JSX.Element => {
   return (
-    <LoadingStyled height={size} width={size}>
-      <circle className="circle electrons electron1" cx={80} cy={50} r={5} />
-      <circle className="circle atom" cx={50} cy={50} r={20} />
-      <circle className="circle electrons electron2" cx={20} cy={50} r={5} />
-    </LoadingStyled>
+    <span style={{ zIndex, transform: `scale(${sizeMap[size]})` }}>
+      <LoadingStyled
+        height={baseSize}
+        width={baseSize}
+        style={{ display: "inline" }}
+      >
+        <circle className="circle electrons electron1" cx={80} cy={50} r={5} />
+        <circle className="circle atom" cx={50} cy={50} r={20} />
+        <circle className="circle electrons electron2" cx={20} cy={50} r={5} />
+      </LoadingStyled>
+    </span>
   );
 };
 
@@ -83,5 +104,36 @@ const Loader = () => {
 
   return <React.Fragment />;
 };
+
+/**
+ * - needs to be wrapped in a div.relative
+ */
+const LoaderIsland = ({
+  size = "sm",
+  zIndex = 120,
+  isLoading,
+  overlayOpacity = 0.5,
+}: {
+  size?: LoadingSize;
+  zIndex?: number;
+  isLoading?: boolean;
+  overlayOpacity?: number;
+}) => {
+  if (isLoading) {
+    return (
+      <div
+        className="absolute inset-0 flex items-center justify-center"
+        style={{ zIndex }}
+      >
+        {overlayOpacity > 0 && <OverlayStyled opacity={overlayOpacity} />}
+        <Loading size={size} zIndex={140} />
+      </div>
+    );
+  }
+
+  return <React.Fragment />;
+};
+
+Loader.Island = LoaderIsland;
 
 export default Loader;

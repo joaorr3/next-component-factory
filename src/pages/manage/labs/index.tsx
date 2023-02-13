@@ -94,7 +94,7 @@ export default withRoles("ManageLabs", () => {
             }
           }}
         >
-          <div className="rounded-2xl bg-neutral-800 p-5">
+          <div className="h-full rounded-2xl bg-neutral-800 p-5">
             <LabForm onSubmit={onSubmit} initialData={selectedLab} />
           </div>
         </Modal>
@@ -136,7 +136,10 @@ export const LabForm = ({
   );
 
   return (
-    <form className="flex flex-col" onSubmit={handleSubmit(handleOnSubmit)}>
+    <form
+      className="flex h-full flex-col"
+      onSubmit={handleSubmit(handleOnSubmit)}
+    >
       <Fields.Text
         label="Lab Display Name"
         disabled={formState.isSubmitting}
@@ -144,7 +147,7 @@ export const LabForm = ({
         register={register("displayName")}
       />
 
-      <p className="max-w-xl overflow-hidden overflow-ellipsis text-sm">
+      <p className="flex-grow-[2] text-sm">
         This action will trigger some procedures: <br />
         - Discord: Create Role;
         <br />
@@ -156,7 +159,7 @@ export const LabForm = ({
         <br />
       </p>
 
-      <div className="flex justify-end">
+      <div className="flex flex-1 justify-end">
         <Fields.Button type="submit" disabled={formState.isSubmitting}>
           Submit
         </Fields.Button>

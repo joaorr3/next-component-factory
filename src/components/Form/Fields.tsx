@@ -1,16 +1,22 @@
 import { remove } from "lodash";
 import React, { type CSSProperties } from "react";
 import { useDropzone } from "react-dropzone";
-import { type FieldError, type UseFormRegisterReturn } from "react-hook-form";
+import type { Control, Path } from "react-hook-form";
+import {
+  useController,
+  type FieldError,
+  type UseFormRegisterReturn,
+} from "react-hook-form";
 import Switch from "react-switch";
-import tw from "tailwind-styled-components";
-import { MediaPreview } from "../MediaPreview";
-import Modal from "../Modal";
 import { cn } from "../../styles/utils";
 import type { CustomFile } from "../../utils/validators/media";
+import Loader from "../Loader";
+import { MediaPreview } from "../MediaPreview";
+import Modal from "../Modal";
+import { SelectMenu } from "./SelectMenu";
 
 //region Button
-export const Button = tw.button`    
+export const button = /*tw*/ `    
   flex 
   justify-center
   rounded-md
@@ -33,14 +39,29 @@ export const Button = tw.button`
   font-bold
 `;
 
+export const Button = ({
+  children,
+  ...buttonProps
+}: React.PropsWithChildren<
+  React.DetailedHTMLProps<
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
+    HTMLButtonElement
+  >
+>) => (
+  <button {...buttonProps} className={cn(button, buttonProps.className)}>
+    {children}
+  </button>
+);
+
 //endregion
 
 //region Base
-const baseField = () => /*tw*/ `
+const baseField = /*tw*/ `
   bg-opacity-20
   bg-neutral-700
   h-16
   w-full
+  flex-1
   font-medium
   placeholder:opacity-40
   rounded-xl
@@ -51,7 +72,7 @@ const baseField = () => /*tw*/ `
 `;
 
 export type BaseFieldProps = {
-  label: string;
+  label?: string;
   disabled?: boolean;
   placeholder?: string;
   description?: string;
@@ -101,8 +122,8 @@ export const BaseField = ({
   children,
 }: FieldWrapProps): JSX.Element => {
   return (
-    <div className="mb-3">
-      <p className="m-3 mb-5">{`${label} ${required ? "*" : ""}`}</p>
+    <div className="mb-3 flex-1">
+      {label && <p className="m-3 mb-5">{`${label} ${required ? "*" : ""}`}</p>}
       {children}
       <Description description={description} />
       <ErrorMessage error={error} />
@@ -118,9 +139,23 @@ export type TextProps = BaseFieldProps & {
   type?: React.HTMLInputTypeAttribute;
 };
 
-export const TwTextField = tw.input`
-  ${baseField}
-`;
+export const TextField = React.forwardRef(
+  (
+    inputProps: React.DetailedHTMLProps<
+      React.InputHTMLAttributes<HTMLInputElement>,
+      HTMLInputElement
+    >,
+    ref: React.Ref<HTMLInputElement>
+  ) => {
+    return (
+      <input
+        ref={ref}
+        {...inputProps}
+        className={cn(baseField, inputProps.className)}
+      />
+    );
+  }
+);
 
 export const Text = ({
   label,
@@ -139,8 +174,7 @@ export const Text = ({
       description={description}
       error={error}
     >
-      <TwTextField
-        id="title"
+      <TextField
         placeholder={placeholder}
         disabled={disabled}
         type={type}
@@ -155,11 +189,23 @@ export const Text = ({
 //region Area
 export type AreaProps = BaseFieldProps & Pick<CSSProperties, "height">;
 
-const TwTextArea = tw.textarea`
-  ${baseField}
-  focus:ring-0
-  h-24
-`;
+export const TextArea = React.forwardRef(
+  (
+    inputProps: React.DetailedHTMLProps<
+      React.TextareaHTMLAttributes<HTMLTextAreaElement>,
+      HTMLTextAreaElement
+    >,
+    ref: React.Ref<HTMLTextAreaElement>
+  ) => {
+    return (
+      <textarea
+        ref={ref}
+        {...inputProps}
+        className={cn(baseField, inputProps.className)}
+      />
+    );
+  }
+);
 
 export const Area = ({
   label,
@@ -178,8 +224,8 @@ export const Area = ({
       description={description}
       error={error}
     >
-      <TwTextArea
-        id="title"
+      <TextArea
+        className="h-24 max-h-24 focus:ring-0"
         style={{ height }}
         placeholder={placeholder}
         disabled={disabled}
@@ -192,23 +238,57 @@ export const Area = ({
 //endregion
 
 //region Select
-type SelectProps<O extends string> = Omit<BaseFieldProps, "placeholder"> & {
-  options: O[];
+type SelectProps<S extends object> = Omit<BaseFieldProps, "register"> & {
+  fieldName: Path<S>;
+  options: string[];
+  control: Control<S>;
+  toggleable?: boolean;
 };
 
-export const TwSelect = tw.select`
-  ${baseField}
-`;
+export const SelectInput = ({
+  children,
+  ...selectProps
+}: React.PropsWithChildren<
+  React.DetailedHTMLProps<
+    React.SelectHTMLAttributes<HTMLSelectElement>,
+    HTMLSelectElement
+  >
+>) => {
+  return (
+    <select {...selectProps} className={cn(baseField, selectProps.className)}>
+      {children}
+    </select>
+  );
+};
 
-export const Select = <O extends string>({
+export const Select = <S extends object>({
+  fieldName,
   label,
   description,
   options,
   disabled,
   error,
   required,
-  register,
-}: SelectProps<O>): JSX.Element => {
+  placeholder,
+  control,
+  toggleable,
+}: SelectProps<S>): JSX.Element => {
+  const { field } = useController({
+    name: fieldName,
+    control,
+  });
+
+  const handleOnChange = React.useCallback(
+    (value: string) => {
+      if (toggleable) {
+        field.onChange(value !== field.value ? value : undefined);
+      } else {
+        field.onChange(value);
+      }
+    },
+    [field, toggleable]
+  );
+
   return (
     <BaseField
       required={required}
@@ -216,20 +296,39 @@ export const Select = <O extends string>({
       description={description}
       error={error}
     >
-      {/* @ts-ignore */}
-      <TwSelect defaultValue="" disabled={disabled} {...register}>
-        <option value="" disabled>
-          -- select an option --
-        </option>
+      <SelectMenu
+        selectedValue={field.value}
+        menuItems={options}
+        onSelect={handleOnChange}
+      >
+        {({ isOpen, setIsOpen }) => (
+          <div
+            className={cn(
+              baseField,
+              "relative flex cursor-pointer items-center",
+              isOpen ? "outline outline-neutral-700" : ""
+            )}
+            onClick={disabled ? undefined : () => setIsOpen(true)}
+          >
+            <span className={cn("flex-1", field.value ? "" : "opacity-20")}>
+              {field.value || placeholder}
+            </span>
 
-        {options.map((value, key) => {
-          return (
-            <option key={key} value={value}>
-              {value}
-            </option>
-          );
-        })}
-      </TwSelect>
+            <div className="relative h-8 w-8">
+              <svg
+                className={cn(
+                  disabled ? "fill-neutral-600" : "fill-neutral-400"
+                )}
+                viewBox="0 0 48 48"
+                height="32"
+                width="32"
+              >
+                <path d="m24 30.75-12-12 2.15-2.15L24 26.5l9.85-9.85L36 18.8Z" />
+              </svg>
+            </div>
+          </div>
+        )}
+      </SelectMenu>
     </BaseField>
   );
 };
@@ -300,10 +399,6 @@ export const Toggle = ({
 //endregion
 
 //region File
-const TwFileField = tw.input`
-  ${baseField}
-`;
-
 export const File = ({
   label,
   description,
@@ -320,13 +415,12 @@ export const File = ({
       description={description}
       error={error}
     >
-      <TwFileField
-        {...register}
+      <TextField
         id="title"
         type="file"
-        name="file"
         placeholder={placeholder}
         disabled={disabled}
+        {...register}
       />
     </BaseField>
   );
@@ -446,6 +540,7 @@ export const Dropzone = ({
 //region ModalSelect
 export type ModalSelectProps = Omit<BaseFieldProps, "register"> & {
   value?: string;
+  isFieldLoading?: boolean;
   children: (props: {
     setIsOpen: (status: boolean) => void;
   }) => React.ReactNode;
@@ -459,6 +554,7 @@ export const ModalSelect = ({
   error,
   required,
   disabled,
+  isFieldLoading,
   children,
 }: ModalSelectProps): JSX.Element => {
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
@@ -480,14 +576,16 @@ export const ModalSelect = ({
       error={error}
     >
       <div
-        className={cn(baseField(), "flex cursor-pointer items-center")}
+        className={cn(baseField, "relative flex cursor-pointer items-center")}
         onClick={() => handleSetIsOpen(true)}
       >
         <span className={cn("flex-1", value ? "" : "opacity-20")}>
           {value || placeholder}
         </span>
 
-        <Plus disabled={disabled} />
+        <div className="absolute right-4">
+          <EndContent disabled={disabled} showLoader={isFieldLoading} />
+        </div>
       </div>
 
       <Modal isOpen={isOpen && !disabled} onChange={handleSetIsOpen}>
@@ -497,11 +595,25 @@ export const ModalSelect = ({
   );
 };
 
-export const Plus = ({ disabled }: { disabled?: boolean }): JSX.Element => {
+const EndContent = ({
+  showLoader,
+  disabled,
+}: {
+  showLoader?: boolean;
+  disabled?: boolean;
+}): JSX.Element => {
   return (
-    <div className="h-8 w-8">
+    <div className="relative h-8 w-8">
+      <Loader.Island isLoading={showLoader} size="sm" overlayOpacity={0} />
+
       <svg
-        className={cn(disabled ? "fill-neutral-600" : "fill-neutral-300")}
+        className={cn(
+          disabled ? "fill-neutral-600" : "fill-neutral-400",
+          "transition-opacity duration-700"
+        )}
+        style={{
+          opacity: showLoader ? 0 : 1,
+        }}
         viewBox="0 0 48 48"
         height="32"
         width="32"

@@ -265,8 +265,8 @@ export const UserForm = ({
         error={getFieldState("labs").error}
       >
         {({ setIsOpen }) => (
-          <div className="m-0 p-5">
-            <div className="mb-5 rounded-2xl bg-neutral-900 bg-opacity-50 p-5">
+          <div className="m-0 flex h-full flex-col p-5">
+            <div className="mb-5 flex-1 rounded-2xl bg-neutral-900 bg-opacity-50 p-5">
               <div className="flex flex-wrap">
                 {labs?.map((lab) => {
                   const selected = !!labsField.value.find(
@@ -313,8 +313,8 @@ export const UserForm = ({
         error={getFieldState("defaultLab")?.error}
       >
         {({ setIsOpen }) => (
-          <div className="m-0 p-5">
-            <div className="mb-5 rounded-2xl bg-neutral-900 bg-opacity-50 p-5">
+          <div className="m-0 flex h-full flex-col p-5">
+            <div className="mb-5 flex-1 rounded-2xl bg-neutral-900 bg-opacity-50 p-5">
               <div className="flex flex-wrap">
                 {labsField.value?.map((lab) => {
                   const selected = lab.id === defaultLabField.value.id;

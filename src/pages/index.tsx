@@ -1,6 +1,7 @@
 import Head from "next/head";
 import React from "react";
 import { withRoles } from "../utils/hoc";
+import Kudos from "./kudos";
 
 export default withRoles("Home", () => {
   return (
@@ -17,6 +18,10 @@ export default withRoles("Home", () => {
           frameBorder="0"
           sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
         ></iframe>
+
+        <div className="mt-24">
+          <Kudos />
+        </div>
       </main>
     </React.Fragment>
   );

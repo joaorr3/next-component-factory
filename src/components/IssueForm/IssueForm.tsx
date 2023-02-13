@@ -16,7 +16,8 @@ import { issueFormSchema } from "./validator";
 export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
   const formRef = React.useRef<HTMLFormElement>(null);
 
-  const { defaultUserLab } = useDefaultUserLab();
+  const { defaultUserLab, isLoading: isLoadingDefaultUserLab } =
+    useDefaultUserLab();
 
   const {
     formState,
@@ -27,6 +28,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
     handleSubmit,
     watch,
     reset,
+    control,
   } = useForm<FormSchema>({
     resolver: zodResolver(issueFormSchema),
     defaultValues: {
@@ -98,10 +100,17 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
 
         <Fields.ModalSelect
           label="Lab"
-          disabled={formState.isSubmitting}
+          disabled={formState.isSubmitting || !defaultUserLab}
           placeholder="Ex: M2030"
           value={watch("lab")?.name}
+          description={
+            !defaultUserLab?.id && !isLoadingDefaultUserLab
+              ? "First, you need select your lab in user settings"
+              : undefined
+          }
           required
+          isFieldLoading={isLoadingDefaultUserLab}
+          // isFieldLoading
           error={getError("lab")}
         >
           {({ setIsOpen }) => (
@@ -118,7 +127,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
         <Fields.Text
           label="Package Version"
           placeholder="Ex: 3.3.0-1.0.332128"
-          description="In you terminal run: npm list @bcp-nextgen-dx-component-factory/accolade-design-system --depth=0"
+          description="In your terminal run: npm list @bcp-nextgen-dx-component-factory/accolade-design-system --depth=0"
           disabled={formState.isSubmitting}
           error={getError("version")}
           required
@@ -126,21 +135,25 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
         />
 
         <Fields.Select
+          fieldName="type"
+          placeholder="Select a type"
           label="Issue Type"
           options={["bug", "help", "feat", "cr"]}
           disabled={formState.isSubmitting}
           error={getError("type")}
           required
-          register={register("type")}
+          control={control}
         />
 
         <Fields.Select
+          fieldName="platform"
+          placeholder="Select a platform"
           label="Platform"
           options={["WEB", "NATIVE", "CROSS"]}
           disabled={formState.isSubmitting}
           error={getError("platform")}
           required
-          register={register("platform")}
+          control={control}
         />
 
         <Fields.Area
@@ -174,12 +187,14 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
         </Fields.ModalSelect>
 
         <Fields.Select
+          fieldName="severity"
+          placeholder="Select a severity"
           label="Severity"
           options={["high", "medium", "low"]}
           disabled={formState.isSubmitting}
           error={getError("severity")}
           required
-          register={register("severity")}
+          control={control}
         />
 
         <Fields.Text
@@ -224,12 +239,14 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
         </div>
 
         <Fields.Select
+          fieldName="scope"
+          placeholder="Select a scope"
           label="Scope"
           options={["dev", "design", "both"]}
           disabled={formState.isSubmitting}
           error={getError("scope")}
           required
-          register={register("scope")}
+          control={control}
         />
 
         <Fields.Text

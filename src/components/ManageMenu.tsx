@@ -99,7 +99,7 @@ export const PopUpMenu = ({
             translateY: value.to([0, 1], [-20, 0], "clamp"),
             backgroundColor: "rgb(28, 28, 28)",
           }}
-          className="absolute right-0 top-14 flex flex-col items-end rounded-2xl border-2 border-solid border-neutral-800 p-5"
+          className="absolute right-3 top-14 flex flex-col items-end rounded-2xl border-2 border-solid border-neutral-800 p-5"
         >
           {children}
         </animated.div>

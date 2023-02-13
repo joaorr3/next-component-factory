@@ -10,6 +10,7 @@ export type DelayVisibilityProps = React.PropsWithChildren<{
    * In milliseconds
    */
   transitionTime?: number;
+  isVisible?: boolean;
 }>;
 
 const Wrapper = styled.span<
@@ -24,6 +25,7 @@ const Wrapper = styled.span<
 export const DelayVisibility = ({
   transitionTime = 200,
   delayTime = 200,
+  isVisible,
   children,
 }: DelayVisibilityProps): JSX.Element => {
   const isMounted = React.useRef(false);
@@ -34,7 +36,7 @@ export const DelayVisibility = ({
     return () => {
       isMounted.current = false;
     };
-  }, []);
+  }, [isVisible]);
 
   return (
     <Wrapper

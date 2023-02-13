@@ -1,10 +1,9 @@
-import "@uiw/react-md-editor/markdown-editor.css";
-import "@uiw/react-markdown-preview/markdown.css";
-import dynamic from "next/dynamic";
 import type { MarkdownPreviewProps } from "@uiw/react-markdown-preview";
-
-import { useTheme } from "../styles/ThemeProvider";
+import "@uiw/react-markdown-preview/markdown.css";
+import "@uiw/react-md-editor/markdown-editor.css";
+import dynamic from "next/dynamic";
 import { montserrat } from "../pages/_app";
+import { useTheme } from "../styles/ThemeProvider";
 
 const MDViewer = dynamic(
   () =>

@@ -1,3 +1,5 @@
+import React from "react";
+import { useLoading } from "../utils/GlobalState/GlobalStateProvider";
 import { DelayVisibility } from "./DelayVisibility";
 
 const unauthorizedMessages = {
@@ -12,10 +14,15 @@ type UnauthorizedPageProps = {
 
 export const UnauthorizedPage = ({ reason }: UnauthorizedPageProps) => {
   const message = unauthorizedMessages[reason || "default"];
+  const { isLoading } = useLoading();
+
+  if (isLoading) {
+    return <React.Fragment />;
+  }
 
   return (
     <div className="flex justify-center">
-      <DelayVisibility>
+      <DelayVisibility delayTime={2000} transitionTime={400}>
         <p>{message}</p>
       </DelayVisibility>
     </div>

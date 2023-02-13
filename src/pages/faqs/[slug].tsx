@@ -4,11 +4,11 @@ import type {
   GetServerSidePropsContext,
   InferGetServerSidePropsType,
 } from "next";
-import Head from "next/head";
 import React from "react";
 import superjson from "superjson";
 import { BackButton } from "../../components/BackButton";
 import MarkdownViewer from "../../components/MarkdownViewer";
+import { MetaHead } from "../../components/MetaHead";
 import { getServerAuthSession } from "../../server/common/get-server-auth-session";
 import { createContextInner } from "../../server/trpc/context";
 import { appRouter } from "../../server/trpc/router/_app";
@@ -55,29 +55,15 @@ export default withRoles(
 
     return (
       <React.Fragment>
-        <Head>
-          <title>{`FAQ ${faqDetail?.label}`}</title>
-
-          <meta
-            property="og:url"
-            content={`https://next-cf.up.railway.app/faqs/${faqDetail?.slug}`}
-          />
-          <meta property="og:title" content={faqDetail?.label} />
-          <meta property="og:type" content="website" />
-          <meta
-            property="og:description"
-            content={`${faqDetail?.type}: ${faqDetail?.label}`}
-          />
-          <meta
-            property="og:image"
-            content="https://component-factory-s3-bucket.s3.eu-west-2.amazonaws.com/generic/bb163cab-616f-43d6-9950-b23e7ebc88ca__cf-logo.png"
-          />
-        </Head>
+        <MetaHead
+          title={`FAQ ${faqDetail?.label}`}
+          url={`https://next-cf.up.railway.app/faqs/${faqDetail?.slug}`}
+        />
         <main>
           <BackButton />
 
           <React.Fragment>
-            <div className="mb-4 flex flex-col rounded-xl bg-neutral-700 bg-opacity-25 p-4">
+            <div className="mb-4 flex flex-col rounded-xl bg-neutral-700 bg-opacity-25 p-5">
               {faqDetail?.type && (
                 <div className="mb-3 flex items-center">
                   <p className="mr-2 text-sm font-semibold text-neutral-600 text-opacity-80">

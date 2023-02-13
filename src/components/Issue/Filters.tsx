@@ -19,7 +19,8 @@ export const IssueFiltersComponent = ({
   defaultValues,
   onChange,
 }: IssueFiltersProps): JSX.Element => {
-  const { getValues, setValue, watch, register } = useForm<FiltersModel>({});
+  const { getValues, setValue, watch, register, control } =
+    useForm<FiltersModel>({});
 
   const handleSetValue = debounce(
     (field: keyof FiltersModel, value: string) => {
@@ -39,7 +40,7 @@ export const IssueFiltersComponent = ({
     <div>
       <p className="ml-3 mb-3">Search</p>
       <div className="flex">
-        <Fields.TwTextField
+        <Fields.TextField
           className="mr-4"
           placeholder="Issue ID"
           defaultValue={defaultValues().id}
@@ -47,7 +48,7 @@ export const IssueFiltersComponent = ({
           value={getValues("id")}
           onChange={(e) => handleSetValue("id", e.target.value)}
         />
-        <Fields.TwTextField
+        <Fields.TextField
           className="mr-4"
           placeholder="Issue Title"
           defaultValue={defaultValues().title}
@@ -55,7 +56,7 @@ export const IssueFiltersComponent = ({
           value={getValues("title")}
           onChange={(e) => handleSetValue("title", e.target.value)}
         />
-        <Fields.TwTextField
+        <Fields.TextField
           className="mr-4"
           placeholder="Issue Author"
           defaultValue={defaultValues().author}
@@ -64,21 +65,13 @@ export const IssueFiltersComponent = ({
           onChange={(e) => handleSetValue("author", e.target.value)}
         />
 
-        <Fields.TwSelect
-          // @ts-ignore
-          defaultValue={defaultValues().type}
-          {...register("type")}
-        >
-          <option value="">None</option>
-
-          {["bug", "help", "feat", "cr"].map((value, key) => {
-            return (
-              <option key={key} value={value}>
-                {value}
-              </option>
-            );
-          })}
-        </Fields.TwSelect>
+        <Fields.Select
+          toggleable
+          fieldName="type"
+          placeholder="Type"
+          options={["bug", "help", "feat", "cr"]}
+          control={control}
+        />
       </div>
     </div>
   );

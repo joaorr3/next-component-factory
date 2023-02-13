@@ -101,7 +101,7 @@ export default withRoles("ManageLabsDetail", () => {
             setIsOpen(status);
           }}
         >
-          <div className="rounded-2xl bg-neutral-800 p-5">
+          <div className="h-full rounded-2xl bg-neutral-800 p-5">
             <LabForm onSubmit={onSubmit} initialData={lab} />
           </div>
         </Modal>
@@ -142,7 +142,10 @@ export const LabForm = ({
   );
 
   return (
-    <form className="flex flex-col" onSubmit={handleSubmit(handleOnSubmit)}>
+    <form
+      className="flex h-full flex-col"
+      onSubmit={handleSubmit(handleOnSubmit)}
+    >
       <Fields.Text
         label="Lab Display Name"
         disabled={formState.isSubmitting}
@@ -152,6 +155,7 @@ export const LabForm = ({
 
       {initialData && (
         <DataDisplay
+          className="flex-grow-[2]"
           data={[
             {
               label: "ID",

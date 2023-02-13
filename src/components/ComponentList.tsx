@@ -1,12 +1,12 @@
-import { type ComponentCategory, type Component } from "@prisma/client";
+import { type Component, type ComponentCategory } from "@prisma/client";
 import { debounce, groupBy, startCase } from "lodash";
 import React from "react";
 import styled from "styled-components";
 import { customScrollBar } from "../styles/GlobalStyles";
 import { cn } from "../styles/utils";
-import { useLoading } from "../utils/GlobalState/GlobalStateProvider";
 import { trpc } from "../utils/trpc";
-import { TwTextField } from "./Form/Fields";
+import { TextField } from "./Form/Fields";
+import Loader from "./Loader";
 
 const ScrollView = styled.div`
   ${customScrollBar}
@@ -41,8 +41,6 @@ export const ComponentList = React.forwardRef(
   ): JSX.Element => {
     const { data, isLoading, fetchStatus, refetch } =
       trpc.components.all.useQuery();
-
-    useLoading(isLoading && fetchStatus !== "idle");
 
     const [searchValue, setSearchValue] = React.useState<string>("");
 
@@ -83,57 +81,63 @@ export const ComponentList = React.forwardRef(
     }, 500);
 
     return (
-      <div className="p-5 pb-0">
-        <TwTextField
-          placeholder="Search"
-          defaultValue={searchValue}
-          onChange={(e) => handleSearch(e.target.value)}
+      <div className="relative h-[70vh] w-full">
+        <Loader.Island
+          isLoading={isLoading && fetchStatus !== "idle"}
+          size="md"
         />
-        <span className="text grow text-xs opacity-50">
-          {searchResults.length} results
-        </span>
+        <div className="component-list flex h-full flex-col justify-between p-5 pb-0">
+          <TextField
+            placeholder="Search"
+            defaultValue={searchValue}
+            onChange={(e) => handleSearch(e.target.value)}
+          />
+          <span className="text grow text-xs opacity-50">
+            {searchResults.length} results
+          </span>
 
-        <div className="my-3 mb-0 overflow-hidden">
-          <ScrollView className="h-96 overflow-y-scroll">
-            {parsedData.map(({ category, components }) => (
-              <div
-                key={category}
-                className="mb-3 mr-3 rounded-2xl bg-neutral-900 bg-opacity-50 p-5"
-              >
-                <div className="flex">
-                  <p className="text mb-3 ml-3 mr-1 text-xs font-bold opacity-50">
-                    {category}
-                  </p>
+          <div className="my-3 mb-0 h-4/5 overflow-hidden">
+            <ScrollView className="h-full overflow-y-scroll">
+              {parsedData.map(({ category, components }) => (
+                <div
+                  key={category}
+                  className="mb-3 mr-3 rounded-2xl bg-neutral-900 bg-opacity-50 p-5"
+                >
+                  <div className="flex">
+                    <p className="text mb-3 ml-3 mr-1 text-xs font-bold opacity-50">
+                      {category}
+                    </p>
 
-                  <p className="text mb-3 text-xs font-semibold opacity-20">
-                    ({components.length})
-                  </p>
+                    <p className="text mb-3 text-xs font-semibold opacity-20">
+                      ({components.length})
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap">
+                    {components.map((component) => {
+                      return (
+                        <div
+                          key={component.id}
+                          onClick={() => {
+                            onItemPress?.(component);
+                          }}
+                          className={cn(
+                            "flex select-none items-center justify-center",
+                            "mb-3 mr-3 max-w-max grow-0 cursor-pointer rounded-2xl bg-neutral-600 bg-opacity-40 p-3 font-bold outline-neutral-200 hover:bg-opacity-50",
+                            selectedComponentName === component.name
+                              ? "outline"
+                              : ""
+                          )}
+                        >
+                          {component.name}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-
-                <div className="flex flex-wrap">
-                  {components.map((component) => {
-                    return (
-                      <div
-                        key={component.id}
-                        onClick={() => {
-                          onItemPress?.(component);
-                        }}
-                        className={cn(
-                          "flex select-none items-center justify-center",
-                          "mb-3 mr-3 max-w-max grow-0 cursor-pointer rounded-2xl bg-neutral-600 bg-opacity-40 p-3 font-bold outline-neutral-200 hover:bg-opacity-50",
-                          selectedComponentName === component.name
-                            ? "outline"
-                            : ""
-                        )}
-                      >
-                        {component.name}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </ScrollView>
+              ))}
+            </ScrollView>
+          </div>
         </div>
       </div>
     );

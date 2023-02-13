@@ -18,6 +18,7 @@ export type DataDisplayProps = {
   header?: string | null;
   data?: Data[];
   nude?: boolean;
+  className?: string;
 };
 
 export const DataDisplay = ({
@@ -25,9 +26,10 @@ export const DataDisplay = ({
   header,
   data,
   nude,
+  className,
 }: DataDisplayProps): JSX.Element => {
   return (
-    <div className="relative">
+    <div className={cn("relative", className)}>
       {actionButton && (
         <div className="absolute right-0 -top-12">
           <InteractionElement

@@ -1,4 +1,3 @@
-import "../styles/globals.css";
 import { Montserrat } from "@next/font/google";
 import { type Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
@@ -6,6 +5,7 @@ import { type AppType } from "next/app";
 import React from "react";
 import { AppContainer } from "../components/AppContainer";
 import { HomeButton } from "../components/HomeButton";
+import { NewIssueShortcut } from "../components/Issue/NewIssueShortcut";
 import Loader from "../components/Loader";
 import { LoginButton } from "../components/LoginButton";
 import { ManageMenu } from "../components/ManageMenu";
@@ -15,6 +15,7 @@ import NavBar, {
 } from "../components/NavBar";
 import ThemeSwitcher from "../components/ThemeSwitcher";
 import { UserAvatar } from "../components/UserAvatar";
+import "../styles/globals.css";
 import { GlobalStyle } from "../styles/GlobalStyles";
 import ThemeProvider from "../styles/ThemeProvider";
 import { GlobalStateProvider } from "../utils/GlobalState/GlobalStateProvider";
@@ -45,6 +46,8 @@ const MyApp: AppType<{ session: Session | null }> = ({
                 <NavBarContent />
 
                 <NavBarActionContainer>
+                  <NewIssueShortcut />
+
                   <ManageMenu />
 
                   <UserAvatar />

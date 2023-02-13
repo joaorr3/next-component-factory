@@ -49,7 +49,7 @@ export const routes: Routes = {
   Kudos: {
     label: "Kudos",
     path: "/kudos",
-    navBar: true,
+    // navBar: true,
     roles: "public",
   },
   FAQs: {

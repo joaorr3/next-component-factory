@@ -42,6 +42,7 @@ export const serverSchema = z.object({
   START_PRISMA: z.string(),
 
   DATABASE_URL: z.string().url(),
+  // DATABASE_URL_RW: z.string().url(),
 
   AWS_S3_BUCKET: z.string(),
   AWS_S3_USER: z.string(),

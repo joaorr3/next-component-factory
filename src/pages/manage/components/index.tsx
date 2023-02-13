@@ -60,7 +60,10 @@ export default withRoles("ManageComponents", () => {
       <main>
         <p className="m-3 mb-8 text-xl font-bold">Components</p>
 
-        <div className="relative rounded-2xl bg-neutral-800">
+        <div
+          className="relative rounded-2xl bg-neutral-800"
+          style={{ height: "70vh" }}
+        >
           <div className="absolute right-0 -top-14">
             <InteractionElement
               text="Add"
@@ -90,7 +93,7 @@ export default withRoles("ManageComponents", () => {
             }
           }}
         >
-          <div className="rounded-2xl bg-neutral-800 p-5">
+          <div className="h-full rounded-2xl bg-neutral-800 p-5">
             <ComponentForm
               onSubmit={onSubmit}
               initialData={selectedComponent}
@@ -122,7 +125,7 @@ export const ComponentForm = ({
 }: ComponentFormProps): JSX.Element => {
   const { mutateAsync: deleteComponent } = trpc.components.delete.useMutation();
 
-  const { formState, getFieldState, handleSubmit, reset, register } =
+  const { formState, getFieldState, handleSubmit, reset, register, control } =
     useForm<ComponentFormModel>({
       resolver: zodResolver(componentFormSchema),
       defaultValues: initialData,
@@ -154,7 +157,10 @@ export const ComponentForm = ({
   );
 
   return (
-    <form className="flex flex-col" onSubmit={handleSubmit(handleOnSubmit)}>
+    <form
+      className="flex h-full flex-col"
+      onSubmit={handleSubmit(handleOnSubmit)}
+    >
       <Fields.Text
         label="Component Name"
         placeholder="Ex: AccountCard"
@@ -163,12 +169,13 @@ export const ComponentForm = ({
         register={register("name")}
       />
 
-      <Fields.Select<ComponentFormModel["category"]>
-        label="Issue Type"
+      <Fields.Select
+        label="Category"
+        fieldName="category"
         options={["BASE", "ATOMS", "MOLECULES", "ORGANISMS"]}
         disabled={formState.isSubmitting}
         error={getFieldState("category").error}
-        register={register("category")}
+        control={control}
       />
 
       <Fields.Area
@@ -178,7 +185,7 @@ export const ComponentForm = ({
         register={register("description")}
       />
 
-      <div className="flex justify-end">
+      <div className="flex flex-1 justify-end">
         {initialData?.id && (
           <Fields.Button
             className="mr-3 bg-red-600 hover:bg-red-700 focus:ring-red-500"
