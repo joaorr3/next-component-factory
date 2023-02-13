@@ -44,10 +44,6 @@ export const Kudos = () => {
 
   return (
     <React.Fragment>
-      <Head>
-        <title>Kudos</title>
-      </Head>
-
       <div
         style={{
           display: "flex",
