@@ -72,6 +72,7 @@ const baseField = /*tw*/ `
 `;
 
 export type BaseFieldProps = {
+  className?: string;
   label?: string;
   disabled?: boolean;
   placeholder?: string;
@@ -208,6 +209,7 @@ export const TextArea = React.forwardRef(
 );
 
 export const Area = ({
+  className,
   label,
   placeholder,
   description,
@@ -225,7 +227,7 @@ export const Area = ({
       error={error}
     >
       <TextArea
-        className="h-24 max-h-24 focus:ring-0"
+        className={cn("h-24 max-h-24 focus:ring-0", className)}
         style={{ height }}
         placeholder={placeholder}
         disabled={disabled}

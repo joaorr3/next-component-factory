@@ -89,6 +89,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
         />
 
         <Fields.Area
+          className="max-h-56"
           label="Description"
           description="Try to be concise in your description"
           placeholder="Issue Description"
@@ -157,6 +158,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
         />
 
         <Fields.Area
+          className="max-h-56"
           label="Steps To Reproduce"
           placeholder={`Ex:\n 1. Dis this; \n 2. Did that;`}
           height={140}
