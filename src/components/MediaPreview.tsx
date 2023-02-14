@@ -50,14 +50,15 @@ export const MediaPreview = ({
         src={url}
         controls
         className={className}
-        width={width * 2}
-        height={height * 2}
+        width={width}
+        height={height}
         onClick={onPress}
         onLoad={onLoad}
         style={{
-          maxWidth: width * 2,
+          maxWidth: width,
           width: "100%",
           height: "auto",
+          maxHeight: height,
         }}
       />
     );
