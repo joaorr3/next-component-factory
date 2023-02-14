@@ -162,7 +162,7 @@ const createIssueThread = async (issue: Issue, user?: GuildUser | null) => {
 
     if (issue?.labId && user) {
       const lab = await prismaNext.labs.read(issue.labId);
-      if (lab?.channelId) {
+      if (lab?.channelId && lab?.guildRoleId) {
         const channel = discordNext.channelById(lab?.channelId);
         const thread = await channel?.threads.create({
           name: truncate(fullTitle, {
@@ -172,12 +172,16 @@ const createIssueThread = async (issue: Issue, user?: GuildUser | null) => {
           reason: `Issue: ${title}`,
         });
 
+        const scopeMentions = mentionsByScope(scope, {
+          dev: discordNext.role("dev"),
+          design: discordNext.role("design"),
+        });
+
+        const labMention = roleMention(lab.guildRoleId);
+
         if (thread) {
           await thread?.send({
-            content: mentionsByScope(scope, {
-              dev: discordNext.role("dev"),
-              design: discordNext.role("design"),
-            }),
+            content: `${scopeMentions} ${labMention}`,
             embeds: [
               new EmbedBuilder()
                 .setTitle(title)
