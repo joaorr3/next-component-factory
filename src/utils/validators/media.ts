@@ -54,6 +54,7 @@ export const acceptedFileTypes = [
   "video/mp4",
   "video/webm",
   "video/mpeg",
+  "video/quicktime",
 ];
 
 export const rawFileValidator = z
