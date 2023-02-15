@@ -201,6 +201,10 @@ const createIssueThread = async (issue: Issue, user?: GuildUser | null) => {
             ],
           });
 
+          await thread.send({
+            content: `${env.NEXT_PROD_URL}/issue/${issue.id}`,
+          });
+
           return {
             id: thread.id,
             url: thread.url,
