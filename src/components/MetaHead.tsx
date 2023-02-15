@@ -1,6 +1,4 @@
 import Head from "next/head";
-import { useRouter } from "next/router";
-import React from "react";
 
 export type MetaHeadProps = {
   title: string;
@@ -18,14 +16,11 @@ export const MetaHead = ({
   url,
   imageUrl = defaultImageUrl,
 }: MetaHeadProps): JSX.Element => {
-  const { asPath } = useRouter();
-  const fallbackPath = `${basePath}/${asPath}`;
-
   return (
     <Head>
       <title>{`${title}`}</title>
 
-      <meta property="og:url" content={url || fallbackPath} />
+      <meta property="og:url" content={url || basePath} />
       <meta property="og:title" content={title} />
       <meta property="og:type" content="website" />
       <meta property="og:image" content={imageUrl} />
