@@ -266,7 +266,7 @@ export const UserForm = ({
       >
         {({ setIsOpen }) => (
           <div className="m-0 flex h-full flex-col p-5">
-            <div className="mb-5 flex-1 rounded-2xl bg-neutral-900 bg-opacity-50 p-5">
+            <div className="mb-5 flex-1 rounded-2xl bg-neutral-100 p-5 dark:bg-neutral-900 dark:bg-opacity-50">
               <div className="flex flex-wrap">
                 {labs?.map((lab) => {
                   const selected = !!labsField.value.find(
@@ -283,7 +283,7 @@ export const UserForm = ({
                       }}
                       className={cn(
                         "flex select-none items-center justify-center",
-                        "mb-3 mr-3 max-w-max grow-0 cursor-pointer rounded-2xl bg-neutral-600 bg-opacity-40 p-3 font-bold outline-neutral-200 hover:bg-opacity-50",
+                        "mb-3 mr-3 max-w-max grow-0 cursor-pointer rounded-2xl bg-neutral-200 p-3 font-bold dark:bg-neutral-700 dark:outline-neutral-200",
                         selected ? "outline" : ""
                       )}
                     >
@@ -314,7 +314,7 @@ export const UserForm = ({
       >
         {({ setIsOpen }) => (
           <div className="m-0 flex h-full flex-col p-5">
-            <div className="mb-5 flex-1 rounded-2xl bg-neutral-900 bg-opacity-50 p-5">
+            <div className="mb-5 flex-1 rounded-2xl bg-neutral-100 p-5 dark:bg-neutral-900 dark:bg-opacity-50">
               <div className="flex flex-wrap">
                 {labsField.value?.map((lab) => {
                   const selected = lab.id === defaultLabField.value.id;
@@ -326,7 +326,7 @@ export const UserForm = ({
                       }}
                       className={cn(
                         "flex select-none items-center justify-center",
-                        "mb-3 mr-3 max-w-max grow-0 cursor-pointer rounded-2xl bg-neutral-600 bg-opacity-40 p-3 font-bold outline-neutral-200 hover:bg-opacity-50",
+                        "mb-3 mr-3 max-w-max grow-0 cursor-pointer rounded-2xl bg-neutral-200 p-3 font-bold dark:bg-neutral-700 dark:outline-neutral-200",
                         selected ? "outline" : ""
                       )}
                     >

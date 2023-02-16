@@ -44,7 +44,7 @@ export const DataDisplay = ({
         className={cn(
           nude
             ? ""
-            : "mb-4 flex flex-col rounded-xl bg-neutral-700 bg-opacity-25 p-4"
+            : "mb-4 flex flex-col rounded-xl bg-neutral-200 p-4 dark:bg-neutral-800"
         )}
       >
         {header && (
@@ -77,7 +77,7 @@ export const Property = ({
   if (element) {
   }
   return (
-    <div className="mb-3 mr-4 flex max-w-sm shrink-0 flex-col justify-center rounded-xl bg-neutral-900 bg-opacity-30 p-5">
+    <div className="mb-3 mr-4 flex max-w-sm shrink-0 flex-col justify-center rounded-xl bg-neutral-300 p-5 dark:bg-neutral-900 dark:bg-opacity-40">
       <p className="mb-1 text-sm font-bold">{label}</p>
 
       <p className="max-w-xl overflow-hidden overflow-ellipsis text-sm">

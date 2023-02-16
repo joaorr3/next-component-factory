@@ -12,23 +12,6 @@ const ThemeProvider = ({ children }: React.PropsWithChildren) => {
     return Themes[themeName];
   }, [themeName]);
 
-  React.useEffect(() => {
-    const root = document.documentElement;
-
-    const darkBg = Themes.dark.backgroundColor;
-    const darkFg = Themes.dark.textColor;
-    const lightBg = Themes.light.backgroundColor;
-    const lightFg = Themes.light.textColor;
-
-    if (themeName === "dark") {
-      root.style.setProperty("--color-bg", darkBg);
-      root.style.setProperty("--color-fg", darkFg);
-    } else if (themeName === "light") {
-      root.style.setProperty("--color-bg", lightBg);
-      root.style.setProperty("--color-fg", lightFg);
-    }
-  }, [themeName]);
-
   return <Provider theme={theme}>{children}</Provider>;
 };
 

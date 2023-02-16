@@ -101,7 +101,7 @@ export const ComponentList = React.forwardRef(
               {parsedData.map(({ category, components }) => (
                 <div
                   key={category}
-                  className="mb-3 mr-3 rounded-2xl bg-neutral-900 bg-opacity-50 p-5"
+                  className="mb-3 mr-3 rounded-2xl bg-neutral-400 bg-opacity-30 p-5 dark:bg-neutral-900 dark:bg-opacity-50"
                 >
                   <div className="flex">
                     <p className="text mb-3 ml-3 mr-1 text-xs font-bold opacity-50">
@@ -123,7 +123,7 @@ export const ComponentList = React.forwardRef(
                           }}
                           className={cn(
                             "flex select-none items-center justify-center",
-                            "mb-3 mr-3 max-w-max grow-0 cursor-pointer rounded-2xl bg-neutral-600 bg-opacity-40 p-3 font-bold outline-neutral-200 hover:bg-opacity-50",
+                            "mb-3 mr-3 max-w-max grow-0 cursor-pointer rounded-2xl bg-neutral-500 bg-opacity-30 p-3 font-bold outline-neutral-200 hover:bg-opacity-50",
                             selectedComponentName === component.name
                               ? "outline"
                               : ""

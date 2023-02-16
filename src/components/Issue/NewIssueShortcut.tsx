@@ -53,7 +53,7 @@ export const NewIssueShortcut = (): JSX.Element => {
       <div className={cn(base)}>
         <FancyBackground />
         <div
-          className="absolute inset-0 z-10 bg-neutral-800"
+          className="absolute inset-0 z-10 bg-neutral-100 bg-opacity-90 dark:bg-neutral-800"
           style={{
             margin: 1,
             borderRadius: 15,

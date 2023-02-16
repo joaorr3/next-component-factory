@@ -2,7 +2,7 @@ import Discord, { channelMention, userMention } from "discord.js";
 import logger from "../../../../shared/logger";
 import { csvToNumberedList, isValidURL, randomInt } from "../../../utils";
 import discord from "../../client";
-import type { IssueCommand } from "../../types";
+import type { IssueLegacyCommand } from "../../types";
 import { angryC18Gif, tenor } from "../../utils/gifs";
 import { c18AngryQuotes } from "../../utils/quotes";
 import { getColor, mentionsByScope } from "../utils";
@@ -15,7 +15,7 @@ type IssueCommandParams = {
 
 export const issueCommand = async ({
   interaction,
-}: IssueCommandParams): Promise<IssueCommand> => {
+}: IssueCommandParams): Promise<IssueLegacyCommand> => {
   const { channelId, options, user } = interaction;
 
   const guildUser = discord.member(user.id);
@@ -181,7 +181,7 @@ export const issueCommand = async ({
   }
 
   return {
-    name: "issue",
+    name: "issue_legacy",
     response: {
       thread,
       hasLabRole: !!guildUserInfo.hasLabRole,

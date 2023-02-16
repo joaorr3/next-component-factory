@@ -30,7 +30,7 @@ export const LabList = ({
     <div className="p-5 pb-0">
       <div className="my-3 mb-0 overflow-hidden">
         <ScrollView className="h-96 overflow-y-scroll">
-          <div className="mb-3 mr-3 rounded-2xl bg-neutral-900 bg-opacity-50 p-5">
+          <div className="mb-5 flex-1 rounded-2xl bg-neutral-100 p-5 dark:bg-neutral-900 dark:bg-opacity-50">
             <div className="flex flex-wrap">
               {data?.map((lab) => {
                 return (
@@ -41,7 +41,7 @@ export const LabList = ({
                     }}
                     className={cn(
                       "flex select-none items-center justify-center",
-                      "mb-3 mr-3 max-w-max grow-0 cursor-pointer rounded-2xl bg-neutral-600 bg-opacity-40 p-3 font-bold outline-neutral-200 hover:bg-opacity-50",
+                      "mb-3 mr-3 max-w-max grow-0 cursor-pointer rounded-2xl bg-neutral-200 p-3 font-bold dark:bg-neutral-700 dark:outline-neutral-200",
                       selectedLab?.id === lab.id ? "outline" : ""
                     )}
                   >

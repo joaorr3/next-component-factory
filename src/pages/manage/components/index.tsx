@@ -61,7 +61,7 @@ export default withRoles("ManageComponents", () => {
         <p className="m-3 mb-8 text-xl font-bold">Components</p>
 
         <div
-          className="relative rounded-2xl bg-neutral-800"
+          className="relative rounded-2xl bg-neutral-100 dark:bg-neutral-800"
           style={{ height: "70vh" }}
         >
           <div className="absolute right-0 -top-14">
@@ -93,7 +93,7 @@ export default withRoles("ManageComponents", () => {
             }
           }}
         >
-          <div className="h-full rounded-2xl bg-neutral-800 p-5">
+          <div className="h-full rounded-2xl p-5 dark:bg-neutral-800">
             <ComponentForm
               onSubmit={onSubmit}
               initialData={selectedComponent}

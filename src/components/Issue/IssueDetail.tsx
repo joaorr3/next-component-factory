@@ -67,7 +67,7 @@ export const IssueDetail: React.FC<{
     <React.Fragment>
       <div
         onClick={onPress ? () => onPress?.(issue?.id) : undefined}
-        className="mb-4 flex flex-col rounded-xl bg-neutral-700 bg-opacity-25 p-4"
+        className="mb-4 flex flex-col rounded-xl bg-neutral-200 p-4 dark:bg-neutral-800"
       >
         <div className="mb-3 flex items-center">
           <p className="mr-2 text-sm font-semibold text-neutral-600 text-opacity-80">
@@ -110,7 +110,7 @@ export const IssueDetail: React.FC<{
               element: (
                 <Link
                   target="_blank"
-                  className="text-sm text-blue-400 underline underline-offset-4"
+                  className="text-sm font-bold text-blue-400 underline underline-offset-4"
                   href={issue?.specs || ""}
                 >
                   Link
@@ -122,7 +122,7 @@ export const IssueDetail: React.FC<{
               element: (
                 <Link
                   target="_blank"
-                  className="text-sm text-blue-400 underline underline-offset-4"
+                  className="text-sm font-bold text-blue-400 underline underline-offset-4"
                   href={issue?.codeSnippet || ""}
                 >
                   Link
@@ -203,7 +203,7 @@ export const IntegrationLink = ({
     return (
       <Link
         target="_blank"
-        className="flex text-sm text-blue-400 underline underline-offset-4"
+        className="flex text-sm font-bold text-blue-400 underline underline-offset-4"
         href={url || ""}
       >
         <Image height={24} width={24} alt="" src={asset[service]} />

@@ -63,7 +63,7 @@ export default withRoles(
           <BackButton />
 
           <React.Fragment>
-            <div className="mb-4 flex flex-col rounded-xl bg-neutral-700 bg-opacity-25 p-5">
+            <div className="mb-4 flex flex-col rounded-xl bg-neutral-100 p-5 dark:bg-neutral-800">
               {faqDetail?.type && (
                 <div className="mb-3 flex items-center">
                   <p className="mr-2 text-sm font-semibold text-neutral-600 text-opacity-80">

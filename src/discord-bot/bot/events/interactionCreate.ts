@@ -33,7 +33,7 @@ export const interactionCreateHandler = async (
 
       switch (name) {
         //region Issue
-        case "issue": {
+        case "issue_legacy": {
           const { hasLabRole, thread, issueDetails } = response;
 
           if (hasLabRole && thread && issueDetails.title) {

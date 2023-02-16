@@ -28,7 +28,7 @@ export const Light: ThemeModel = {
 };
 export const Dark: ThemeModel = {
   themeName: "dark",
-  backgroundColor: "#181818",
+  backgroundColor: "#171717",
   backgroundColorSecondary: "#1e1e1e",
   textColor: "#D3D3D3",
   linkColor: "#5457eb",
@@ -41,24 +41,13 @@ export const Themes: Record<ThemeNames, ThemeModel> = {
 };
 
 export function setColorsByTheme() {
-  const root = document.documentElement;
-
   const fallback = JSON.stringify("dark");
-
   const stored = JSON.parse(
     window.localStorage.getItem("currentTheme") || fallback
   );
-
-  const darkBg = "#181818";
-  const darkFg = "#898989";
-  const lightBg = "#fff";
-  const lightFg = "#000";
-
   if (stored === "dark") {
-    root.style.setProperty("--color-bg", darkBg);
-    root.style.setProperty("--color-fg", darkFg);
-  } else if (stored === "light") {
-    root.style.setProperty("--color-bg", lightBg);
-    root.style.setProperty("--color-fg", lightFg);
+    document.documentElement.classList.add("dark");
+  } else {
+    document.documentElement.classList.remove("dark");
   }
 }

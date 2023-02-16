@@ -2,47 +2,26 @@ import type { LinkProps } from "next/link";
 import Link from "next/link";
 import React from "react";
 import styled, { css } from "styled-components";
-import { Bold } from "../components/base";
 import { usePathMatch } from "../hooks/usePathMatch";
 import { useRoles, type UseRoles } from "../hooks/useRoles";
 import { navBarRouteEntries } from "../routes";
 
-const NavBarContainer = styled.div`
-  height: 64px;
-  position: relative;
-  width: 100%;
-  /* box-shadow: 0px 4px 20px 4px #18181813; */
-  position: fixed;
-  z-index: 100;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  backdrop-filter: blur(12px);
-`;
-
 const NavBar = ({ children }: React.PropsWithChildren) => {
   return (
     <React.Fragment>
-      <NavBarContainer>{children}</NavBarContainer>
+      <div className="fixed z-[100] flex h-16 w-full items-center justify-end backdrop-blur-md">
+        {children}
+      </div>
       <div style={{ height: 80 }} />
     </React.Fragment>
   );
 };
 
-export const NavBarContentContainer = styled.div`
-  display: flex;
-  flex: 1;
-  height: 100%;
-  align-items: center;
-  padding: 0px 16px;
-  padding-left: 0px;
-`;
-
 export const NavBarContent = (): JSX.Element => {
   const { matchPath } = usePathMatch();
 
   return (
-    <NavBarContentContainer>
+    <div className="flex h-full flex-1 items-center px-4 pl-0">
       {navBarRouteEntries.map(({ label, path, match, roles }) => {
         const active = matchPath({ path, match });
 
@@ -56,7 +35,7 @@ export const NavBarContent = (): JSX.Element => {
           />
         );
       })}
-    </NavBarContentContainer>
+    </div>
   );
 };
 
@@ -71,7 +50,6 @@ const NavBarItemContainer = styled.div<{ active?: boolean }>`
 
   .inner {
     display: flex;
-    /* display: inline-block; */
     padding: 0px 8px;
     margin: 0px 8px;
     align-items: center;
@@ -92,7 +70,6 @@ const NavBarItemContainer = styled.div<{ active?: boolean }>`
 
 const ActiveIndicator = styled.div<{ active?: boolean }>`
   transition: height 320ms ease, opacity 220ms ease;
-  background-color: ${({ theme }) => theme.textColor};
   height: 1px;
   opacity: 0;
   width: 90%;
@@ -127,9 +104,12 @@ export const NavBarItem = ({
     <NavBarItemContainer className="navBarItemContainer" active={active}>
       <div className="inner">
         <Link style={{ color: "unset", textDecoration: "none" }} href={href}>
-          <Bold>{label}</Bold>
+          <p className="font-bold">{label}</p>
         </Link>
-        <ActiveIndicator className="activeIndicator" active={active} />
+        <ActiveIndicator
+          className="activeIndicator bg-black dark:bg-neutral-300"
+          active={active}
+        />
       </div>
     </NavBarItemContainer>
   );

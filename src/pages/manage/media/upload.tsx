@@ -71,7 +71,7 @@ export default withRoles("ManageMediaUpload", () => {
           <BackButton />
         </div>
 
-        <div className="mb-4 flex flex-col rounded-xl bg-neutral-700 bg-opacity-25 p-4">
+        <div className="mb-4 flex flex-col rounded-xl bg-neutral-200 p-4 dark:bg-neutral-800">
           <form onSubmit={handleSubmit(handleOnSubmit)}>
             <Fields.Dropzone
               files={getValues("files")}

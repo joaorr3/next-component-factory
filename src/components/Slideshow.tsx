@@ -19,7 +19,7 @@ export const Slideshow = React.forwardRef(
   ): JSX.Element => {
     return (
       <Modal isOpen={isOpen} onChange={onChange}>
-        <div className="flex items-center rounded-2xl bg-neutral-800 p-5">
+        <div className="flex items-center rounded-2xl bg-neutral-100 p-5 dark:bg-neutral-800">
           <ReactSlipAndSlide
             ref={ref}
             data={data}

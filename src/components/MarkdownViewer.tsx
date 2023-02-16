@@ -17,7 +17,12 @@ function MarkdownViewer(props: MarkdownPreviewProps) {
   const { themeName } = useTheme();
 
   return (
-    <MDViewer {...props} style={montserrat.style} data-color-mode={themeName} />
+    <MDViewer
+      {...props}
+      className="!text-neutral-900 dark:!text-neutral-100"
+      style={montserrat.style}
+      data-color-mode={themeName}
+    />
   );
 }
 

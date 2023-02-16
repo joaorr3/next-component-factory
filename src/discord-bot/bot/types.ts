@@ -47,6 +47,7 @@ export type CommandName =
   | "gif"
   | "quote"
   | "issue"
+  | "issue_legacy"
   | "roles"
   | "pr"
   | "archive"
@@ -79,9 +80,14 @@ type QuoteCommand = {
   response: undefined;
 };
 
-export type IssueCommand =
+type IssueCommand = {
+  name: "issue";
+  response: undefined;
+};
+
+export type IssueLegacyCommand =
   | {
-      name: "issue";
+      name: "issue_legacy";
       response: IssueCommandModel;
     }
   | undefined;
@@ -173,6 +179,7 @@ export type DiscordCommandObject = {
   gif: () => Promise<GifCommand>;
   quote: () => Promise<QuoteCommand>;
   issue: () => Promise<IssueCommand>;
+  issue_legacy: () => Promise<IssueLegacyCommand>;
   roles: () => Promise<RolesCommand>;
   pr: () => Promise<PrCommand>;
   archive: () => Promise<ArchiveCommand>;
@@ -200,6 +207,7 @@ export type CommandsResponse = Promise<
   | GifCommand
   | QuoteCommand
   | IssueCommand
+  | IssueLegacyCommand
   | RolesCommand
   | PrCommand
   | ArchiveCommand

@@ -17,10 +17,10 @@ export const ListItem: React.FC<{
   return (
     <div
       onClick={onPress}
-      className="mb-4 flex cursor-pointer flex-col rounded-xl bg-neutral-700 bg-opacity-25 p-4 transition-transform hover:scale-[1.01]"
+      className="mb-4 flex cursor-pointer flex-col rounded-xl bg-neutral-200 p-4 transition-transform hover:scale-[1.01] dark:bg-neutral-800"
     >
       {headerLabel && (
-        <p className="mb-3 text-sm font-semibold text-neutral-600 text-opacity-80">
+        <p className="mb-3 text-sm font-semibold text-neutral-600">
           {headerLabel}
         </p>
       )}
@@ -77,7 +77,7 @@ export const ListMediaItem: React.FC<{
   return (
     <div
       onClick={onPress}
-      className="relative mb-4 flex rounded-xl bg-neutral-700 bg-opacity-10 p-4"
+      className="relative mb-4 flex rounded-xl bg-neutral-200 p-4 dark:bg-neutral-800"
     >
       <div className="mr-3 flex items-center">
         <MediaPreview

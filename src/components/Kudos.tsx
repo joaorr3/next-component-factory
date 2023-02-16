@@ -8,7 +8,6 @@ import {
   Tooltip,
 } from "chart.js";
 import { shuffle } from "lodash";
-import Head from "next/head";
 import Image from "next/image";
 import React from "react";
 import { Radar } from "react-chartjs-2";
@@ -17,7 +16,6 @@ import type { ParsedKudos } from "../shared/dataUtils";
 import { useTheme } from "../styles/ThemeProvider";
 import { useLoading } from "../utils/GlobalState/GlobalStateProvider";
 import { trpc } from "../utils/trpc";
-import { P } from "./base";
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip);
 
@@ -136,8 +134,8 @@ const KudosCard = ({ user, kudos }: ParsedKudos) => {
                 justifyContent: "space-between",
               }}
             >
-              <P>{k}</P>
-              <P>{v}</P>
+              <p>{k}</p>
+              <p>{v}</p>
             </div>
           ))}
         </div>
@@ -149,7 +147,6 @@ const KudosCard = ({ user, kudos }: ParsedKudos) => {
 };
 
 const Avatar = ({ name, avatarURL }: ParsedKudos["user"]) => {
-  const { backgroundColor } = useTheme();
   return (
     <div>
       <div
@@ -164,14 +161,9 @@ const Avatar = ({ name, avatarURL }: ParsedKudos["user"]) => {
           <Image src={avatarURL} width={80} height={80} alt="user image" />
         ) : (
           <div
+            className="flex h-20 w-20 items-center justify-center dark:text-neutral-100"
             style={{
-              width: 80,
-              height: 80,
               backgroundColor: "#969696",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              color: backgroundColor,
             }}
           >
             <h3

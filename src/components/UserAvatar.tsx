@@ -3,7 +3,6 @@ import Link from "next/link";
 import styled from "styled-components";
 import { routes } from "../routes";
 import { useGlobalState } from "../utils/GlobalState/GlobalStateProvider";
-import { Bold } from "./base";
 
 const Container = styled.div<{ show?: boolean }>`
   opacity: ${({ show }) => (show ? 1 : 0)};
@@ -24,7 +23,7 @@ export const UserAvatar = (): JSX.Element => {
   return (
     <Link href={routes.User.path}>
       <Container show={!!profile}>
-        <Bold style={{ marginRight: 12 }}>{profile?.friendlyName}</Bold>
+        <p className="mr-3 font-bold">{profile?.friendlyName}</p>
 
         {profile?.avatarURL && (
           <div style={{ borderRadius: 80, overflow: "hidden" }}>

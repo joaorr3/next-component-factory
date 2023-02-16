@@ -101,7 +101,7 @@ export default withRoles("ManageLabsDetail", () => {
             setIsOpen(status);
           }}
         >
-          <div className="h-full rounded-2xl bg-neutral-800 p-5">
+          <div className="h-full rounded-2xl p-5 dark:bg-neutral-800">
             <LabForm onSubmit={onSubmit} initialData={lab} />
           </div>
         </Modal>

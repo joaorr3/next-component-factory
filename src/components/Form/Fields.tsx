@@ -19,11 +19,10 @@ import { SelectMenu } from "./SelectMenu";
 export const button = /*tw*/ `    
   flex 
   justify-center
-  rounded-md
   border
   border-transparent
   bg-indigo-600
-  py-2
+  py-3
   px-4
   text-sm
   text-white
@@ -37,6 +36,7 @@ export const button = /*tw*/ `
   self-end
   w-40
   font-bold
+  rounded-2xl
 `;
 
 export const Button = ({
@@ -57,8 +57,11 @@ export const Button = ({
 
 //region Base
 const baseField = /*tw*/ `
-  bg-opacity-20
-  bg-neutral-700
+  bg-neutral-200
+  dark:bg-neutral-800
+  outline
+  outline-neutral-300
+  dark:outline-neutral-700
   h-16
   w-full
   flex-1
@@ -66,9 +69,11 @@ const baseField = /*tw*/ `
   placeholder:opacity-40
   rounded-xl
   p-5
-  focus:outline-none
   mb-2
-  border-none
+  focus:outline-neutral-600
+  dark:focus:outline-neutral-400
+  placeholder-neutral-900
+  dark:placeholder-neutral-500
 `;
 
 export type BaseFieldProps = {
@@ -308,7 +313,9 @@ export const Select = <S extends object>({
             className={cn(
               baseField,
               "relative flex cursor-pointer items-center",
-              isOpen ? "outline outline-neutral-700" : ""
+              isOpen
+                ? "outline outline-neutral-600 dark:outline-neutral-400"
+                : ""
             )}
             onClick={disabled ? undefined : () => setIsOpen(true)}
           >
@@ -610,7 +617,9 @@ const EndContent = ({
 
       <svg
         className={cn(
-          disabled ? "fill-neutral-600" : "fill-neutral-400",
+          disabled
+            ? "fill-neutral-300 dark:fill-neutral-600"
+            : "fill-neutral-400",
           "transition-opacity duration-700"
         )}
         style={{

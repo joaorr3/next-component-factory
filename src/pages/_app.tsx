@@ -40,6 +40,10 @@ const MyApp: AppType<{ session: Session | null }> = ({
             <Loader />
 
             <main className={montserrat.className}>
+              <span className="fixed top-48 z-50 -rotate-90 text-xs font-semibold">
+                v1.0.0
+              </span>
+
               <NavBar>
                 <HomeButton />
 

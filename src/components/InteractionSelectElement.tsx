@@ -1,6 +1,4 @@
-import { useTheme } from "../styles/ThemeProvider";
 import { cn } from "../styles/utils";
-import { type ThemeNames } from "../theme";
 
 export type InteractionSelectElement = {
   text: string;
@@ -19,32 +17,23 @@ const selectBase = /*tw*/ `
   select-none
   flex
   items-center
+  dark:text-white
+  dark:bg-neutral-800
+  dark:hover:bg-neutral-700
+  dark:active:bg-neutral-600
+
+  text-black
+  bg-neutral-100
+  hover:bg-neutral-200
+  active:bg-neutral-300
 `;
 
-const baseDark = /*tw*/ `
-text-white
-bg-neutral-800
-hover:bg-neutral-700
-active:bg-opacity-80
-`;
-
-const baseLight = /*tw*/ `
-text-black
-bg-neutral-200
-hover:bg-neutral-300
-active:bg-opacity-80
-`;
-
-const activeDark = /*tw*/ `
-bg-neutral-600
-`;
-
-const activeLight = /*tw*/ `
+const activeClasses = /*tw*/ `
+dark:bg-neutral-600
 bg-neutral-300
 `;
 
 type Classes = {
-  themeName: ThemeNames;
   baseClasses: string;
   props: {
     className?: string;
@@ -52,18 +41,8 @@ type Classes = {
   };
 };
 
-const classes = ({
-  themeName,
-  baseClasses,
-  props: { active, className },
-}: Classes) => {
-  const activeClass = themeName === "dark" ? activeDark : activeLight;
-  return cn(
-    baseClasses,
-    themeName === "dark" ? baseDark : baseLight,
-    active ? activeClass : "",
-    className
-  );
+const classes = ({ baseClasses, props: { active, className } }: Classes) => {
+  return cn(baseClasses, active ? activeClasses : "", className);
 };
 
 export const InteractionSelectElement = ({
@@ -72,9 +51,7 @@ export const InteractionSelectElement = ({
   className,
   onPress,
 }: Omit<InteractionSelectElement, "href">): JSX.Element => {
-  const { themeName } = useTheme();
   const cls = classes({
-    themeName,
     baseClasses: selectBase,
     props: { active, className },
   });

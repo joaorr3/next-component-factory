@@ -15,23 +15,11 @@ export function MagicScriptTag() {
   return <script dangerouslySetInnerHTML={{ __html: iif }} />;
 }
 
-const Styles = () => {
-  const s = `
-    html {
-      background-color: var(--color-bg);
-      color: var(--color-fg);
-    }`;
-
-  return <style>{s}</style>;
-};
-
 export default function Document() {
   return (
-    <Html>
-      <Head>
-        <Styles />
-      </Head>
-      <body>
+    <Html className="dark">
+      <Head />
+      <body className="bg-white text-black transition-colors duration-200 dark:bg-neutral-900 dark:text-neutral-300">
         <MagicScriptTag />
         <Main />
         <NextScript />

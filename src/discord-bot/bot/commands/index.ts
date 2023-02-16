@@ -51,7 +51,8 @@ export const registerCommands = () => {
     command("ping"),
     command("gif"),
     command("quote"),
-    command("issue")
+    command("issue"),
+    command("issue_legacy")
       .addStringOption(issueTypeStringOptions())
       .addBooleanOption(issueCheckTechLeadBooleanOption())
       .addBooleanOption(issueCheckDesignerBooleanOption())
@@ -317,7 +318,17 @@ export const commandReactions = async ({
         response: undefined,
       };
     },
-    issue: async () => await issueCommand({ interaction }),
+    issue: async () => {
+      await interaction.reply({
+        content:
+          "https://next-cf.up.railway.app/faqs/how_to_use_the_issue_form",
+      });
+      return {
+        name: "issue",
+        response: undefined,
+      };
+    },
+    issue_legacy: async () => await issueCommand({ interaction }),
     roles: async () => {
       const { options, user, channel } = interaction;
       const action = options.getString("action") as RoleAction;

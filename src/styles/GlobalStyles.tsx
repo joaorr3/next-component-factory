@@ -182,10 +182,9 @@ export const reactMdEditor = css`
     }
   }
 
-  .wmde-markdown.md-preview {
+  .wmde-markdown {
     box-shadow: none;
     background-color: transparent;
-    color: var(--color-fg);
   }
 `;
 
@@ -195,21 +194,18 @@ export const GlobalStyle = createGlobalStyle<{ theme: ThemeModel }>`
   
   html {
     font-size: 100%;
+
+    &.dark {
+      color-scheme: dark;
+    }
   }
   
   body {
     overflow-x: hidden;
-    overflow-y: auto;
-    ${customScrollBar} 
+    overflow-y: scroll;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     position: relative;
-    font-family: 'Lato', sans-serif;
-    background-color: var(--color-bg);
-    color: var(--color-fg);
-    transition-property: color, background-color;
-    transition-duration: 220ms;
-    transition-timing-function: ease;
     min-height: 100vh;
   }
 

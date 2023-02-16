@@ -12,6 +12,7 @@ const ThemeSwitcher = () => {
 
     actions.setThemeName(nextTheme, (p) => {
       localStorageActions.set("currentTheme", p);
+      setThemeName(p);
     });
   }, [actions, state.themeName]);
 
@@ -24,6 +25,14 @@ const ThemeSwitcher = () => {
       }}
     />
   );
+};
+
+const setThemeName = (themeName: ThemeNames) => {
+  if (themeName === "dark") {
+    document.documentElement.classList.add("dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+  }
 };
 
 export default ThemeSwitcher;

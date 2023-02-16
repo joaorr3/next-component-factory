@@ -23,11 +23,10 @@ const Modal = ({ isOpen, onChange, children }: ModalProps) => {
 
   return (
     <animated.div
-      className="modal fixed inset-0 flex items-center justify-center"
+      className="modal fixed inset-0 flex items-center justify-center bg-neutral-900 bg-opacity-50 dark:bg-opacity-90"
       style={{
         opacity: value,
         zIndex: 120,
-        backgroundColor: "rgba(24, 24, 24, 0.95)",
       }}
     >
       <animated.div
@@ -43,11 +42,10 @@ const Modal = ({ isOpen, onChange, children }: ModalProps) => {
           ref={ref}
           style={{
             zIndex: 120,
-            // height: "70vh",
             maxHeight: "70vh",
             maxWidth: 672,
           }}
-          className="modal relative m-3 flex w-full max-w-2xl flex-col justify-center rounded-xl bg-neutral-800"
+          className="modal relative m-3 flex w-full max-w-2xl flex-col justify-center rounded-xl bg-neutral-200 dark:bg-neutral-800"
         >
           <div className="modal absolute -top-14 right-0">
             <InteractionElement text="Close" onPress={close} />
