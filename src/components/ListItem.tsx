@@ -1,6 +1,8 @@
 import dayjs from "dayjs";
+import Image from "next/image";
 import React from "react";
 import { derive } from "../shared/utils";
+import { cn } from "../styles/utils";
 import { baseMediaMetadataSchemaValidator } from "../utils/validators/media";
 import { ContextMenu } from "./ContextMenu";
 import type { MediaPreviewProps } from "./MediaPreview";
@@ -9,15 +11,27 @@ import { MediaPreview } from "./MediaPreview";
 export const ListItem: React.FC<{
   headerLabel?: string | null;
   title?: string | null;
+  startImageUrl?: string | null;
   titleSuffixElement?: JSX.Element;
   footer?: Date | null;
   author?: string | null;
   onPress?: () => void;
-}> = ({ headerLabel, title, titleSuffixElement, footer, author, onPress }) => {
+}> = ({
+  headerLabel,
+  title,
+  startImageUrl,
+  titleSuffixElement,
+  footer,
+  author,
+  onPress,
+}) => {
   return (
     <div
       onClick={onPress}
-      className="mb-4 flex cursor-pointer flex-col rounded-xl bg-neutral-200 p-4 transition-transform hover:scale-[1.01] dark:bg-neutral-800"
+      className={cn(
+        "mb-4 flex  flex-col rounded-xl bg-neutral-200 p-4 transition-transform  dark:bg-neutral-800",
+        onPress ? "cursor-pointer hover:scale-[1.01]" : ""
+      )}
     >
       {headerLabel && (
         <p className="mb-3 text-sm font-semibold text-neutral-600">
@@ -25,9 +39,24 @@ export const ListItem: React.FC<{
         </p>
       )}
 
-      <div className="flex items-center">
-        <p className="text-md mr-3 font-bold">{title}</p>
-        {!!titleSuffixElement ? titleSuffixElement : <React.Fragment />}
+      <div className="flex">
+        {startImageUrl && (
+          <div className="mr-2">
+            <div style={{ borderRadius: 80, overflow: "hidden" }}>
+              <Image
+                src={startImageUrl}
+                width={24}
+                height={24}
+                alt="user image"
+              />
+            </div>
+          </div>
+        )}
+
+        <div className="flex items-center">
+          <p className="text-md mr-3 font-bold">{title}</p>
+          {!!titleSuffixElement ? titleSuffixElement : <React.Fragment />}
+        </div>
       </div>
 
       {footer && (

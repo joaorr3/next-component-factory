@@ -27,13 +27,35 @@ export const labsRouter = router({
   findLabsByRoles: protectedProcedure
     .input(z.object({ rolesId: z.array(z.string()).optional() }))
     .query(async ({ ctx, input }) => {
-      return ctx.prisma.lab.findMany({
+      return await ctx.prisma.lab.findMany({
         where: {
           guildRoleId: {
             in: input.rolesId,
           },
         },
       });
+    }),
+  allLabMembers: protectedProcedure
+    .input(z.object({ id: z.string().optional() }))
+    .query(async ({ ctx, input: { id } }) => {
+      if (id) {
+        const lab = await ctx.prisma.lab.findUnique({
+          where: {
+            id,
+          },
+          include: {
+            LabGuildUser: {
+              include: {
+                GuildUser: true,
+              },
+            },
+          },
+        });
+
+        const members = lab?.LabGuildUser.map(({ GuildUser }) => GuildUser);
+
+        return members || [];
+      }
     }),
   update: protectedProcedure
     .input(z.object({ lab: labSchema, id: z.string() }))

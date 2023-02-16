@@ -8,6 +8,7 @@ import { z } from "zod";
 import { BackButton } from "../../../components/BackButton";
 import { DataDisplay } from "../../../components/DataDisplay";
 import * as Fields from "../../../components/Form/Fields";
+import { ListItem } from "../../../components/ListItem";
 import Modal from "../../../components/Modal";
 import { useLoading } from "../../../utils/GlobalState/GlobalStateProvider";
 import { withRoles } from "../../../utils/hoc";
@@ -26,6 +27,10 @@ export default withRoles("ManageLabsDetail", () => {
     refetch,
   } = trpc.labs.read.useQuery({
     id: typeof id === "string" ? id : undefined,
+  });
+
+  const { data: labMembers } = trpc.labs.allLabMembers.useQuery({
+    id: lab?.id,
   });
 
   const { mutateAsync: updateLab } = trpc.labs.update.useMutation();
@@ -91,6 +96,21 @@ export default withRoles("ManageLabsDetail", () => {
               },
             ]}
           />
+
+          <div>
+            {labMembers?.map((member) => {
+              return (
+                <ListItem
+                  key={member.id}
+                  title={member.friendlyName || member.username}
+                  headerLabel={`${member.id} / Default Lab ID: ${
+                    member.defaultLabId || "--"
+                  }`}
+                  startImageUrl={member.avatarURL}
+                />
+              );
+            })}
+          </div>
         </div>
       </main>
 
