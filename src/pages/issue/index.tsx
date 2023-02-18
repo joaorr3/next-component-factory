@@ -54,12 +54,6 @@ export default withRoles("Issue", () => {
         <title>Issues</title>
       </Head>
       <main>
-        <div className="mb-20 flex justify-end">
-          <Link className="self-end" href={routeInfo.path}>
-            <Button>New Issue</Button>
-          </Link>
-        </div>
-
         <div className="mb-5">
           <IssueFilters
             onChange={handleFilters}
