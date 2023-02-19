@@ -11,6 +11,18 @@ export const userRouter = router({
   all: protectedProcedure.query(({ ctx }) => {
     return ctx.prisma.user.findMany();
   }),
+  allGuildUsers: protectedProcedure.query(({ ctx }) => {
+    return ctx.prisma.guildUser.findMany({
+      include: {
+        LabGuildUser: {
+          include: {
+            Lab: true,
+          },
+        },
+      },
+    });
+  }),
+
   detail: protectedProcedure
     .input(z.object({ id: z.string().optional() }))
     .query(async ({ ctx, input: { id } }) => {

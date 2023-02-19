@@ -168,7 +168,7 @@ export const IssueDetail: React.FC<{
           ]}
         />
 
-        <div className="mb-4 flex flex-wrap rounded-xl bg-neutral-900 bg-opacity-30 p-4">
+        <div className="my-4 flex flex-wrap rounded-xl bg-neutral-900 bg-opacity-30 p-4">
           {thumbs}
         </div>
 

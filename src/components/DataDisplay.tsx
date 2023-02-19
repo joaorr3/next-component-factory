@@ -54,7 +54,7 @@ export const DataDisplay = ({
         )}
 
         {!!data?.length && (
-          <div className="flex flex-wrap">
+          <div className="flex flex-wrap gap-4">
             {data.map((d, key) => {
               return <Property key={key} {...d} />;
             })}
@@ -77,10 +77,13 @@ export const Property = ({
   if (element) {
   }
   return (
-    <div className="mb-3 mr-4 flex max-w-sm shrink-0 flex-col justify-center rounded-xl bg-neutral-300 p-5 dark:bg-neutral-900 dark:bg-opacity-40">
+    <div
+      onClick={(e) => e.stopPropagation()}
+      className="flex max-w-sm shrink-0 flex-col justify-center rounded-xl bg-neutral-300 p-5 dark:bg-neutral-900 dark:bg-opacity-40"
+    >
       <p className="mb-1 text-sm font-bold">{label}</p>
 
-      <p className="max-w-xl overflow-hidden overflow-ellipsis text-sm">
+      <p className="max-w-xl cursor-text overflow-hidden overflow-ellipsis text-sm">
         {element ? element : value || "--"}
       </p>
     </div>

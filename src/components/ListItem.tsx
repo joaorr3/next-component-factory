@@ -1,3 +1,4 @@
+import { animated, useSpringValue } from "@react-spring/web";
 import dayjs from "dayjs";
 import Image from "next/image";
 import React from "react";
@@ -155,6 +156,99 @@ export const ListMediaItem: React.FC<{
           ]}
         />
       </div>
+    </div>
+  );
+};
+
+export const ListItemExpanded: React.FC<{
+  headerLabel?: string | null;
+  title?: string | null;
+  startImageUrl?: string | null;
+  titleSuffixElement?: JSX.Element;
+  footer?: Date | null;
+  author?: string | null;
+  AdditionalInfoElement?: () => JSX.Element;
+  onPress?: () => void;
+}> = ({
+  headerLabel,
+  title,
+  startImageUrl,
+  titleSuffixElement,
+  footer,
+  author,
+  AdditionalInfoElement,
+}) => {
+  const additionalInfoRef = React.useRef<HTMLDivElement>(null);
+  const [_, setIsExpanded] = React.useState<boolean>(false);
+  const [additionalInfoHeight, setAdditionalInfoHeight] =
+    React.useState<number>(0);
+
+  const Height = useSpringValue<number>(0, {
+    config: {
+      tension: 260,
+      friction: 32,
+      mass: 1,
+    },
+  });
+
+  React.useLayoutEffect(() => {
+    setAdditionalInfoHeight(
+      additionalInfoRef.current?.getBoundingClientRect().height || 0
+    );
+  }, []);
+
+  const handleOnPress = () => {
+    setIsExpanded((prevIsExpanded) => {
+      Height.start({
+        to: !prevIsExpanded ? additionalInfoHeight : 0,
+      });
+      return !prevIsExpanded;
+    });
+  };
+
+  return (
+    <div
+      onClick={handleOnPress}
+      className="mb-4 flex cursor-pointer flex-col rounded-xl bg-neutral-200 p-4 transition-transform dark:bg-neutral-800"
+    >
+      {headerLabel && (
+        <p className="mb-3 text-sm font-semibold text-neutral-600">
+          {headerLabel}
+        </p>
+      )}
+
+      <div className="flex">
+        {startImageUrl && (
+          <div className="mr-2">
+            <div style={{ borderRadius: 80, overflow: "hidden" }}>
+              <Image
+                src={startImageUrl}
+                width={24}
+                height={24}
+                alt="user image"
+              />
+            </div>
+          </div>
+        )}
+
+        <div className="flex items-center">
+          <p className="text-md mr-3 font-bold">{title}</p>
+          {!!titleSuffixElement ? titleSuffixElement : <React.Fragment />}
+        </div>
+      </div>
+
+      <animated.div style={{ overflow: "hidden", height: Height }}>
+        <div ref={additionalInfoRef}>
+          {AdditionalInfoElement && <AdditionalInfoElement />}
+        </div>
+      </animated.div>
+
+      {footer && (
+        <p className="mt-4 text-xs font-light">
+          {dayjs(footer).format("DD/MM/YYYY")}
+        </p>
+      )}
+      {author && <p className="text-xs font-bold">{author}</p>}
     </div>
   );
 };

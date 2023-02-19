@@ -1,5 +1,4 @@
 import Head from "next/head";
-import Link from "next/link";
 import Router from "next/router";
 import React from "react";
 import {
@@ -7,7 +6,6 @@ import {
   type FiltersModel,
 } from "../../components/Issue/Filters";
 import { IssueCard } from "../../components/Issue/IssueCard";
-import { Button } from "../../components/Form/Fields";
 import { useHandler } from "../../hooks/useHandler";
 import { routes } from "../../routes";
 import {
@@ -16,8 +14,6 @@ import {
 } from "../../utils/GlobalState/GlobalStateProvider";
 import { withRoles } from "../../utils/hoc";
 import { trpc } from "../../utils/trpc";
-
-const routeInfo = routes.IssueOpen;
 
 export default withRoles("Issue", () => {
   const {
