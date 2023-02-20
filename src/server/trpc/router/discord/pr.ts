@@ -68,7 +68,6 @@ export const prRouter = router({
       });
 
       if (prId && msg.id && guildUser?.id) {
-        console.log("pr: ", pr);
         await ctx.prisma.pullRequest.create({
           data: {
             pullRequestId: String(prId),

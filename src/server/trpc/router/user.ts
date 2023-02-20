@@ -8,12 +8,27 @@ import { discordNext } from "../../discord/client";
 import { protectedProcedure, router } from "../trpc";
 
 export const userRouter = router({
-  all: protectedProcedure.query(({ ctx }) => {
-    return ctx.prisma.user.findMany();
+  registeredUsers: protectedProcedure.query(({ ctx }) => {
+    return ctx.prisma.user.findMany({
+      include: {
+        GuildUser: {
+          include: {
+            DefaultLab: true,
+            LabGuildUser: {
+              include: {
+                Lab: true,
+              },
+            },
+          },
+        },
+      },
+    });
   }),
   allGuildUsers: protectedProcedure.query(({ ctx }) => {
     return ctx.prisma.guildUser.findMany({
       include: {
+        User: true,
+        DefaultLab: true,
         LabGuildUser: {
           include: {
             Lab: true,
@@ -22,7 +37,6 @@ export const userRouter = router({
       },
     });
   }),
-
   detail: protectedProcedure
     .input(z.object({ id: z.string().optional() }))
     .query(async ({ ctx, input: { id } }) => {
@@ -78,11 +92,25 @@ export const userRouter = router({
   updateDefaultUserLab: protectedProcedure
     .input(
       z.object({
+        userId: z.string().optional(),
         defaultLabId: z.string().nullable(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      if (input.defaultLabId !== undefined) {
+      if (input.defaultLabId === undefined) {
+        return undefined;
+      }
+
+      if (input.userId) {
+        await ctx.prisma.guildUser.update({
+          where: {
+            id: input.userId,
+          },
+          data: {
+            defaultLabId: input.defaultLabId,
+          },
+        });
+      } else {
         await ctx.prisma.user.update({
           where: {
             id: ctx.session.user.id,
@@ -100,11 +128,56 @@ export const userRouter = router({
   updateUserLabs: protectedProcedure
     .input(
       z.object({
+        userId: z.string().optional(),
         labs: z.array(z.string()).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      if (input.labs) {
+      if (!input.labs) {
+        return undefined;
+      }
+
+      if (input.userId) {
+        await ctx.prisma.guildUser.update({
+          where: {
+            id: input.userId,
+          },
+          data: {
+            LabGuildUser: {
+              deleteMany: {},
+            },
+          },
+        });
+
+        await ctx.prisma.guildUser.update({
+          where: {
+            id: input.userId,
+          },
+          data: {
+            LabGuildUser: {
+              createMany: {
+                data: input.labs.map((labId) => ({ labId })),
+                skipDuplicates: true,
+              },
+            },
+          },
+        });
+      } else {
+        await ctx.prisma.user.update({
+          where: {
+            id: ctx.session.user.id,
+          },
+          data: {
+            GuildUser: {
+              update: {
+                LabGuildUser: {
+                  deleteMany: {},
+                },
+              },
+            },
+          },
+        });
+
         await ctx.prisma.user.update({
           where: {
             id: ctx.session.user.id,
@@ -124,22 +197,6 @@ export const userRouter = router({
         });
       }
     }),
-  deleteUserLabs: protectedProcedure.mutation(async ({ ctx }) => {
-    await ctx.prisma.user.update({
-      where: {
-        id: ctx.session.user.id,
-      },
-      data: {
-        GuildUser: {
-          update: {
-            LabGuildUser: {
-              deleteMany: {},
-            },
-          },
-        },
-      },
-    });
-  }),
   labUsersWithoutProjectRole: protectedProcedure.query(async ({ ctx }) => {
     const users = await ctx.prisma.guildUser.findMany();
 

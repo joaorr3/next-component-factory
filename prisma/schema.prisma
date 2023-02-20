@@ -156,6 +156,8 @@ model GuildUser {
   color        String?  @db.Text
   from         Kudos[]  @relation("from")
   to           Kudos[]  @relation("to")
+
+  DefaultLab   Lab?    @relation(fields: [defaultLabId], references: [id])
   defaultLabId String?
 
   notionUser   NotionUser?    @relation(fields: [notionUserId], references: [id])
@@ -270,6 +272,7 @@ model Lab {
   guildRoleId  String?        @unique
   LabGuildUser LabGuildUser[]
   Issue        Issue[]
+  GuildUser    GuildUser[]
 }
 
 model LabGuildUser {

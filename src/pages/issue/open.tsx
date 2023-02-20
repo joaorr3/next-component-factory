@@ -20,7 +20,7 @@ export default withRoles("IssueOpen", () => {
 
   const { mutateAsync: openIssue } = trpc.issues.open.useMutation();
 
-  const { setLoading } = useLoading();
+  const { setLoading } = useLoading("setOnly");
 
   const handleFilesUpload = React.useCallback(
     async (files: CustomFile[], issueId: number) => {

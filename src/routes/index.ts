@@ -49,7 +49,6 @@ export const routes: Routes = {
   Kudos: {
     label: "Kudos",
     path: "/kudos",
-    // navBar: true,
     roles: "public",
   },
   FAQs: {
@@ -89,6 +88,7 @@ export const routes: Routes = {
       anyOf: ["cf", "labs"],
     },
   },
+  // Manage
   Manage: {
     label: "Manage",
     path: "/manage",

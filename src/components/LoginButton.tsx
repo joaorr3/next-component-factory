@@ -58,7 +58,7 @@ export const LogoutIcon = ({ onPress }: IconProps): JSX.Element => {
 export const LoginButton = (): JSX.Element => {
   const { data: sessionData } = useSession();
   const { actions } = useGlobalState();
-  const { setLoading } = useLoading();
+  const { setLoading } = useLoading("setOnly");
 
   const handleLogout = React.useCallback(() => {
     setLoading(true);

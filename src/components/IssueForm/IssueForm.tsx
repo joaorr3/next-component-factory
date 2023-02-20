@@ -41,12 +41,15 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
 
   React.useEffect(() => {
     if (defaultUserLab) {
-      setValue("lab", defaultUserLab);
+      setValue("lab", {
+        id: defaultUserLab?.id,
+        name: defaultUserLab?.displayName || defaultUserLab?.name,
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultUserLab]);
 
-  const { setLoading } = useLoading();
+  const { setLoading } = useLoading("setOnly");
 
   const resetForm = React.useCallback(() => {
     reset();
@@ -180,7 +183,6 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
             <ComponentList
               selectedComponentName={watch("component")}
               onItemPress={({ name }) => {
-                console.log("name: ", name);
                 setValue("component", name);
                 setIsOpen(false);
               }}

@@ -7,6 +7,7 @@ export type Data = {
   value?: string | number | null;
   element?: JSX.Element;
   visible?: boolean;
+  active?: boolean;
 };
 
 export type DataDisplayProps = {
@@ -48,7 +49,7 @@ export const DataDisplay = ({
         )}
       >
         {header && (
-          <div className="mb-6 flex items-center">
+          <div className="mb-3 flex items-center">
             <p className="text-xl font-bold">{header}</p>
           </div>
         )}
@@ -70,6 +71,7 @@ export const Property = ({
   value,
   element,
   visible = true,
+  active,
 }: Data): JSX.Element => {
   if (!visible) {
     return <React.Fragment />;
@@ -79,9 +81,12 @@ export const Property = ({
   return (
     <div
       onClick={(e) => e.stopPropagation()}
-      className="flex max-w-sm shrink-0 flex-col justify-center rounded-xl bg-neutral-300 p-5 dark:bg-neutral-900 dark:bg-opacity-40"
+      className={cn(
+        "flex max-w-sm shrink-0 flex-col justify-center rounded-xl bg-neutral-300 p-5 dark:bg-neutral-900 dark:bg-opacity-40",
+        active ? "m-1 ring-1 ring-neutral-400 dark:ring-neutral-600" : ""
+      )}
     >
-      <p className="mb-1 text-sm font-bold">{label}</p>
+      {label && <p className="mb-1 text-sm font-bold">{label}</p>}
 
       <p className="max-w-xl cursor-text overflow-hidden overflow-ellipsis text-sm">
         {element ? element : value || "--"}

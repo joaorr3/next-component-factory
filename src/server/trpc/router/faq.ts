@@ -35,7 +35,7 @@ export const faqRouter = router({
         return await prismaNext.faq.read(Number(input.id));
       }
     }),
-  readMany: publicProcedure.query(async ({ ctx }) => {
+  readMany: publicProcedure.query(async () => {
     return await prismaNext.faq.readMany();
   }),
   readManyPublic: publicProcedure.query(async ({ ctx }) => {

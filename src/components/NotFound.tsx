@@ -2,7 +2,7 @@ import React from "react";
 import { useLoading } from "../utils/GlobalState/GlobalStateProvider";
 
 export const NotFoundPage = () => {
-  const { isLoading } = useLoading();
+  const { isLoading } = useLoading("setOnly");
 
   if (isLoading) {
     return <React.Fragment />;

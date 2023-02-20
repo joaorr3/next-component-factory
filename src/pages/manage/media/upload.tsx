@@ -26,7 +26,7 @@ const redirect = () => {
 export default withRoles("ManageMediaUpload", () => {
   const { upload } = useFileUpload("GENERIC");
 
-  const { setLoading } = useLoading();
+  const { setLoading } = useLoading("setOnly");
 
   const handleFilesUpload = React.useCallback(
     async (files: CustomFile[], id?: string) => {

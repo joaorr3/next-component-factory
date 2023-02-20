@@ -92,7 +92,7 @@ export const Loading = ({
 };
 
 const Loader = () => {
-  const { isLoading } = useLoading();
+  const { isLoading } = useLoading("setOnly");
 
   if (isLoading) {
     return (

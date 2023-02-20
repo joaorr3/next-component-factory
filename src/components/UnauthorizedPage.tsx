@@ -14,7 +14,7 @@ type UnauthorizedPageProps = {
 
 export const UnauthorizedPage = ({ reason }: UnauthorizedPageProps) => {
   const message = unauthorizedMessages[reason || "default"];
-  const { isLoading } = useLoading();
+  const { isLoading } = useLoading("setOnly");
 
   if (isLoading) {
     return <React.Fragment />;

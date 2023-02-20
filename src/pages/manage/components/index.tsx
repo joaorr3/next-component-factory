@@ -27,7 +27,7 @@ export default withRoles("ManageComponents", () => {
   const { mutateAsync: create } = trpc.components.create.useMutation();
   const { mutateAsync: update } = trpc.components.update.useMutation();
 
-  const { setLoading } = useLoading();
+  const { setLoading } = useLoading("setOnly");
 
   const onSubmit = React.useCallback(
     async ({ id, ...data }: ComponentFormModel) => {
@@ -131,7 +131,7 @@ export const ComponentForm = ({
       defaultValues: initialData,
     });
 
-  const { setLoading } = useLoading();
+  const { setLoading } = useLoading("setOnly");
 
   const handleOnSubmit = React.useCallback(
     async (data: ComponentFormModel) => {

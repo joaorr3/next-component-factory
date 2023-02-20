@@ -8,13 +8,15 @@ import { useUser } from "../../hooks/useUser";
 import type { Role } from "../../shared/roles";
 import { type ThemeNames } from "../../theme";
 
+export type UserStateModel = {
+  profile?: GuildUser;
+  roles?: Role[];
+};
+
 export type ContextModel = {
   themeName: ThemeNames;
   isLoading: boolean;
-  user: {
-    profile?: GuildUser;
-    roles?: Role[];
-  };
+  user: UserStateModel;
   issues: {
     searchFilters: FiltersModel;
   };
@@ -235,7 +237,7 @@ export const useInitGlobalState = (actions: ContextHandlers["actions"]) => {
   }, [actions, themeName]);
 };
 
-export const useLoading = (loading?: boolean) => {
+export const useLoading = (loading?: boolean | "setOnly") => {
   const { state, actions } = useGlobalState();
 
   // Make sure we don't dispatch as often.
@@ -245,11 +247,13 @@ export const useLoading = (loading?: boolean) => {
   );
 
   React.useEffect(() => {
-    debouncedSetLoading(Boolean(loading));
+    if (loading !== "setOnly") {
+      debouncedSetLoading(Boolean(loading));
 
-    // If incoming is distinct from state we don't wait for debounce.
-    if (Boolean(loading) !== state.isLoading) {
-      debouncedSetLoading.flush();
+      // If incoming is distinct from state we don't wait for debounce.
+      if (Boolean(loading) !== state.isLoading) {
+        debouncedSetLoading.flush();
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading]);

@@ -37,6 +37,7 @@ export const button = /*tw*/ `
   w-40
   font-bold
   rounded-2xl
+  m-1
 `;
 
 export const Button = ({
