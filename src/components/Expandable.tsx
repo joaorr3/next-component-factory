@@ -5,11 +5,23 @@ export type ExpandableProps = React.PropsWithChildren<{
   expand?: boolean;
 }>;
 
+const getElementHeight = (element: HTMLDivElement | null) => {
+  return new Promise<number>((res, rej) => {
+    const height =
+      element?.offsetHeight || element?.getBoundingClientRect().height || 0;
+    if (height) {
+      res(height);
+    } else {
+      rej("Element height is not valid");
+    }
+  });
+};
+
 export const Expandable = ({
-  expand,
+  expand = false,
   children,
 }: ExpandableProps): JSX.Element => {
-  const additionalInfoRef = React.useRef<HTMLDivElement>(null);
+  const elementRef = React.useRef<HTMLDivElement>(null);
 
   const Height = useSpringValue<number | "unset">(0, {
     config: {
@@ -19,19 +31,27 @@ export const Expandable = ({
     },
   });
 
-  const getElementHeight = () => additionalInfoRef.current?.offsetHeight || 0;
+  const animate = (to: number) => {
+    Height.start({
+      to,
+    }).then(() => {
+      if (to > 0 && Height.get() === to) {
+        Height.start({
+          to: "unset",
+          immediate: true,
+        });
+      }
+    });
+  };
 
   React.useEffect(() => {
-    Height.start({
-      to: expand ? getElementHeight() : 0,
-      onRest: () => {
-        if (expand) {
-          Height.start({
-            to: "unset",
-          });
-        }
-      },
-    });
+    if (expand) {
+      getElementHeight(elementRef.current).then((h) => {
+        animate(h);
+      });
+    } else {
+      animate(0);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [expand]);
 
@@ -42,7 +62,7 @@ export const Expandable = ({
         height: Height,
       }}
     >
-      <div ref={additionalInfoRef}>{children}</div>
+      <div ref={elementRef}>{children}</div>
     </animated.div>
   );
 };

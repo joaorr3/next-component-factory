@@ -138,7 +138,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
           register={register("version")}
         />
 
-        <Fields.Select
+        <Fields.Selector
           fieldName="type"
           placeholder="Select a type"
           label="Issue Type"
@@ -149,7 +149,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
           control={control}
         />
 
-        <Fields.Select
+        <Fields.Selector
           fieldName="platform"
           placeholder="Select a platform"
           label="Platform"
@@ -190,7 +190,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
           )}
         </Fields.ModalSelect>
 
-        <Fields.Select
+        <Fields.Selector
           fieldName="severity"
           placeholder="Select a severity"
           label="Severity"
@@ -242,7 +242,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
           />
         </div>
 
-        <Fields.Select
+        <Fields.Selector
           fieldName="scope"
           placeholder="Select a scope"
           label="Scope"

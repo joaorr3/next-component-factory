@@ -10,6 +10,8 @@ import {
 import Switch from "react-switch";
 import { cn } from "../../styles/utils";
 import type { CustomFile } from "../../utils/validators/media";
+import { Arrow } from "../Arrow";
+import { Expandable } from "../Expandable";
 import Loader from "../Loader";
 import { MediaPreview } from "../MediaPreview";
 import Modal from "../Modal";
@@ -324,21 +326,91 @@ export const Select = <S extends object>({
               {field.value || placeholder}
             </span>
 
-            <div className="relative h-8 w-8">
-              <svg
-                className={cn(
-                  disabled ? "fill-neutral-600" : "fill-neutral-400"
-                )}
-                viewBox="0 0 48 48"
-                height="32"
-                width="32"
-              >
-                <path d="m24 30.75-12-12 2.15-2.15L24 26.5l9.85-9.85L36 18.8Z" />
-              </svg>
-            </div>
+            <Arrow direction={isOpen ? "up" : "down"} />
           </div>
         )}
       </SelectMenu>
+    </BaseField>
+  );
+};
+
+export const Selector = <S extends object>({
+  fieldName,
+  label,
+  description,
+  options,
+  disabled,
+  error,
+  required,
+  placeholder,
+  control,
+  toggleable,
+}: SelectProps<S>): JSX.Element => {
+  const [isOpen, setIsOpen] = React.useState<boolean>(false);
+
+  const { field } = useController({
+    name: fieldName,
+    control,
+  });
+
+  const handleOnChange = React.useCallback(
+    (value: string) => {
+      if (toggleable) {
+        field.onChange(value !== field.value ? value : undefined);
+      } else {
+        field.onChange(value);
+      }
+      setIsOpen(false);
+    },
+    [field, toggleable]
+  );
+
+  return (
+    <BaseField
+      required={required}
+      label={label}
+      description={description}
+      error={error}
+    >
+      <div
+        style={{ height: "unset" }}
+        className={cn(
+          baseField,
+          "relative flex cursor-pointer flex-col items-center p-4 px-5",
+          isOpen ? "outline outline-neutral-600 dark:outline-neutral-400" : ""
+        )}
+        onClick={disabled ? undefined : () => setIsOpen(!isOpen)}
+      >
+        <div className="flex w-full items-center">
+          <span className={cn("flex-1", field.value ? "" : "opacity-20")}>
+            {field.value || placeholder}
+          </span>
+
+          <Arrow direction={isOpen ? "up" : "down"} />
+        </div>
+
+        <div className="w-full">
+          <Expandable expand={isOpen}>
+            <div className="flex py-2">
+              {options
+                .filter((opt) => opt !== field.value)
+                .map((opt, k) => {
+                  return (
+                    <div
+                      key={k}
+                      className="mr-3"
+                      onClick={() => handleOnChange(opt)}
+                    >
+                      <p className="font-semibold opacity-40 transition-opacity duration-200 hover:opacity-100">
+                        {opt}
+                      </p>
+                    </div>
+                  );
+                })}
+            </div>
+          </Expandable>
+        </div>
+      </div>
     </BaseField>
   );
 };
