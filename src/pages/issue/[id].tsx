@@ -7,6 +7,7 @@ import { BackButton } from "../../components/BackButton";
 import { IssueDetail } from "../../components/Issue/IssueDetail";
 import { MetaHead } from "../../components/MetaHead";
 import { NotFoundPage } from "../../components/NotFound";
+import { routes } from "../../routes";
 import { useLoading } from "../../utils/GlobalState/GlobalStateProvider";
 import { withRoles } from "../../utils/hoc";
 import { trpc } from "../../utils/trpc";
@@ -26,14 +27,10 @@ const Detail = withRoles("IssueDetail", ({ id }: { id: string }) => {
 
   if (issue.data) {
     return (
-      <React.Fragment>
-        {issue.data && (
-          <div className="flex flex-col">
-            <BackButton />
-            <IssueDetail issue={issue.data} />
-          </div>
-        )}
-      </React.Fragment>
+      <div className="flex flex-col">
+        <BackButton href={routes.Issue.path} />
+        <IssueDetail issue={issue.data} />
+      </div>
     );
   }
 
