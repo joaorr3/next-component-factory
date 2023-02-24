@@ -171,12 +171,17 @@ const GuildUsers = React.memo(() => {
 
       <div>
         {results?.map((member) => {
+          const isRegistered = member.User ? "[Registered]" : "";
+          const needsDefaultLab = !member.defaultLabId
+            ? "[Needs Default Lab]"
+            : "";
+
           return (
             <ListItemExpanded
               key={member.id}
               title={member.friendlyName || member.username}
               startImageUrl={member.avatarURL}
-              headerLabel={member.User ? "Registered" : ""}
+              headerLabel={`${isRegistered} ${needsDefaultLab}`}
               AdditionalInfoElement={() => {
                 return (
                   <GuildUserAdditionalInfoElement
