@@ -6,6 +6,7 @@ import Discord, {
   type ClientEvents,
 } from "discord.js";
 import { env } from "../env/server";
+import { prismaSharedClient } from "./prisma/client";
 import { promisify } from "./utils";
 
 export class DiscordClient {
@@ -48,23 +49,6 @@ export class DiscordClient {
     techLead: "tech-lead",
     visitor: "Visitors 👽",
   } as const;
-
-  public readonly autoAssignableRoles = [
-    "LABS 🧪",
-    "m2030",
-    "mse",
-    "chatbot",
-    "izibizi",
-    "shopping",
-    "dmm",
-    "apparte",
-    "investments-savings",
-    "gip",
-    "credit-experience",
-    "e-commerce",
-    "personal-credit",
-    "T4G",
-  ];
 
   private static _instance: DiscordClient = new DiscordClient();
 
@@ -157,11 +141,10 @@ export class DiscordClient {
     return false;
   }
 
-  public roleIsAutoAssignable(roleName?: string) {
-    if (roleName) {
-      return this.autoAssignableRoles.includes(roleName);
-    }
-    return false;
+  public async roleIsAutoAssignable(_role?: Discord.Role) {
+    const autoAssignable = await prismaSharedClient.roles.autoAssignable();
+    const role = autoAssignable.find((r) => r.id === _role?.id);
+    return Boolean(role && role.isAutoAssignable);
   }
 
   public hasRoleById(memberId: string | undefined, roleId: string | undefined) {

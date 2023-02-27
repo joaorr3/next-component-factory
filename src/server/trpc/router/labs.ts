@@ -18,8 +18,12 @@ export const labsRouter = router({
     }),
   read: protectedProcedure
     .input(z.object({ id: z.string().optional() }))
-    .query(async ({ input }) => {
-      return await prismaNext.labs.read(input.id);
+    .query(async ({ ctx, input }) => {
+      return await ctx.prisma.lab.findUnique({
+        where: {
+          id: input.id,
+        },
+      });
     }),
   readMany: protectedProcedure.query(async () => {
     return await prismaNext.labs.readMany();
@@ -35,27 +39,25 @@ export const labsRouter = router({
         },
       });
     }),
-  allLabMembers: protectedProcedure
+  labWithMembers: protectedProcedure
     .input(z.object({ id: z.string().optional() }))
     .query(async ({ ctx, input: { id } }) => {
-      if (id) {
-        const lab = await ctx.prisma.lab.findUnique({
-          where: {
-            id,
-          },
-          include: {
-            LabGuildUser: {
-              include: {
-                GuildUser: true,
+      return await ctx.prisma.lab.findUnique({
+        where: {
+          id,
+        },
+        include: {
+          LabGuildUser: {
+            include: {
+              GuildUser: {
+                include: {
+                  User: true,
+                },
               },
             },
           },
-        });
-
-        const members = lab?.LabGuildUser.map(({ GuildUser }) => GuildUser);
-
-        return members || [];
-      }
+        },
+      });
     }),
   update: protectedProcedure
     .input(z.object({ lab: labSchema, id: z.string() }))

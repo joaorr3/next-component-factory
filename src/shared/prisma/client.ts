@@ -36,4 +36,6 @@ class Prisma {
   }
 }
 
+export const prismaSharedClient = Prisma.Instance;
+
 export default Prisma;

@@ -44,20 +44,26 @@ export const ManageMenu = (): JSX.Element => {
         />
         <InteractionElement
           className="mb-3"
-          text={"FAQs"}
+          text={routes.ManageFAQs.label}
           href={routes.ManageFAQs.path}
           onPress={() => close()}
         />
         <InteractionElement
           className="mb-3"
-          text={"LABS"}
+          text={routes.ManageLabs.label}
           href={routes.ManageLabs.path}
           onPress={() => close()}
         />
         <InteractionElement
           className="mb-3"
-          text={"Users"}
+          text={routes.ManageUsers.label}
           href={routes.ManageUsers.path}
+          onPress={() => close()}
+        />
+        <InteractionElement
+          className="mb-3"
+          text={routes.ManageRoles.label}
+          href={routes.ManageRoles.path}
           onPress={() => close()}
         />
         <InteractionElement

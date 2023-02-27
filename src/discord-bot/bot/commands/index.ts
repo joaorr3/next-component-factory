@@ -339,7 +339,7 @@ export const commandReactions = async ({
       const hasAlreadyThisRole = discord.hasRoleById(guildUser?.id, role.id);
 
       try {
-        const isAutoAssignable = discord.roleIsAutoAssignable(role?.name);
+        const isAutoAssignable = await discord.roleIsAutoAssignable(role);
 
         if (isAutoAssignable && guildUser) {
           if (action === RoleAction.give) {

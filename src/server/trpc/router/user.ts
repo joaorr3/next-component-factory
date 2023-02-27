@@ -202,6 +202,12 @@ export const userRouter = router({
 
     const outArray = [] as Pick<GuildUser, "id" | "username">[];
 
+    const autoAssignableRoles = await ctx.prisma.guildRole.findMany({
+      where: {
+        isAutoAssignable: true,
+      },
+    });
+
     for (const { id: userId, username, roles } of users) {
       const userRoles = rolesParser(roles);
 
@@ -211,9 +217,11 @@ export const userRouter = router({
       };
 
       if (userRoles) {
-        for (const { name } of userRoles) {
+        for (const { id, name } of userRoles) {
+          const role = autoAssignableRoles.find((r) => r.id === id);
+
           const isAutoAssignable =
-            discordNext.roleIsAutoAssignable(name) &&
+            Boolean(role && role.isAutoAssignable) &&
             name !== discordNext.roleNames.labs;
 
           const isCF = name === discordNext.roleNames.cf;
@@ -250,17 +258,25 @@ export const userRouter = router({
         ),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
       console.log("notifyLabUsersWithoutProjectRole:input: ", input);
       const users = input.users;
 
       const mentionString = users.map((u) => userMention(u.id)).join(" ");
 
+      const autoAssignableRoles = await ctx.prisma.guildRole.findMany({
+        where: {
+          isAutoAssignable: true,
+        },
+      });
+
+      const rolesName = autoAssignableRoles.map(({ name }) => name);
+
       const info = [
         `Hey, ${mentionString}!\n`,
         "I've notice you don't have a project role.",
         "Here's a list of the roles you can assign to yourself with the **/roles** command.\n",
-        discordNext.autoAssignableRoles.map((r) => `• ${r}`).join("\n"),
+        rolesName.map((r) => `• ${r}`).join("\n"),
       ];
 
       await discordNext.sendMessage("roles", {

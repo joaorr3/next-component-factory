@@ -30,6 +30,7 @@ type Routes = {
   ManageComponents: RouteData;
   ManageLabs: RouteData;
   ManageLabsDetail: RouteDataWithDynamicPath;
+  ManageRoles: RouteData;
   ManageUsers: RouteData;
 };
 
@@ -162,6 +163,13 @@ export const routes: Routes = {
     label: "Labs Detail",
     path: "/manage/labs/[id]",
     dynamicPath: (param) => `/manage/labs/${param}`,
+    roles: {
+      anyOf: ["cf", "dev"],
+    },
+  },
+  ManageRoles: {
+    label: "Roles",
+    path: "/manage/roles",
     roles: {
       anyOf: ["cf", "dev"],
     },

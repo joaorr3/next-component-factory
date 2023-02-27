@@ -9,6 +9,14 @@ export class RolesManager extends CrudHandler<GuildRole> {
     this.client = _client;
   }
 
+  async autoAssignable() {
+    return await this.client.guildRole.findMany({
+      where: {
+        isAutoAssignable: true,
+      },
+    });
+  }
+
   async bulkInsertion(data: GuildRole[]) {
     return await this.client.guildRole.createMany({
       data,

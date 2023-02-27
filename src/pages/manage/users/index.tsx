@@ -1,7 +1,5 @@
-import type { GuildUser, Lab, LabGuildUser, User } from "@prisma/client";
 import { debounce, sortBy } from "lodash";
 import Head from "next/head";
-import Link from "next/link";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { Accordion } from "../../../components/Accordion";
@@ -9,14 +7,8 @@ import { BackButton } from "../../../components/BackButton";
 import { DataDisplay } from "../../../components/DataDisplay";
 import * as Fields from "../../../components/Form/Fields";
 import { Button } from "../../../components/Form/Fields";
-import { EditIcon } from "../../../components/Icons/EditIcon";
 import { ListItemExpanded } from "../../../components/ListItem";
-import type { UserFormModel } from "../../../components/UserPage";
-import { UserForm } from "../../../components/UserPage";
-import { routes } from "../../../routes";
-import { rolesParser } from "../../../shared/roles";
-import { derive } from "../../../shared/utils";
-import { cn } from "../../../styles/utils";
+import { GuildUserAdditionalInfoElement } from "../../../components/UserPage";
 import { useLoading } from "../../../utils/GlobalState/GlobalStateProvider";
 import { withRoles } from "../../../utils/hoc";
 import { trpc } from "../../../utils/trpc";
@@ -181,7 +173,7 @@ const GuildUsers = React.memo(() => {
               key={member.id}
               title={member.friendlyName || member.username}
               startImageUrl={member.avatarURL}
-              headerLabel={`${isRegistered} ${needsDefaultLab}`}
+              headerLabel={`${isRegistered} ${needsDefaultLab}`.trim()}
               AdditionalInfoElement={() => {
                 return (
                   <GuildUserAdditionalInfoElement
@@ -197,188 +189,3 @@ const GuildUsers = React.memo(() => {
     </Accordion>
   );
 });
-
-type GuildUserAdditionalInfoElementProps = {
-  member: GuildUser & {
-    User: User | null;
-    LabGuildUser: (LabGuildUser & {
-      Lab: Lab;
-    })[];
-    DefaultLab: Lab | null;
-  };
-  refetch: () => Promise<void>;
-};
-
-const GuildUserAdditionalInfoElement = React.memo(
-  ({ member, refetch }: GuildUserAdditionalInfoElementProps): JSX.Element => {
-    const [showForm, setShowForm] = React.useState<boolean>(false);
-
-    const { setLoading } = useLoading("setOnly");
-
-    const { mutateAsync: updateDefaultUserLab } =
-      trpc.user.updateDefaultUserLab.useMutation();
-
-    const { mutateAsync: updateUserLabs } =
-      trpc.user.updateUserLabs.useMutation();
-
-    const onSubmit = React.useCallback(
-      async ({ labs, defaultLab }: UserFormModel) => {
-        setLoading(true);
-
-        await updateUserLabs({
-          userId: member.id,
-          labs: labs.map((l) => l.id),
-        });
-
-        const nextDefaultLabId = derive(() => {
-          const isDefaultLabStillValid = !!labs.find(
-            ({ id }) => id === member.defaultLabId
-          );
-
-          if (isDefaultLabStillValid) {
-            return defaultLab.id;
-          } else {
-            return labs[0]?.id || null;
-          }
-        });
-
-        await updateDefaultUserLab({
-          userId: member.id,
-          defaultLabId: nextDefaultLabId,
-        });
-
-        await refetch();
-
-        setLoading(false);
-        setShowForm(false);
-      },
-      [
-        member.defaultLabId,
-        member.id,
-        refetch,
-        setLoading,
-        updateDefaultUserLab,
-        updateUserLabs,
-      ]
-    );
-
-    const userRoles = rolesParser(member.roles);
-    return (
-      <div className="pt-4">
-        <DataDisplay
-          nude
-          header="Guild"
-          data={[
-            {
-              label: "ID",
-              value: member.id,
-            },
-            {
-              label: "Username",
-              value: member.username,
-            },
-            {
-              label: "Azure ID",
-              value: member.azureUserId,
-            },
-          ]}
-        />
-
-        {member.User && (
-          <DataDisplay
-            nude
-            className="pt-3"
-            header="Account"
-            data={[
-              {
-                label: "ID",
-                value: member.User?.id,
-              },
-              {
-                label: "Email",
-                value: member.User?.email,
-              },
-            ]}
-          />
-        )}
-
-        <DataDisplay
-          nude
-          header="Roles"
-          className="pt-3"
-          data={userRoles?.map(({ name }) => ({
-            label: "Role",
-            value: name,
-          }))}
-        />
-
-        <div className="flex items-center py-3">
-          <p className="mr-1 text-xl font-bold">Labs</p>
-
-          <div
-            className={cn(
-              "cursor-pointer rounded-lg bg-opacity-20 p-1",
-              showForm ? "bg-neutral-400" : ""
-            )}
-            onClick={() => setShowForm(!showForm)}
-          >
-            <EditIcon />
-          </div>
-        </div>
-        {!!member.LabGuildUser.length && !showForm && (
-          <React.Fragment>
-            <DataDisplay
-              nude
-              data={[
-                {
-                  active: true,
-                  label: "Default Lab",
-                  element: (
-                    <Link
-                      className="text-sm font-bold text-blue-400"
-                      href={routes.ManageLabsDetail.dynamicPath(
-                        member.DefaultLab?.id || ""
-                      )}
-                    >
-                      {member.DefaultLab?.displayName || "Not set"}
-                    </Link>
-                  ),
-                },
-                ...member.LabGuildUser?.map(({ Lab }) => ({
-                  label: "Lab",
-                  element: (
-                    <Link
-                      className="text-sm font-bold text-blue-400"
-                      href={routes.ManageLabsDetail.dynamicPath(Lab.id || "")}
-                    >
-                      {Lab.displayName}
-                    </Link>
-                  ),
-                })),
-              ]}
-            />
-          </React.Fragment>
-        )}
-
-        {showForm && (
-          <div className="mx-1 rounded-xl bg-neutral-200 p-3 dark:bg-neutral-700">
-            <UserForm
-              initialData={{
-                labs:
-                  member.LabGuildUser.map(({ Lab }) => ({
-                    id: Lab.id,
-                    name: Lab.displayName || Lab.name,
-                  })) || [],
-                defaultLab: {
-                  id: member.DefaultLab?.id || "",
-                  name: member.DefaultLab?.displayName || "",
-                },
-              }}
-              onSubmit={onSubmit}
-            />
-          </div>
-        )}
-      </div>
-    );
-  }
-);

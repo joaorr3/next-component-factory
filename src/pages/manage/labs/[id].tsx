@@ -5,10 +5,11 @@ import { useRouter } from "next/router";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { Accordion } from "../../../components/Accordion";
 import { BackButton } from "../../../components/BackButton";
 import { DataDisplay } from "../../../components/DataDisplay";
 import * as Fields from "../../../components/Form/Fields";
-import { ListItem } from "../../../components/ListItem";
+import { ListItemExpanded } from "../../../components/ListItem";
 import Modal from "../../../components/Modal";
 import { useLoading } from "../../../utils/GlobalState/GlobalStateProvider";
 import { withRoles } from "../../../utils/hoc";
@@ -25,12 +26,8 @@ export default withRoles("ManageLabsDetail", () => {
     isLoading,
     fetchStatus,
     refetch,
-  } = trpc.labs.read.useQuery({
+  } = trpc.labs.labWithMembers.useQuery({
     id: typeof id === "string" ? id : undefined,
-  });
-
-  const { data: labMembers } = trpc.labs.allLabMembers.useQuery({
-    id: lab?.id,
   });
 
   const { mutateAsync: updateLab } = trpc.labs.update.useMutation();
@@ -97,20 +94,64 @@ export default withRoles("ManageLabsDetail", () => {
             ]}
           />
 
-          <div>
-            {labMembers?.map((member) => {
-              return (
-                <ListItem
-                  key={member.id}
-                  title={member.friendlyName || member.username}
-                  headerLabel={`${member.id} / Default Lab ID: ${
-                    member.defaultLabId || "--"
-                  }`}
-                  startImageUrl={member.avatarURL}
-                />
-              );
-            })}
-          </div>
+          <Accordion
+            headerLabel="Members"
+            className="mb-4 border-b border-solid border-b-neutral-800 pb-4"
+          >
+            <div className="pt-8">
+              {lab?.LabGuildUser?.map(({ GuildUser: member }) => {
+                return (
+                  <ListItemExpanded
+                    key={member.id}
+                    title={member.friendlyName || member.username}
+                    startImageUrl={member.avatarURL}
+                    AdditionalInfoElement={() => {
+                      return (
+                        <div className="pt-4">
+                          <DataDisplay
+                            nude
+                            header="Guild"
+                            data={[
+                              {
+                                label: "ID",
+                                value: member.id,
+                              },
+                              {
+                                label: "Username",
+                                value: member.username,
+                              },
+                              {
+                                label: "Azure ID",
+                                value: member.azureUserId,
+                              },
+                            ]}
+                          />
+
+                          {member.User && (
+                            <DataDisplay
+                              nude
+                              className="pt-3"
+                              header="Account"
+                              data={[
+                                {
+                                  label: "ID",
+                                  value: member.User?.id,
+                                },
+                                {
+                                  label: "Email",
+                                  value: member.User?.email,
+                                },
+                              ]}
+                            />
+                          )}
+                        </div>
+                      );
+                    }}
+                  />
+                );
+              })}
+            </div>
+          </Accordion>
         </div>
       </main>
 
