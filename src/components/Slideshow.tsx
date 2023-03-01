@@ -29,7 +29,7 @@ export const Slideshow = React.forwardRef(
             itemHeight={600}
             renderItem={({ item }) => {
               return (
-                <div className="flex h-full items-center overflow-scroll">
+                <div className="flex h-full items-center overflow-auto">
                   <div className="flex w-full justify-center">
                     <MediaPreview
                       url={item.url}
