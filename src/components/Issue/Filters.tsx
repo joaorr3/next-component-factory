@@ -8,6 +8,7 @@ export type FiltersModel = {
   title?: string;
   author?: string;
   type?: string;
+  component?: string;
 };
 
 export type IssueFiltersProps = {

@@ -10,20 +10,26 @@ import type { MediaPreviewProps } from "./MediaPreview";
 import { MediaPreview } from "./MediaPreview";
 
 export const ListItem: React.FC<{
+  className?: string;
   headerLabel?: string | null;
   title?: string | null;
   startImageUrl?: string | null;
   titleSuffixElement?: JSX.Element;
   footer?: Date | null;
   author?: string | null;
+  scaleUp?: boolean;
+  cursorPointer?: boolean;
   onPress?: () => void;
 }> = ({
+  className,
   headerLabel,
   title,
   startImageUrl,
   titleSuffixElement,
   footer,
   author,
+  scaleUp = true,
+  cursorPointer = true,
   onPress,
 }) => {
   return (
@@ -31,7 +37,9 @@ export const ListItem: React.FC<{
       onClick={onPress}
       className={cn(
         "mb-4 flex  flex-col rounded-xl bg-neutral-200 p-4 transition-transform  dark:bg-neutral-800",
-        onPress ? "cursor-pointer hover:scale-[1.01]" : ""
+        cursorPointer ? "cursor-pointer" : "",
+        scaleUp ? "hover:scale-[1.01]" : "",
+        className
       )}
     >
       {headerLabel && (

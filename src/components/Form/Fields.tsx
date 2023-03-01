@@ -84,7 +84,7 @@ export type BaseFieldProps = {
   label?: string;
   disabled?: boolean;
   placeholder?: string;
-  description?: string;
+  description?: string | JSX.Element;
   error?: FieldError;
   required?: boolean;
   register: UseFormRegisterReturn;
@@ -97,15 +97,22 @@ export type FieldWrapProps = React.PropsWithChildren<
 export const Description = ({
   description,
 }: {
-  description?: string;
+  description?: BaseFieldProps["description"];
 }): JSX.Element => {
   if (!description) {
     return <React.Fragment />;
   }
+  const descriptionElement =
+    typeof description === "string" ? (
+      <p className="text-xs">{description}</p>
+    ) : (
+      description
+    );
+
   return (
     <div className="ml-3 mb-3 flex items-center">
       <div className="mr-1">💁‍♀️</div>
-      <p className="text-xs">{description}</p>
+      {descriptionElement}
     </div>
   );
 };

@@ -41,7 +41,7 @@ export const issuesRouter = router({
     }),
   search: protectedProcedure
     .input(z.custom<FiltersModel>())
-    .query(async ({ ctx, input: { id, title, author, type } }) => {
+    .query(async ({ ctx, input: { id, title, author, type, component } }) => {
       const validId = derive(() => {
         if (id) {
           const parsed = parseInt(id);
@@ -51,7 +51,7 @@ export const issuesRouter = router({
         return undefined;
       });
 
-      if (!!validId || !!title || !!author || !!type) {
+      if (!!validId || !!title || !!author || !!type || !!component) {
         return await ctx.prisma.issue.findMany({
           where: {
             id: validId,
@@ -63,6 +63,9 @@ export const issuesRouter = router({
             },
             type: {
               contains: type,
+            },
+            component: {
+              contains: component,
             },
           },
           orderBy: {
