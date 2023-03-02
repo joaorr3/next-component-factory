@@ -52,6 +52,12 @@ export default withRoles("ManageLabsDetail", () => {
     [refetch, setLoading, updateLab]
   );
 
+  if (!lab) {
+    return <React.Fragment />;
+  }
+
+  const { LabGuildUser: _, GuildRole: __, ...formInitialData } = lab;
+
   return (
     <React.Fragment>
       <Head>
@@ -76,20 +82,20 @@ export default withRoles("ManageLabsDetail", () => {
                 value: lab?.id,
               },
               {
-                label: "Name",
-                value: lab?.name,
-              },
-              {
                 label: "Channel ID",
                 value: lab?.channelId,
               },
               {
-                label: "Channel Name",
+                label: "Guild Channel Name",
                 value: lab?.channelName,
               },
               {
                 label: "Guild Role ID",
                 value: lab?.guildRoleId,
+              },
+              {
+                label: "Guild Role Name",
+                value: lab?.GuildRole?.name,
               },
             ]}
           />
@@ -163,7 +169,7 @@ export default withRoles("ManageLabsDetail", () => {
           }}
         >
           <div className="h-full rounded-2xl p-5 dark:bg-neutral-800">
-            <LabForm onSubmit={onSubmit} initialData={lab} />
+            <LabForm onSubmit={onSubmit} initialData={formInitialData} />
           </div>
         </Modal>
       )}

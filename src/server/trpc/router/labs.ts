@@ -56,6 +56,7 @@ export const labsRouter = router({
               },
             },
           },
+          GuildRole: true
         },
       });
     }),

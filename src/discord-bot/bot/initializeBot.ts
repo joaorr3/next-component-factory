@@ -7,6 +7,7 @@ import {
   guildMemberUpdateHandler,
   interactionCreateHandler,
 } from "./events";
+import { channelUpdateHandler } from "./events/channelUpdate";
 import { guildRolesHandler } from "./events/guildRoles";
 import { BotLog } from "./utils";
 
@@ -39,5 +40,10 @@ export const initializeBot = () => {
   });
   discord.on(Discord.Events.GuildRoleUpdate, async (role) => {
     await guildRolesHandler("update", role);
+  });
+  discord.on(Discord.Events.ChannelUpdate, async (channel) => {
+    if (channel.type === Discord.ChannelType.GuildText) {
+      await channelUpdateHandler(channel);
+    }
   });
 };

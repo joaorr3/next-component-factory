@@ -7,4 +7,13 @@ export class LabsManager extends CrudHandler<Lab> {
     super(_client, "lab");
     this.client = _client;
   }
+
+  async updateLabByChannelId(channelId: string, data: Partial<Lab>) {
+    return await this.client.lab.update({
+      where: {
+        channelId,
+      },
+      data,
+    });
+  }
 }
