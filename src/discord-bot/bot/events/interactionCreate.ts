@@ -88,7 +88,7 @@ export const interactionCreateHandler = async (
               });
             }
 
-            await notion?.updatePageStatus(pageId, "DONE");
+            await notion?.updatePageStatus(pageId, "Complete");
 
             logger.db.notion({
               level: "info",

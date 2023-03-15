@@ -33,12 +33,46 @@ class Notion {
     return this._instance;
   }
 
+  async getIssuesDatabase() {
+    return await this.client.databases.retrieve({
+      database_id: env.NOTION_ISSUES_DB_ID,
+    });
+  }
+
+  public readonly pageStatus = {
+    "Not started": {
+      id: "}NqP",
+      name: "Not started",
+      color: "gray",
+    },
+    Design: {
+      id: "^x,x",
+      name: "Design",
+      color: "purple",
+    },
+    "In progress": {
+      id: "b7cf3a94-9136-4511-9578-f3a81c08fb77",
+      name: "In progress",
+      color: "blue",
+    },
+    Complete: {
+      id: "nu=l",
+      name: "Complete",
+      color: "green",
+    },
+    Closed: {
+      id: ":RHe",
+      name: "Closed",
+      color: "pink",
+    },
+  } as const;
+
   async addIssue({
     title,
     description,
     lab,
     author,
-    status = "TODO",
+    // status = "TODO",
     discordThreadId,
     version,
     type,
@@ -138,9 +172,7 @@ class Notion {
             ],
           },
           Status: {
-            select: {
-              name: status,
-            },
+            status: this.pageStatus["Not started"],
           },
           Type: {
             select: {
@@ -203,7 +235,7 @@ class Notion {
 
   async updatePageStatus(
     pageId?: string,
-    status: IssueDetailsModel["status"] = "TODO"
+    status: keyof typeof this.pageStatus = "Not started"
   ) {
     try {
       if (pageId) {
@@ -211,9 +243,7 @@ class Notion {
           page_id: pageId,
           properties: {
             Status: {
-              select: {
-                name: status,
-              },
+              status: this.pageStatus[status],
             },
           },
         });
