@@ -1,4 +1,3 @@
-import type { GuildRole } from "@prisma/client";
 import type Discord from "discord.js";
 import prisma from "../../data";
 import discord from "../client";
@@ -12,21 +11,19 @@ export const guildRolesHandler = async (
   const r = await discord.guild?.roles.fetch(role.id);
   const roleName = r?.name || role.name;
 
-  const genericGuildRole: GuildRole = {
-    id: role.id,
-    name: roleName,
-    isAutoAssignable: false,
-  };
-
   switch (eventType) {
     case "create":
-      await prisma.roles.create(genericGuildRole);
+      await prisma.roles.create({
+        id: role.id,
+        name: roleName,
+        isAutoAssignable: false,
+      });
       break;
     case "delete":
-      await prisma.roles.delete(genericGuildRole.id);
+      await prisma.roles.delete(role.id);
       break;
     case "update":
-      await prisma.roles.update(genericGuildRole, genericGuildRole.id);
+      await prisma.roles.update({ name: roleName }, role.id);
       break;
   }
 };
