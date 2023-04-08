@@ -11,7 +11,6 @@ import { isNaN, truncate } from "lodash";
 import { z } from "zod";
 import { type FiltersModel } from "../../../components/Issue/Filters";
 import { issueProcedureSchema } from "../../../components/IssueForm/validator";
-import { env } from "../../../env/server";
 import { IssueScope } from "../../../shared/enums";
 import notion from "../../../shared/notion";
 import { derive } from "../../../shared/utils";
@@ -133,19 +132,26 @@ export const issuesRouter = router({
         data: prepareData,
       });
 
-      const thread = await createIssueThread(issueResponse, user?.GuildUser);
-      const page_id = await notion?.addIssue(issueResponse);
+      const notionPageId = await notion?.addIssue(issueResponse);
 
-      if (thread && page_id) {
-        const pageUrl = await notion?.getPageUrl(page_id);
+      const notionPageUrl = notionPageId
+        ? await notion?.getPageUrl(notionPageId)
+        : undefined;
 
+      const thread = await createIssueThread({
+        issue: issueResponse,
+        notionPageUrl,
+        user: user?.GuildUser,
+      });
+
+      if (thread && notionPageId) {
         await ctx.prisma.issueIdMapping.update({
           where: {
             id: mapping.id,
           },
           data: {
-            notion_page_id: page_id,
-            notion_page_url: pageUrl,
+            notion_page_id: notionPageId,
+            notion_page_url: notionPageUrl,
             discord_thread_id: thread.id,
             discord_thread_url: thread.url,
             author: issueResponse.author,
@@ -157,15 +163,24 @@ export const issuesRouter = router({
     }),
 });
 
-const createIssueThread = async (issue: Issue, user?: GuildUser | null) => {
+const createIssueThread = async ({
+  issue,
+  user,
+  notionPageUrl,
+}: {
+  issue: Issue;
+  user?: GuildUser | null;
+  notionPageUrl?: string;
+}) => {
   try {
     const { type, component, title, scope } = issue;
 
     const fullTitle = `[${type}] ${component} - ${title}`;
 
-    if (issue?.labId && user) {
+    if (issue?.labId && user && notionPageUrl) {
       const lab = await prismaNext.labs.read(issue.labId);
-      if (lab?.channelId && lab?.guildRoleId) {
+
+      if (lab?.channelId && lab?.guildRoleId && notionPageUrl) {
         const channel = discordNext.channelById(lab?.channelId);
         const thread = await channel?.threads.create({
           name: truncate(fullTitle, {
@@ -188,10 +203,11 @@ const createIssueThread = async (issue: Issue, user?: GuildUser | null) => {
             embeds: [
               new EmbedBuilder()
                 .setTitle(title)
-                .setURL(`${env.NEXT_PROD_URL}/issue/${issue.id}`)
-                .setAuthor({
-                  name: user.friendlyName || user.username,
-                  iconURL: user.avatarURL || undefined,
+                .setURL(notionPageUrl)
+                .setFooter({
+                  text: "Follow the issue status on Notion.",
+                  iconURL:
+                    "https://component-factory-s3-bucket.s3.eu-west-2.amazonaws.com/generic/413b494c-2a37-41f5-ae0f-bf44395f1f36__notion_logo_comp.png",
                 })
                 .addFields([
                   {
@@ -202,10 +218,6 @@ const createIssueThread = async (issue: Issue, user?: GuildUser | null) => {
                 ])
                 .setTimestamp(),
             ],
-          });
-
-          await thread.send({
-            content: `${env.NEXT_PROD_URL}/issue/${issue.id}`,
           });
 
           return {
