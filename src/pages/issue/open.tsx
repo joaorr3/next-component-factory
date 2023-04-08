@@ -19,7 +19,11 @@ const redirect = (path: string) => {
 export default withRoles("IssueOpen", () => {
   const { upload } = useFileUpload("ISSUE");
 
-  const { mutateAsync: openIssue } = trpc.issues.open.useMutation();
+  const {
+    mutateAsync: openIssue,
+    error,
+    isError,
+  } = trpc.issues.open.useMutation();
 
   const { setLoading } = useLoading("setOnly");
 
@@ -50,6 +54,15 @@ export default withRoles("IssueOpen", () => {
     },
     [handleFilesUpload, openIssue, setLoading]
   );
+
+  if (isError) {
+    return (
+      <div className="flex justify-center">
+        <p>Ups...</p>
+        <p>{error.message}</p>
+      </div>
+    );
+  }
 
   return (
     <React.Fragment>

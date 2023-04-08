@@ -1,5 +1,6 @@
 import type { GuildUser } from "@prisma/client";
 import { type Issue } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
 import {
   EmbedBuilder,
   roleMention,
@@ -82,84 +83,93 @@ export const issuesRouter = router({
   open: protectedProcedure
     .input(issueProcedureSchema)
     .mutation(async ({ ctx, input }) => {
-      const user = await ctx.prisma.user.findUnique({
-        where: {
-          id: ctx.session.user.id,
-        },
-        include: {
-          GuildUser: true,
-        },
-      });
-
-      const mapping = await ctx.prisma.issueIdMapping.create({
-        data: {
-          author: user?.name,
-          title: input.title,
-        },
-      });
-
-      const prepareData: Omit<Issue, "id"> = {
-        title: input.title,
-        description: input.description,
-        lab: input.lab,
-        labId: input.labId,
-        version: input.version,
-        type: input.type,
-        stepsToReproduce: input.stepsToReproduce,
-        component: input.component,
-        severity: input.severity,
-        specs: input.specs,
-        codeSnippet: input.codeSnippet,
-        checkTechLead: input.checkTechLead,
-        checkDesign: input.checkDesign,
-        scope: input.scope,
-        azureWorkItem: input.azureWorkItem,
-        attachment: input.files[0]?.url,
-        attachment2: input.files[1]?.url,
-
-        issueIdMappingId: mapping.id,
-
-        author: user?.name || null,
-
-        createdAt: new Date(),
-        timestamp: new Date(),
-        status: "TODO",
-        discordThreadId: null,
-        platform: input.platform,
-      };
-
-      const issueResponse = await ctx.prisma.issue.create({
-        data: prepareData,
-      });
-
-      const notionPageId = await notion?.addIssue(issueResponse);
-
-      const notionPageUrl = notionPageId
-        ? await notion?.getPageUrl(notionPageId)
-        : undefined;
-
-      const thread = await createIssueThread({
-        issue: issueResponse,
-        notionPageUrl,
-        user: user?.GuildUser,
-      });
-
-      if (thread && notionPageId) {
-        await ctx.prisma.issueIdMapping.update({
+      try {
+        const user = await ctx.prisma.user.findUnique({
           where: {
-            id: mapping.id,
+            id: ctx.session.user.id,
           },
-          data: {
-            notion_page_id: notionPageId,
-            notion_page_url: notionPageUrl,
-            discord_thread_id: thread.id,
-            discord_thread_url: thread.url,
-            author: issueResponse.author,
-            title: issueResponse.title,
+          include: {
+            GuildUser: true,
           },
         });
+
+        const mapping = await ctx.prisma.issueIdMapping.create({
+          data: {
+            author: user?.name,
+            title: input.title,
+          },
+        });
+
+        const prepareData: Omit<Issue, "id"> = {
+          title: input.title,
+          description: input.description,
+          lab: input.lab,
+          labId: input.labId,
+          version: input.version,
+          type: input.type,
+          stepsToReproduce: input.stepsToReproduce,
+          component: input.component,
+          severity: input.severity,
+          specs: input.specs,
+          codeSnippet: input.codeSnippet,
+          checkTechLead: input.checkTechLead,
+          checkDesign: input.checkDesign,
+          scope: input.scope,
+          azureWorkItem: input.azureWorkItem,
+          attachment: input.files[0]?.url,
+          attachment2: input.files[1]?.url,
+
+          issueIdMappingId: mapping.id,
+
+          author: user?.name || null,
+
+          createdAt: new Date(),
+          timestamp: new Date(),
+          status: "TODO",
+          discordThreadId: null,
+          platform: input.platform,
+        };
+
+        const issueResponse = await ctx.prisma.issue.create({
+          data: prepareData,
+        });
+
+        const notionPageId = await notion?.addIssue(issueResponse);
+
+        const notionPageUrl = notionPageId
+          ? await notion?.getPageUrl(notionPageId)
+          : undefined;
+
+        const thread = await createIssueThread({
+          issue: issueResponse,
+          notionPageUrl,
+          user: user?.GuildUser,
+        });
+
+        if (thread && notionPageId) {
+          await ctx.prisma.issueIdMapping.update({
+            where: {
+              id: mapping.id,
+            },
+            data: {
+              notion_page_id: notionPageId,
+              notion_page_url: notionPageUrl,
+              discord_thread_id: thread.id,
+              discord_thread_url: thread.url,
+              author: issueResponse.author,
+              title: issueResponse.title,
+            },
+          });
+        }
+        return issueResponse;
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message:
+            "An unexpected error occurred while trying to open this issue, please try again later.",
+          cause: error,
+        });
       }
-      return issueResponse;
     }),
 });
 
@@ -207,7 +217,7 @@ const createIssueThread = async ({
                 .setFooter({
                   text: "Follow the issue status on Notion.",
                   iconURL:
-                    "https://component-factory-s3-bucket.s3.eu-west-2.amazonaws.com/generic/413b494c-2a37-41f5-ae0f-bf44395f1f36__notion_logo_comp.png",
+                    "https://component-factory-s3-bucket.s3.eu-west-2.amazonaws.com/generic/f9db27e5-c347-45c3-a5b9-6ed05de374f7__notion_logo_resized.png",
                 })
                 .addFields([
                   {
