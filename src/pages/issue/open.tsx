@@ -25,6 +25,9 @@ export default withRoles("IssueOpen", () => {
     isError,
   } = trpc.issues.open.useMutation();
 
+  const { mutateAsync: updateIssueAttachments } =
+    trpc.issues.updateNotionIssueAttachments.useMutation();
+
   const { setLoading } = useLoading("setOnly");
 
   const handleFilesUpload = React.useCallback(
@@ -40,19 +43,25 @@ export default withRoles("IssueOpen", () => {
 
   const handleOnSubmit = React.useCallback(
     async ({ lab, ...data }: FormSchema) => {
-      const issue = await openIssue({
+      const { issue, notionData } = await openIssue({
         ...data,
         lab: lab.name,
         labId: lab.id,
         files: [],
       });
       if (issue.id) {
-        await handleFilesUpload(data.files, issue.id);
+        const attachments = await handleFilesUpload(data.files, issue.id);
+
+        await updateIssueAttachments({
+          pageId: notionData.pageId,
+          attachments: attachments.map((a) => a.url),
+        });
+
         redirect(routes.IssueDetail.dynamicPath(String(issue.id)));
       }
       setLoading(false);
     },
-    [handleFilesUpload, openIssue, setLoading]
+    [handleFilesUpload, openIssue, setLoading, updateIssueAttachments]
   );
 
   if (isError) {

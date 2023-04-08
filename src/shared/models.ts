@@ -5,6 +5,10 @@ export type IssueModel = Omit<Issue, "id" | "issueIdMappingId" | "timestamp">;
 
 export type IssueDetailsModel = Omit<IssueModel, "platform">;
 
+export type NotionIssueDetailsModel = IssueDetailsModel & {
+  attachments?: string[];
+};
+
 export type OptionsDataExtractorModel = Omit<
   IssueDetailsModel,
   | "author"

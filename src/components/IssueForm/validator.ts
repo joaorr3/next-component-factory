@@ -37,3 +37,8 @@ export const issueProcedureSchema = baseIssueSchema.merge(
     files: z.array(z.custom<ImageResponseModel>()),
   })
 );
+
+export const updateIssueProcedureSchema = z.object({
+  pageId: z.string().optional(),
+  attachments: z.array(z.string()),
+});

@@ -9,13 +9,13 @@ import {
   bookmark,
   checkBox,
   getPublicUrl,
+  guildChannelUrl,
   image,
   paragraph,
   parseToNumberedList,
   scopeToLabel,
   severityLevelToEmoji,
   spacer,
-  guildChannelUrl,
 } from "./utils";
 
 class Notion {
@@ -229,6 +229,37 @@ class Notion {
       logger.db.notion({
         level: "error",
         message: `getPageUrl: ${error}`,
+      });
+    }
+  }
+
+  async updateIssueAttachments(pageId?: string, attachments?: string[]) {
+    try {
+      if (pageId) {
+        await this.client.blocks.children.append({
+          block_id: pageId,
+          children: [
+            {
+              type: "toggle",
+              toggle: {
+                rich_text: [
+                  {
+                    type: "text",
+                    text: {
+                      content: "Attachments",
+                    },
+                  },
+                ],
+                children: attachments?.map((item) => image(item)),
+              },
+            },
+          ],
+        });
+      }
+    } catch (error) {
+      logger.db.notion({
+        level: "error",
+        message: `updatePageStatus: ${error}`,
       });
     }
   }

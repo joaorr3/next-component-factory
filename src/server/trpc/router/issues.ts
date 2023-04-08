@@ -11,7 +11,10 @@ import {
 import { isNaN, truncate } from "lodash";
 import { z } from "zod";
 import { type FiltersModel } from "../../../components/Issue/Filters";
-import { issueProcedureSchema } from "../../../components/IssueForm/validator";
+import {
+  issueProcedureSchema,
+  updateIssueProcedureSchema,
+} from "../../../components/IssueForm/validator";
 import { IssueScope } from "../../../shared/enums";
 import notion from "../../../shared/notion";
 import { derive } from "../../../shared/utils";
@@ -161,7 +164,14 @@ export const issuesRouter = router({
             },
           });
         }
-        return issueResponse;
+
+        return {
+          issue: issueResponse,
+          notionData: {
+            pageId: notionPageId,
+            pageUrl: notionPageUrl,
+          },
+        };
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -170,6 +180,11 @@ export const issuesRouter = router({
           cause: error,
         });
       }
+    }),
+  updateNotionIssueAttachments: protectedProcedure
+    .input(updateIssueProcedureSchema)
+    .mutation(async ({ input: { pageId, attachments } }) => {
+      await notion.updateIssueAttachments(pageId, attachments);
     }),
 });
 
