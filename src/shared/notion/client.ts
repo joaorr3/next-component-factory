@@ -3,11 +3,10 @@ import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoint
 import { env } from "../../env/server";
 import { c18Avatar } from "../dataUtils";
 import logger from "../logger";
-import type { IssueDetailsModel } from "../models";
+import type { NotionIssueDetailsModel } from "../models";
 
 import {
   bookmark,
-  checkBox,
   getPublicUrl,
   guildChannelUrl,
   image,
@@ -33,10 +32,43 @@ class Notion {
     return this._instance;
   }
 
-  async getIssuesDatabase() {
-    return await this.client.databases.retrieve({
-      database_id: env.NOTION_ISSUES_DB_ID,
+  async getDatabase(id: string) {
+    this.client.databases.query({
+      database_id: id,
     });
+    return await this.client.databases.retrieve({
+      database_id: id,
+    });
+  }
+
+  async getIssuesDatabase() {
+    return await this.getDatabase(env.NOTION_ISSUES_DB_ID);
+  }
+  async getComponentDatabase() {
+    const comp_map: Array<{ id: string; name: string }> = [];
+
+    const get = async (cursor?: string) => {
+      const { results, next_cursor } = await this.client.databases.query({
+        database_id: env.NOTION_COMPONENTS_DB_ID,
+        start_cursor: cursor,
+      });
+
+      results.forEach((page) => {
+        comp_map.push({
+          id: page.id,
+          // @ts-ignore
+          name: page.properties.Component.title[0].plain_text,
+        });
+      });
+
+      if (next_cursor) {
+        await get(next_cursor);
+      }
+    };
+
+    await get();
+
+    return comp_map;
   }
 
   public readonly pageStatus = {
@@ -72,7 +104,6 @@ class Notion {
     description,
     lab,
     author,
-    // status = "TODO",
     discordThreadId,
     version,
     type,
@@ -81,13 +112,11 @@ class Notion {
     severity,
     specs,
     codeSnippet,
-    checkTechLead,
-    checkDesign,
     scope,
-    attachment,
-    attachment2,
     createdAt,
-  }: IssueDetailsModel) {
+    attachments,
+    componentId,
+  }: NotionIssueDetailsModel) {
     try {
       const res = await this.client.pages.create({
         parent: {
@@ -101,53 +130,123 @@ class Notion {
           },
         },
         children: [
-          paragraph(`Component: ${component}`),
-          ...spacer(),
-
-          paragraph(`Severity: ${severityLevelToEmoji(severity)}`),
-          ...spacer(),
-
-          paragraph(`Scope: ${scopeToLabel(scope)}`),
-          ...spacer(),
-
-          // Description (Quote)
           {
-            type: "quote",
-            quote: {
+            type: "callout",
+            callout: {
+              icon: {
+                type: "emoji",
+                emoji: "📄",
+              },
               rich_text: [
                 {
                   type: "text",
                   text: {
-                    content: description ?? "",
+                    content: "Description",
                   },
-                  annotations: {
-                    italic: true,
+                },
+              ],
+              children: [
+                {
+                  type: "quote",
+                  quote: {
+                    rich_text: [
+                      {
+                        type: "text",
+                        text: {
+                          content: description ?? "",
+                        },
+                        annotations: {
+                          italic: true,
+                        },
+                      },
+                    ],
                   },
                 },
               ],
             },
           },
+          {
+            type: "callout",
+            callout: {
+              icon: {
+                type: "emoji",
+                emoji: "🚶",
+              },
+              rich_text: [
+                {
+                  type: "text",
+                  text: {
+                    content: "Repro",
+                  },
+                },
+              ],
+              children: [...parseToNumberedList(stepsToReproduce)],
+            },
+          },
+          {
+            type: "callout",
+            callout: {
+              icon: {
+                type: "emoji",
+                emoji: "💁🏻‍♂️",
+              },
+              rich_text: [
+                {
+                  type: "text",
+                  text: {
+                    content: "+ Info",
+                  },
+                },
+              ],
+              children: [
+                paragraph(`Component: ${component}`),
+                paragraph(`Severity: ${severityLevelToEmoji(severity)}`),
+                paragraph(`Scope: ${scopeToLabel(scope)}`),
+              ],
+            },
+          },
           ...spacer(),
-          // Steps to reproduce (Numbered List)
-          ...parseToNumberedList(stepsToReproduce),
-          ...spacer(2),
-
-          // Specs (Bookmark)
-          bookmark(specs, "Specs"),
+          {
+            type: "toggle",
+            toggle: {
+              color: "gray_background",
+              rich_text: [
+                {
+                  type: "text",
+                  text: {
+                    content: "Links",
+                  },
+                },
+              ],
+              children: [
+                ...spacer(),
+                bookmark(specs, "Specs"),
+                ...spacer(),
+                bookmark(codeSnippet, "Code Snippet"),
+                ...spacer(),
+                bookmark(
+                  guildChannelUrl(discordThreadId || ""),
+                  "Discord Thread"
+                ),
+              ],
+            },
+          },
           ...spacer(),
-
-          // CodeSnippet (Bookmark)
-          bookmark(codeSnippet, "Code Snippet"),
-          ...spacer(),
-          // Discord Thread (Bookmark)
-          bookmark(guildChannelUrl(discordThreadId || ""), "Discord Thread"),
-          ...spacer(),
-
-          checkBox(checkTechLead, "Check with TechLead"),
-          checkBox(checkDesign, "Check with Design"),
-          ...spacer(),
-          image(attachment, "Attachment"),
-          image(attachment2, "Attachment2"),
+          {
+            type: "toggle",
+            toggle: {
+              color: "gray_background",
+              rich_text: [
+                {
+                  type: "text",
+                  text: {
+                    content: "Attachments",
+                  },
+                },
+              ],
+              children: attachments?.map((url) => image(url)),
+            },
+          },
           ...spacer(),
           {
             type: "divider",
@@ -179,7 +278,7 @@ class Notion {
               name: type || "",
             },
           },
-          "Person Requesting": {
+          Author: {
             rich_text: [{ type: "text", text: { content: author || "" } }],
           },
           Origin: {
@@ -191,6 +290,13 @@ class Notion {
           },
           Version: {
             rich_text: [{ type: "text", text: { content: version || "" } }],
+          },
+          "Atomic Components": {
+            relation: [
+              {
+                id: componentId || "",
+              },
+            ],
           },
           CreatedAt: {
             type: "date",
@@ -229,37 +335,6 @@ class Notion {
       logger.db.notion({
         level: "error",
         message: `getPageUrl: ${error}`,
-      });
-    }
-  }
-
-  async updateIssueAttachments(pageId?: string, attachments?: string[]) {
-    try {
-      if (pageId) {
-        await this.client.blocks.children.append({
-          block_id: pageId,
-          children: [
-            {
-              type: "toggle",
-              toggle: {
-                rich_text: [
-                  {
-                    type: "text",
-                    text: {
-                      content: "Attachments",
-                    },
-                  },
-                ],
-                children: attachments?.map((item) => image(item)),
-              },
-            },
-          ],
-        });
-      }
-    } catch (error) {
-      logger.db.notion({
-        level: "error",
-        message: `updatePageStatus: ${error}`,
       });
     }
   }

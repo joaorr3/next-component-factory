@@ -27,6 +27,7 @@ export const issueFormSchema = baseIssueSchema.merge(
       name: z.string(),
     }),
     files: rawFileValidator,
+    componentId: z.string().nullable(),
   })
 );
 
@@ -35,6 +36,7 @@ export const issueProcedureSchema = baseIssueSchema.merge(
     lab: notEmptyString,
     labId: notEmptyString,
     files: z.array(z.custom<ImageResponseModel>()),
+    componentId: z.string().nullable(),
   })
 );
 

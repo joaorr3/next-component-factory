@@ -3,6 +3,7 @@ import S3 from "aws-sdk/clients/s3";
 import { uuid } from "uuidv4";
 import { z } from "zod";
 import { env } from "../../../env/server";
+import { slug } from "../../../shared/utils";
 import {
   genericMediaSchemaValidator,
   issueMediaSchemaValidator,
@@ -81,7 +82,7 @@ export const mediaRouter = router({
     .input(genericMediaSchemaValidator)
     .mutation(async ({ ctx, input: { fileType, fileName, metadata } }) => {
       const imageId = uuid();
-      const key = `generic/${imageId}__${fileName}`;
+      const key = `generic/${imageId}__${slug(fileName)}`;
 
       const presignedPost = await s3Response(key);
 
@@ -105,7 +106,7 @@ export const mediaRouter = router({
     .input(issueMediaSchemaValidator)
     .mutation(async ({ ctx, input: { fileType, fileName, metadata } }) => {
       const imageId = uuid();
-      const key = `issues/${metadata.issueId}/${imageId}`;
+      const key = `issues/${metadata.issueId}/${imageId}__${slug(fileName)}`;
 
       const presignedPost = await s3Response(key);
 

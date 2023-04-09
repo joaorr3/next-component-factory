@@ -1,5 +1,6 @@
 import slugify from "slugify";
 import { z } from "zod";
+import { slug } from "../../../shared/utils";
 import { notEmptyString } from "../../../utils/validators";
 import { prismaNext } from "../../db/client";
 import { protectedProcedure, publicProcedure, router } from "../trpc";
@@ -20,10 +21,7 @@ export const faqRouter = router({
     .mutation(async ({ input }) => {
       const data = {
         ...input.faq,
-        slug: slugify(input.faq.label, {
-          replacement: "_",
-          lower: true,
-        }),
+        slug: slug(input.faq.label),
       };
 
       return await prismaNext.faq.create(data);

@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { notEmptyString } from "../../../utils/validators";
-
+import notion from "../../../shared/notion";
 import { router, protectedProcedure } from "../trpc";
+import { wait } from "../../../shared/utils";
 
 export const componentFormSchema = z.object({
   id: z.string().optional(),
@@ -17,6 +18,34 @@ export const componentsRouter = router({
     const components = await ctx.prisma.component.findMany();
     return components;
   }),
+  allNotion: protectedProcedure.query(async ({ ctx }) => {
+    const notion_comps = notion.getComponentDatabase();
+    return notion_comps;
+  }),
+  syncNotion: protectedProcedure
+    .input(z.custom<Array<{ id: string; name: string }>>())
+    .mutation(async ({ ctx, input }) => {
+      for (const { id, name } of input) {
+        const comp = await ctx.prisma.component.findFirst({
+          where: {
+            name,
+          },
+        });
+
+        if (comp?.id) {
+          await ctx.prisma.component.update({
+            where: {
+              id: comp.id,
+            },
+            data: {
+              notion_id: id,
+            },
+          });
+          console.log(`Comp: ${comp.name}, updated with notionId: ${id}`);
+        }
+        await wait(200);
+      }
+    }),
   detail: protectedProcedure
     .input(z.object({ id: z.string().optional() }))
     .query(async ({ ctx, input: { id } }) => {

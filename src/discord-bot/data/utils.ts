@@ -49,6 +49,7 @@ export const notionBatchUpdate = async (range: {
         attachment2: Issue?.attachment2 || "",
         azureWorkItem: Issue?.azureWorkItem || "",
         createdAt: new Date(),
+        componentId: "",
       });
       await wait(200);
       await prisma?.issues.updateIssueMapping(id, pageId);

@@ -9,6 +9,11 @@ export type NotionIssueDetailsModel = IssueDetailsModel & {
   attachments?: string[];
 };
 
+export type DiscordIssueDetailsModel = {
+  issue: IssueModel;
+  notionPageUrl?: string;
+};
+
 export type OptionsDataExtractorModel = Omit<
   IssueDetailsModel,
   | "author"

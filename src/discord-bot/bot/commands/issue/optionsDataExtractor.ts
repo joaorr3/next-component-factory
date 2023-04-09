@@ -25,5 +25,6 @@ export const optionsDataExtractor = (
     attachment: options.getAttachment(IssueCommandOptions.attachment, true),
     attachment2: options.getAttachment(IssueCommandOptions.attachment2),
     azureWorkItem: options.getString(IssueCommandOptions.azure_work_item),
+    componentId: "",
   };
 };

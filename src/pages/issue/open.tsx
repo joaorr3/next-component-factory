@@ -20,13 +20,18 @@ export default withRoles("IssueOpen", () => {
   const { upload } = useFileUpload("ISSUE");
 
   const {
-    mutateAsync: openIssue,
+    mutateAsync: createIssue,
     error,
     isError,
-  } = trpc.issues.open.useMutation();
+  } = trpc.issues.createIssue.useMutation();
 
-  const { mutateAsync: updateIssueAttachments } =
-    trpc.issues.updateNotionIssueAttachments.useMutation();
+  const { mutateAsync: openThread } = trpc.issues.openThread.useMutation();
+
+  const { mutateAsync: updateIssueMapping } =
+    trpc.issues.updateIssueMapping.useMutation();
+
+  const { mutateAsync: createNotionIssue } =
+    trpc.issues.createNotionIssue.useMutation();
 
   const { setLoading } = useLoading("setOnly");
 
@@ -43,7 +48,7 @@ export default withRoles("IssueOpen", () => {
 
   const handleOnSubmit = React.useCallback(
     async ({ lab, ...data }: FormSchema) => {
-      const { issue, notionData } = await openIssue({
+      const { issue, issueMapping } = await createIssue({
         ...data,
         lab: lab.name,
         labId: lab.id,
@@ -52,16 +57,38 @@ export default withRoles("IssueOpen", () => {
       if (issue.id) {
         const attachments = await handleFilesUpload(data.files, issue.id);
 
-        await updateIssueAttachments({
-          pageId: notionData.pageId,
+        const { pageId, pageUrl } = await createNotionIssue({
+          ...issue,
           attachments: attachments.map((a) => a.url),
+        });
+
+        const { threadId, threadUrl } = await openThread({
+          issue,
+          notionPageUrl: pageUrl,
+        });
+
+        await updateIssueMapping({
+          mappingId: issueMapping.id,
+          issueAuthor: issue.author,
+          issueTitle: issue.title,
+          notionPageId: pageId,
+          notionPageUrl: pageUrl,
+          threadId,
+          threadUrl,
         });
 
         redirect(routes.IssueDetail.dynamicPath(String(issue.id)));
       }
       setLoading(false);
     },
-    [handleFilesUpload, openIssue, setLoading, updateIssueAttachments]
+    [
+      createIssue,
+      setLoading,
+      handleFilesUpload,
+      createNotionIssue,
+      openThread,
+      updateIssueMapping,
+    ]
   );
 
   if (isError) {

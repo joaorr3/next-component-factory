@@ -126,7 +126,9 @@ model Issue {
   createdAt        DateTime?
   IssuesMedia      IssuesMedia[]
   Lab              Lab?           @relation(fields: [labId], references: [id])
+  Component        Component?     @relation(fields: [componentId], references: [id])
   labId            String?
+  componentId      String?
 
   @@index([issueIdMappingId, labId])
 }
@@ -249,9 +251,11 @@ enum ComponentCategory {
 
 model Component {
   id          String            @id @default(cuid())
+  notion_id   String?           @unique
   name        String
   category    ComponentCategory
   description String?
+  Issue       Issue[]
 }
 
 model GuildRole {

@@ -107,8 +107,9 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
             {({ setIsOpen }) => (
               <ComponentList
                 selectedComponentName={watch("component")}
-                onItemPress={({ name }) => {
+                onItemPress={({ name, id }) => {
                   setValue("component", name);
+                  setValue("componentId", id);
                   setIsOpen(false);
                 }}
               />

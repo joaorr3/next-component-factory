@@ -1,4 +1,5 @@
 import { kebabCase, lowerCase } from "lodash";
+import slugify from "slugify";
 
 export const derive = <T>(fn: () => T): T => fn();
 
@@ -31,3 +32,9 @@ export const normalizeLabLabel = (name: string, suffix?: boolean) => {
   }
   return normalized;
 };
+
+export const slug = (text: string) =>
+  slugify(text, {
+    replacement: "_",
+    lower: true,
+  });

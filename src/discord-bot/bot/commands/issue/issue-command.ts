@@ -107,6 +107,7 @@ export const issueCommand = async ({
       : "invalid URL",
     checkTechLead,
     checkDesign,
+    componentId: null,
   });
 
   await interaction
