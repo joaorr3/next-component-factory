@@ -219,11 +219,8 @@ class Notion {
                 },
               ],
               children: [
-                ...spacer(),
                 bookmark(specs, "Specs"),
-                ...spacer(),
                 bookmark(codeSnippet, "Code Snippet"),
-                ...spacer(),
                 bookmark(
                   guildChannelUrl(discordThreadId || ""),
                   "Discord Thread"
