@@ -25,6 +25,18 @@ import { discordNext } from "../../discord/client";
 
 import { protectedProcedure, router } from "../trpc";
 
+export const handledProcedure = <T>(fn: () => T, errorMessage?: string): T => {
+  try {
+    return fn();
+  } catch (error) {
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: errorMessage,
+      cause: error,
+    });
+  }
+};
+
 export const issuesRouter = router({
   all: protectedProcedure.query(async ({ ctx }) => {
     const all = await ctx.prisma.issue.findMany();
@@ -88,7 +100,7 @@ export const issuesRouter = router({
   createIssue: protectedProcedure
     .input(issueProcedureSchema)
     .mutation(async ({ ctx, input }) => {
-      try {
+      return handledProcedure(async () => {
         const user = await ctx.prisma.user.findUnique({
           where: {
             id: ctx.session.user.id,
@@ -144,35 +156,30 @@ export const issuesRouter = router({
           issue: issueResponse,
           issueMapping: mapping,
         };
-      } catch (error) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message:
-            "An unexpected error occurred while trying to open this issue, please try again later.",
-          cause: error,
-        });
-      }
+      }, "Phase 1: createIssue error");
     }),
   createNotionIssue: protectedProcedure
     .input(z.custom<NotionIssueDetailsModel>())
     .mutation(async ({ ctx, input }) => {
-      const component = await ctx.prisma.component.findUnique({
-        where: {
-          id: input.componentId || "",
-        },
-      });
-      const pageId = await notion.addIssue({
-        ...input,
-        componentId: component?.notion_id || null,
-      });
-      const pageUrl = pageId ? await notion?.getPageUrl(pageId) : undefined;
+      return handledProcedure(async () => {
+        const component = await ctx.prisma.component.findUnique({
+          where: {
+            id: input.componentId || "",
+          },
+        });
+        const pageId = await notion.addIssue({
+          ...input,
+          componentId: component?.notion_id || null,
+        });
+        const pageUrl = pageId ? await notion?.getPageUrl(pageId) : undefined;
 
-      return { pageId, pageUrl };
+        return { pageId, pageUrl };
+      }, "Phase 2: createNotionIssue error");
     }),
   openThread: protectedProcedure
     .input(z.custom<DiscordIssueDetailsModel>())
     .mutation(async ({ ctx, input: { issue, notionPageUrl } }) => {
-      try {
+      return handledProcedure(async () => {
         const user = await ctx.prisma.user.findUnique({
           where: {
             id: ctx.session.user.id,
@@ -192,15 +199,21 @@ export const issuesRouter = router({
           threadId: thread?.id,
           threadUrl: thread?.url,
         };
-      } catch (error) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message:
-            "An unexpected error occurred while trying to open this issue thread, please try again later.",
-          cause: error,
-        });
-      }
+      }, "Phase 3: openThread error");
     }),
+  updateNotionPage: protectedProcedure
+    .input(
+      z.object({
+        pageId: z.string().optional(),
+        threadUrl: z.string().optional(),
+      })
+    )
+    .mutation(async ({ input: { pageId, threadUrl } }) => {
+      return handledProcedure(async () => {
+        await notion.updatePageThread(pageId, threadUrl);
+      }, "Phase 4: updateNotionPage error");
+    }),
+
   updateIssueMapping: protectedProcedure
     .input(
       z.object({
@@ -226,19 +239,21 @@ export const issuesRouter = router({
           issueTitle,
         },
       }) => {
-        await ctx.prisma.issueIdMapping.update({
-          where: {
-            id: mappingId,
-          },
-          data: {
-            notion_page_id: notionPageId,
-            notion_page_url: notionPageUrl,
-            discord_thread_id: threadId,
-            discord_thread_url: threadUrl,
-            author: issueAuthor,
-            title: issueTitle,
-          },
-        });
+        return handledProcedure(async () => {
+          await ctx.prisma.issueIdMapping.update({
+            where: {
+              id: mappingId,
+            },
+            data: {
+              notion_page_id: notionPageId,
+              notion_page_url: notionPageUrl,
+              discord_thread_id: threadId,
+              discord_thread_url: threadUrl,
+              author: issueAuthor,
+              title: issueTitle,
+            },
+          });
+        }, "Phase 5: updateIssueMapping error");
       }
     ),
 });

@@ -5,8 +5,10 @@ import React from "react";
 import { BackButton } from "../../components/BackButton";
 import { IssueForm } from "../../components/IssueForm/IssueForm";
 import { type FormSchema } from "../../components/IssueForm/models";
+import Modal from "../../components/Modal";
 import { useFileUpload } from "../../hooks/useFileUpload";
 import { routes } from "../../routes";
+import { derive } from "../../shared/utils";
 import { useLoading } from "../../utils/GlobalState/GlobalStateProvider";
 import { withRoles } from "../../utils/hoc";
 import { trpc } from "../../utils/trpc";
@@ -21,17 +23,61 @@ export default withRoles("IssueOpen", () => {
 
   const {
     mutateAsync: createIssue,
-    error,
-    isError,
+    error: createIssueError,
+    isError: hasCreateIssueError,
+    isSuccess: hasCreateIssueSuccess,
   } = trpc.issues.createIssue.useMutation();
 
-  const { mutateAsync: openThread } = trpc.issues.openThread.useMutation();
+  const {
+    mutateAsync: createNotionIssue,
+    error: createNotionIssueError,
+    isError: hasCreateNotionIssueError,
+    isSuccess: hasCreateNotionIssueSuccess,
+  } = trpc.issues.createNotionIssue.useMutation();
 
-  const { mutateAsync: updateIssueMapping } =
-    trpc.issues.updateIssueMapping.useMutation();
+  const {
+    mutateAsync: openThread,
+    error: openThreadError,
+    isError: hasOpenThreadError,
+    isSuccess: hasOpenThreadSuccess,
+  } = trpc.issues.openThread.useMutation();
 
-  const { mutateAsync: createNotionIssue } =
-    trpc.issues.createNotionIssue.useMutation();
+  const {
+    mutateAsync: updateNotionPage,
+    error: updateNotionPageError,
+    isError: hasUpdateNotionPageError,
+    isSuccess: hasUpdateNotionPageSuccess,
+  } = trpc.issues.updateNotionPage.useMutation();
+
+  const {
+    mutateAsync: updateIssueMapping,
+    error: updateIssueMappingError,
+    isError: hasUpdateIssueMappingError,
+    isSuccess: hasUpdateIssueMappingSuccess,
+  } = trpc.issues.updateIssueMapping.useMutation();
+
+  const [isProceduresModalOpen, setIsProceduresModalOpen] =
+    React.useState<boolean>(false);
+
+  const { hasError, errorMessagesList } = derive(() => {
+    const errorMessages = [
+      createIssueError?.message,
+      createNotionIssueError?.message,
+      openThreadError?.message,
+      updateNotionPageError?.message,
+      updateIssueMappingError?.message,
+    ];
+
+    return {
+      hasError:
+        hasCreateIssueError ||
+        hasCreateNotionIssueError ||
+        hasOpenThreadError ||
+        hasUpdateNotionPageError ||
+        hasUpdateIssueMappingError,
+      errorMessagesList: errorMessages,
+    };
+  });
 
   const { setLoading } = useLoading("setOnly");
 
@@ -48,6 +94,7 @@ export default withRoles("IssueOpen", () => {
 
   const handleOnSubmit = React.useCallback(
     async ({ lab, ...data }: FormSchema) => {
+      setIsProceduresModalOpen(true);
       const { issue, issueMapping } = await createIssue({
         ...data,
         lab: lab.name,
@@ -67,6 +114,8 @@ export default withRoles("IssueOpen", () => {
           notionPageUrl: pageUrl,
         });
 
+        await updateNotionPage({ pageId, threadUrl });
+
         await updateIssueMapping({
           mappingId: issueMapping.id,
           issueAuthor: issue.author,
@@ -79,29 +128,58 @@ export default withRoles("IssueOpen", () => {
 
         redirect(routes.IssueDetail.dynamicPath(String(issue.id)));
       }
-      setLoading(false);
     },
     [
       createIssue,
-      setLoading,
       handleFilesUpload,
       createNotionIssue,
       openThread,
+      updateNotionPage,
       updateIssueMapping,
     ]
   );
 
-  if (isError) {
-    return (
-      <div className="flex justify-center">
-        <p>Ups...</p>
-        <p>{error.message}</p>
-      </div>
-    );
-  }
-
   return (
     <React.Fragment>
+      <Modal isOpen={hasError}>
+        <div className="h-full overflow-y-auto">
+          <div className="m-8 flex flex-col justify-center ">
+            <p className="mb-12 text-xl">Ups...</p>
+
+            <div>
+              {errorMessagesList.map((msg, key) => {
+                return <pre key={key}>{msg}</pre>;
+              })}
+            </div>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal isOpen={isProceduresModalOpen}>
+        <div className="m-8 flex flex-col justify-center">
+          <p>
+            {"Phase 1: createIssue "}
+            {hasCreateIssueSuccess ? "✅" : ""}
+          </p>
+          <p>
+            {"Phase 2: createNotionIssue "}
+            {hasCreateNotionIssueSuccess ? "✅" : ""}
+          </p>
+          <p>
+            {"Phase 3: openThread "}
+            {hasOpenThreadSuccess ? "✅" : ""}
+          </p>
+          <p>
+            {"Phase 4: updateNotionPage "}
+            {hasUpdateNotionPageSuccess ? "✅" : ""}
+          </p>
+          <p>
+            {"Phase 5: updateIssueMapping "}
+            {hasUpdateIssueMappingSuccess ? "✅" : ""}
+          </p>
+        </div>
+      </Modal>
+
       <Head>
         <title>Open Issue</title>
       </Head>

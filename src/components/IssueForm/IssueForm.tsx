@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { useDefaultUserLab } from "../../hooks/useDefaultUserLab";
 import { routes } from "../../routes";
 import { cn } from "../../styles/utils";
-import { useLoading } from "../../utils/GlobalState/GlobalStateProvider";
+// import { useLoading } from "../../utils/GlobalState/GlobalStateProvider";
 import { trpc } from "../../utils/trpc";
 import { Accordion } from "../Accordion";
 import { ComponentList } from "../ComponentList";
@@ -35,7 +35,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
     getFieldState,
     handleSubmit,
     watch,
-    reset,
+    // reset,
     control,
   } = useForm<FormSchema>({
     resolver: zodResolver(issueFormSchema),
@@ -57,19 +57,19 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultUserLab]);
 
-  const { setLoading } = useLoading("setOnly");
+  // const { setLoading } = useLoading("setOnly");
 
-  const resetForm = React.useCallback(() => {
-    reset();
-    setValue("files", []);
-    formRef.current?.reset();
-  }, [reset, setValue]);
+  // const resetForm = React.useCallback(() => {
+  //   reset();
+  //   setValue("files", []);
+  //   formRef.current?.reset();
+  // }, [reset, setValue]);
 
   const handleOnSubmit = React.useCallback(async (data: FormSchema) => {
-    setLoading(true);
+    // setLoading(true);
     return new Promise((res) => {
       onSubmit?.(data);
-      resetForm();
+      // resetForm();
       res(data);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps

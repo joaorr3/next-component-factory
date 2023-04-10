@@ -104,7 +104,6 @@ class Notion {
     description,
     lab,
     author,
-    discordThreadId,
     version,
     type,
     stepsToReproduce,
@@ -221,10 +220,6 @@ class Notion {
               children: [
                 bookmark(specs, "Specs"),
                 bookmark(codeSnippet, "Code Snippet"),
-                bookmark(
-                  guildChannelUrl(discordThreadId || ""),
-                  "Discord Thread"
-                ),
               ],
             },
           },
@@ -252,11 +247,6 @@ class Notion {
           paragraph("Created by C18"),
         ],
         properties: {
-          discord_id: {
-            rich_text: [
-              { type: "text", text: { content: discordThreadId || "" } },
-            ],
-          },
           title: {
             title: [{ type: "text", text: { content: title || "" } }],
           },
@@ -355,6 +345,26 @@ class Notion {
       logger.db.notion({
         level: "error",
         message: `updatePageStatus: ${error}`,
+      });
+    }
+  }
+
+  async updatePageThread(pageId?: string, threadUrl?: string) {
+    try {
+      if (pageId) {
+        await this.client.pages.update({
+          page_id: pageId,
+          properties: {
+            Thread: {
+              url: threadUrl || "",
+            },
+          },
+        });
+      }
+    } catch (error) {
+      logger.db.notion({
+        level: "error",
+        message: `updatePageThread: ${error}`,
       });
     }
   }
