@@ -107,14 +107,14 @@ export const hasInvalidMediaFormat = (url: string) =>
 
 export const image = (
   url: string | null,
-  description = ""
+  _description = ""
 ): NotionModels.Image | NotionModels.Spacer | NotionModels.Bookmark => {
   if (!url) {
     return space;
   }
-  if (hasInvalidMediaFormat(url)) {
-    return bookmark(url, description);
-  }
+  // if (hasInvalidMediaFormat(url)) {
+  //   return bookmark(url, description);
+  // }
   return {
     type: "image",
     image: {
