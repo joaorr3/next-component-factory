@@ -1,4 +1,4 @@
-import type { PrismaClient, Lab } from "@prisma/client";
+import type { Lab, PrismaClient } from "@prisma/client";
 import { CrudHandler } from "./interfaces";
 
 export class LabsManager extends CrudHandler<Lab> {
@@ -9,11 +9,15 @@ export class LabsManager extends CrudHandler<Lab> {
   }
 
   async updateLabByChannelId(channelId: string, data: Partial<Lab>) {
-    return await this.client.lab.update({
-      where: {
-        channelId,
-      },
-      data,
-    });
+    try {
+      return await this.client.lab.update({
+        where: {
+          channelId,
+        },
+        data,
+      });
+    } catch (error) {
+      console.log("error -> [updateLabByChannelId]: ", error);
+    }
   }
 }
