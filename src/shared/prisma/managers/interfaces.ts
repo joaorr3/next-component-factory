@@ -2,11 +2,11 @@ import type { PrismaClient } from "@prisma/client";
 import type { PickPartial } from "../../utilityTypes";
 
 export interface CRUD<T extends { id: string | number }> {
-  create(data: PickPartial<T, "id">): Promise<T>;
+  create(data: PickPartial<T, "id">): Promise<T | null>;
   read(id?: string | number): Promise<T | null>;
   readMany(): Promise<T[] | null>;
-  update(data: Partial<T>, id: string | number): Promise<T>;
-  delete(id: string | number): Promise<T>;
+  update(data: Partial<T>, id: string | number): Promise<T | null>;
+  delete(id: string | number): Promise<T | null>;
 }
 
 type Entity = keyof Pick<
@@ -39,47 +39,71 @@ export class CrudHandler<T extends { id: string | number }> implements CRUD<T> {
     this.entity = _entity;
   }
 
-  async create(data: PickPartial<T, "id">): Promise<T> {
-    // @ts-ignore
-    return this.client[this.entity].create({
-      data,
-    });
+  async create(data: PickPartial<T, "id">): Promise<T | null> {
+    try {
+      // @ts-ignore
+      return this.client[this.entity].create({
+        data,
+      });
+    } catch (error) {
+      console.log(`error -> [CrudHandler.create[${this.entity}]]`, error);
+      return null;
+    }
   }
 
   async read(id?: string | number): Promise<T | null> {
-    if (id) {
+    try {
+      if (id) {
+        // @ts-ignore
+        return await this.client[this.entity].findUnique({
+          where: {
+            id,
+          },
+        });
+      }
+      return null;
+    } catch (error) {
+      console.log(`error -> [CrudHandler.read[${this.entity}]]`, error);
+      return null;
+    }
+  }
+
+  async readMany(): Promise<T[] | null> {
+    try {
       // @ts-ignore
-      return await this.client[this.entity].findUnique({
+      return await this.client[this.entity].findMany();
+    } catch (error) {
+      console.log(`error -> [CrudHandler.readMany[${this.entity}]]`, error);
+      return null;
+    }
+  }
+
+  async update(data: Partial<T>, id: string | number): Promise<T | null> {
+    try {
+      // @ts-ignore
+      return await this.client[this.entity].update({
+        data,
         where: {
           id,
         },
       });
+    } catch (error) {
+      console.log(`error -> [CrudHandler.update[${this.entity}]]`, error);
+      return null;
     }
-
-    return null;
   }
 
-  async readMany(): Promise<T[] | null> {
-    // @ts-ignore
-    return await this.client[this.entity].findMany();
-  }
-
-  async update(data: Partial<T>, id: string | number): Promise<T> {
-    // @ts-ignore
-    return await this.client[this.entity].update({
-      data,
-      where: {
-        id,
-      },
-    });
-  }
-
-  async delete(id: string | number): Promise<T> {
-    // @ts-ignore
-    return await this.client[this.entity].delete({
-      where: {
-        id,
-      },
-    });
+  async delete(id: string | number): Promise<T | null> {
+    try {
+      // @ts-ignore
+      return await this.client[this.entity].delete({
+        where: {
+          id,
+        },
+      });
+    } catch (error) {
+      console.log(`error -> [CrudHandler.delete[${this.entity}]]`, error);
+      return null;
+    }
   }
 }
