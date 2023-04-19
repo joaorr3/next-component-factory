@@ -525,7 +525,7 @@ export const commandReactions = async ({
 
           currentThread.setAutoArchiveDuration(d);
           await interaction.reply({
-            content: `Done. This thread will be archive in ${friendlyArchiveDuration(
+            content: `Done. This thread will be archived in ${friendlyArchiveDuration(
               d
             )}`,
           });
