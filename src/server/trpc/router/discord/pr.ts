@@ -1,3 +1,4 @@
+import { z } from "zod";
 import notion from "../../../../shared/notion";
 import {
   pullRequestCommentedOnValidator,
@@ -12,7 +13,7 @@ const cleanBranchName = (name: string) => {
 
 export const prRouter = router({
   create: publicProcedure
-    .input(pullRequestCreatedValidator)
+    .input(z.custom<any>())
     .query(async ({ input, ctx }) => {
       console.log("input.resource: ", input.resource);
       const pullRequestId = String(input.resource.pullRequestId);
