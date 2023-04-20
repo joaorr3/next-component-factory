@@ -1,9 +1,9 @@
 import { z } from "zod";
 import notion from "../../../../shared/notion";
-import {
-  pullRequestCommentedOnValidator,
-  pullRequestCreatedValidator,
-} from "../../../../utils/validators/azure";
+// import {
+//   pullRequestCommentedOnValidator,
+//   pullRequestCreatedValidator,
+// } from "../../../../utils/validators/azure";
 import { publicProcedure, router } from "../../trpc";
 
 const cleanBranchName = (name: string) => {
@@ -15,7 +15,12 @@ export const prRouter = router({
   create: publicProcedure
     .input(z.custom<any>())
     .query(async ({ input, ctx }) => {
-      console.log("input.resource: ", input.resource);
+      try {
+        console.log("stringify-create-input-shape: ", JSON.stringify(input));
+      } catch (error) {
+        console.log("cant stringify");
+      }
+      console.log("create-input-shape: ", input);
       const pullRequestId = String(input.resource.pullRequestId);
       const azureUserId = input.resource.createdBy.id;
       const azureUserName = input.resource.createdBy.displayName;
@@ -41,8 +46,9 @@ export const prRouter = router({
       return "OK - PR/CREATE";
     }),
   update: publicProcedure
-    .input(pullRequestCreatedValidator)
+    .input(z.custom<any>())
     .query(async ({ input, ctx }) => {
+      console.log("update-input-shape: ", input);
       const pullRequestId = String(input.resource.pullRequestId);
       const azureUserId = input.resource.createdBy.id;
       const azureUserName = input.resource.createdBy.displayName;
@@ -76,24 +82,23 @@ export const prRouter = router({
 
       return "OK - PR/UPDATE";
     }),
-  commented: publicProcedure
-    .input(pullRequestCommentedOnValidator)
-    .query(async ({ input }) => {
-      const pullRequestId = String(input.resource.pullRequest.pullRequestId);
+  commented: publicProcedure.input(z.custom<any>()).query(async ({ input }) => {
+    console.log("commented-input-shape: ", input);
+    const pullRequestId = String(input.resource.pullRequest.pullRequestId);
 
-      const prPageId = await notion.getPrPageByPrId(pullRequestId);
+    const prPageId = await notion.getPrPageByPrId(pullRequestId);
 
-      if (prPageId) {
-        await notion.commentedPr({
-          pageId: prPageId,
-          data: {
-            commentId: String(input.resource.comment.id),
-            commentAuthorName: input.resource.comment.author.displayName,
-            commentUrl: input.resource.pullRequest._links.web.href,
-          },
-        });
-      }
+    if (prPageId) {
+      await notion.commentedPr({
+        pageId: prPageId,
+        data: {
+          commentId: String(input.resource.comment.id),
+          commentAuthorName: input.resource.comment.author.displayName,
+          commentUrl: input.resource.pullRequest._links.web.href,
+        },
+      });
+    }
 
-      return "OK - PR/COMMENTED";
-    }),
+    return "OK - PR/COMMENTED";
+  }),
 });
