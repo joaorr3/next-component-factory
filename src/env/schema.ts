@@ -36,6 +36,7 @@ export const serverSchema = z.object({
   NOTION_TOKEN: z.string(),
   NOTION_ISSUES_DB_ID: z.string(),
   NOTION_COMPONENTS_DB_ID: z.string(),
+  NOTION_PR_DB_ID: z.string(),
 
   START_DISCORD: z.string(),
   START_NOTION: z.string(),

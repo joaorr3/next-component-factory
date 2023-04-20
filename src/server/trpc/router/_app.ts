@@ -8,6 +8,7 @@ import { issuesRouter } from "./issues";
 import { kudosRouter } from "./kudos";
 import { labsRouter } from "./labs";
 import { mediaRouter } from "./media";
+import { notionRouter } from "./notion";
 import { rolesRouter } from "./roles";
 import { userRouter } from "./user";
 
@@ -23,6 +24,7 @@ export const appRouter = router({
   components: componentsRouter,
   labs: labsRouter,
   faq: faqRouter,
+  notion: notionRouter,
 });
 
 // export type definition of API

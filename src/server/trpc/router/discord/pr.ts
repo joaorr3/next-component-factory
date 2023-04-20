@@ -1,14 +1,9 @@
-import dayjs from "dayjs";
-import { Colors } from "discord.js";
-import { c18WebhookClient } from "./index";
-// import { env } from "../../../../env/server";
-import { WebhookType } from "../../../../shared/webhookType";
-import { prValidator } from "../../../../utils/validators/discord";
+import notion from "../../../../shared/notion";
+import {
+  pullRequestCommentedOnValidator,
+  pullRequestCreatedValidator,
+} from "../../../../utils/validators/azure";
 import { publicProcedure, router } from "../../trpc";
-
-// const prWebhookClient = new WebhookClient({
-//   url: env.DISCORD_WEBHOOK_PR,
-// });
 
 const cleanBranchName = (name: string) => {
   const reg = /(?<=refs\/heads\/).*$/g;
@@ -16,111 +11,87 @@ const cleanBranchName = (name: string) => {
 };
 
 export const prRouter = router({
-  create: publicProcedure.input(prValidator).query(async ({ input, ctx }) => {
-    const prId = input.resource.pullRequestId;
-    const azureUserId = input.resource.createdBy.id;
+  create: publicProcedure
+    .input(pullRequestCreatedValidator)
+    .query(async ({ input, ctx }) => {
+      const pullRequestId = String(input.resource.pullRequestId);
+      const azureUserId = input.resource.createdBy.id;
+      const azureUserName = input.resource.createdBy.displayName;
 
-    const guildUser = await ctx.prisma.guildUser.findUnique({
-      where: {
-        azureUserId,
-      },
-    });
-
-    const pr = await ctx.prisma.pullRequest.findUnique({
-      where: {
-        pullRequestId: String(prId),
-      },
-    });
-
-    if (!pr) {
-      const msg = await c18WebhookClient.send({
-        content: WebhookType.PR,
-        embeds: [
-          {
-            author: {
-              name: guildUser?.friendlyName || guildUser?.username || "",
-              icon_url: guildUser?.avatarURL || undefined,
-            },
-            title: input.resource.title,
-            description: input.detailedMessage.markdown,
-            color: Colors.Gold,
-            fields: [
-              {
-                name: "Source Branch",
-                value: cleanBranchName(input.resource.sourceRefName),
-                inline: true,
-              },
-              {
-                name: "Target Branch",
-                value: cleanBranchName(input.resource.targetRefName),
-                inline: true,
-              },
-              {
-                name: "Merge Status",
-                value: input.resource.mergeStatus,
-              },
-            ],
-            footer: {
-              text: dayjs(input.createdDate).format("HH:mm DD/MM/YYYY"),
-            },
-          },
-        ],
+      const guildUser = await ctx.prisma.guildUser.findUnique({
+        where: {
+          azureUserId,
+        },
       });
 
-      if (prId && msg.id && guildUser?.id) {
-        await ctx.prisma.pullRequest.create({
+      await notion.createPr({
+        pullRequestId,
+        authorName:
+          guildUser?.friendlyName || guildUser?.username || azureUserName || "",
+        authorAvatar: guildUser?.avatarURL || "",
+        title: input.resource.title,
+        description: input.detailedMessage.markdown,
+        sourceBranch: cleanBranchName(input.resource.sourceRefName),
+        targetBranch: cleanBranchName(input.resource.targetRefName),
+        mergeStatus: input.resource.mergeStatus,
+      });
+
+      return "OK - PR/CREATE";
+    }),
+  update: publicProcedure
+    .input(pullRequestCreatedValidator)
+    .query(async ({ input, ctx }) => {
+      const pullRequestId = String(input.resource.pullRequestId);
+      const azureUserId = input.resource.createdBy.id;
+      const azureUserName = input.resource.createdBy.displayName;
+
+      const guildUser = await ctx.prisma.guildUser.findUnique({
+        where: {
+          azureUserId,
+        },
+      });
+
+      const prPageId = await notion.getPrPageByPrId(pullRequestId);
+
+      if (prPageId) {
+        await notion.updatePr({
+          pageId: prPageId,
           data: {
-            pullRequestId: String(prId),
-            webhookMessageId: msg.id,
-            guildUserId: guildUser?.id,
+            authorName:
+              guildUser?.friendlyName ||
+              guildUser?.username ||
+              azureUserName ||
+              "",
+            authorAvatar: guildUser?.avatarURL || "",
+            title: input.resource.title,
+            description: input.detailedMessage.markdown,
+            sourceBranch: cleanBranchName(input.resource.sourceRefName),
+            targetBranch: cleanBranchName(input.resource.targetRefName),
+            mergeStatus: input.resource.mergeStatus,
           },
         });
       }
-    }
 
-    return "OK - PR/CREATE";
-  }),
-  update: publicProcedure.input(prValidator).query(async ({ input, ctx }) => {
-    const prId = input.resource.pullRequestId;
-    // const azureUserId = input.resource.createdBy.id;
+      return "OK - PR/UPDATE";
+    }),
+  commented: publicProcedure
+    .input(pullRequestCommentedOnValidator)
+    .query(async ({ input }) => {
+      const pullRequestId = String(input.resource.pullRequest.pullRequestId);
 
-    // const guildUser = await ctx.prisma.guildUser.findUnique({
-    //   where: {
-    //     azureUserId,
-    //   },
-    // });
+      const prPageId = await notion.getPrPageByPrId(pullRequestId);
 
-    const pr = await ctx.prisma.pullRequest.findUnique({
-      where: {
-        pullRequestId: String(prId),
-      },
-    });
-
-    if (pr) {
-      const msg = await c18WebhookClient.fetchMessage(pr.webhookMessageId);
-      const embed = msg.embeds[0];
-      const fields =
-        msg.embeds[0].fields?.filter((_, index) => index <= 2) || [];
-
-      await c18WebhookClient.editMessage(pr.webhookMessageId, {
-        content: WebhookType.PR,
-        embeds: [
-          {
-            ...embed,
-            color: Colors.Green,
-            fields: [
-              ...fields,
-              {
-                name: "Approves (update 4)",
-                value: "5",
-                inline: true,
-              },
-            ],
+      if (prPageId) {
+        await notion.commentedPr({
+          pageId: prPageId,
+          data: {
+            commentId: String(input.resource.comment.id),
+            commentAuthorName: input.resource.comment.author.displayName,
+            commentUrl: input.resource.pullRequest._links.web.href,
           },
-        ],
-      });
-    }
+        });
+      }
 
-    return "OK - PR/UPDATE";
-  }),
+      return "OK - PR/COMMENTED";
+    }),
 });

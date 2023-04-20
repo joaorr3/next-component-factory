@@ -1,14 +1,20 @@
 import { Client } from "@notionhq/client";
 import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
+import { markdownToBlocks } from "@tryfabric/martian";
 import { env } from "../../env/server";
+import type {
+  NotionPullRequestCommentedModel,
+  NotionPullRequestCreatedModel,
+  NotionPullRequestUpdatedModel,
+} from "../../utils/validators/notion";
 import { c18Avatar } from "../dataUtils";
 import logger from "../logger";
 import type { NotionIssueDetailsModel } from "../models";
 
+import dedent from "dedent";
 import {
   bookmark,
   getPublicUrl,
-  guildChannelUrl,
   image,
   paragraph,
   parseToNumberedList,
@@ -33,9 +39,6 @@ class Notion {
   }
 
   async getDatabase(id: string) {
-    this.client.databases.query({
-      database_id: id,
-    });
     return await this.client.databases.retrieve({
       database_id: id,
     });
@@ -44,6 +47,189 @@ class Notion {
   async getIssuesDatabase() {
     return await this.getDatabase(env.NOTION_ISSUES_DB_ID);
   }
+
+  async getPrDatabase() {
+    return await this.getDatabase(env.NOTION_PR_DB_ID);
+  }
+
+  async getPrDatabaseItems(cursor?: string) {
+    const { results, next_cursor } = await this.client.databases.query({
+      database_id: env.NOTION_PR_DB_ID,
+      start_cursor: cursor,
+    });
+
+    const res = results.map((item) => ({
+      // @ts-ignore
+      title: item.properties.Name.title[0].plain_text,
+      // @ts-ignore
+      pageId: item.id,
+    }));
+
+    return { results: res, next_cursor };
+  }
+
+  async getAllPrs() {
+    const comp_map: Array<{ id: string; pullRequestId: string }> = [];
+
+    const get = async (cursor?: string) => {
+      const { results, next_cursor } = await this.client.databases.query({
+        database_id: env.NOTION_PR_DB_ID,
+        start_cursor: cursor,
+      });
+
+      results.forEach((page) => {
+        comp_map.push({
+          id: page.id,
+          // @ts-ignore
+          name: page.properties.pullRequestId.title[0].plain_text,
+        });
+      });
+
+      if (next_cursor) {
+        await get(next_cursor);
+      }
+    };
+
+    await get();
+
+    return comp_map;
+  }
+
+  async getPrPageByPrId(pullRequestId: string) {
+    const allPrs = await this.getAllPrs();
+    const prPage = allPrs.find((item) => item.pullRequestId === pullRequestId);
+
+    try {
+      if (prPage) {
+        const res = await this.client.pages.retrieve({
+          page_id: prPage.id,
+        });
+        return res.id;
+      }
+    } catch (error) {
+      console.log("error: ", error);
+    }
+  }
+
+  async createPr(data: NotionPullRequestCreatedModel) {
+    try {
+      const res = await this.client.pages.create({
+        parent: {
+          type: "database_id",
+          database_id: env.NOTION_PR_DB_ID,
+        },
+        icon: {
+          type: "external",
+          external: {
+            url: data.authorAvatar,
+          },
+        },
+        properties: {
+          title: {
+            title: [{ type: "text", text: { content: data.title } }],
+          },
+          Author: {
+            rich_text: [{ type: "text", text: { content: data.authorName } }],
+          },
+          "Source Branch": {
+            rich_text: [{ type: "text", text: { content: data.sourceBranch } }],
+          },
+          "Target Branch": {
+            rich_text: [{ type: "text", text: { content: data.targetBranch } }],
+          },
+          "Merge Status": {
+            select: {
+              name: data.mergeStatus,
+            },
+          },
+        },
+        children: [...markdownToBlocks(dedent(data.description))],
+      });
+
+      return res.id;
+    } catch (error) {
+      console.log("error: ", error);
+    }
+  }
+
+  async updatePr(props: NotionPullRequestUpdatedModel) {
+    try {
+      const res = await this.client.pages.update({
+        page_id: props.pageId,
+        properties: {
+          title: {
+            title: [{ type: "text", text: { content: props.data.title } }],
+          },
+          Author: {
+            rich_text: [
+              { type: "text", text: { content: props.data.authorName } },
+            ],
+          },
+          "Source Branch": {
+            rich_text: [
+              { type: "text", text: { content: props.data.sourceBranch } },
+            ],
+          },
+          "Target Branch": {
+            rich_text: [
+              { type: "text", text: { content: props.data.targetBranch } },
+            ],
+          },
+          "Merge Status": {
+            select: {
+              name: props.data.mergeStatus,
+            },
+          },
+        },
+      });
+
+      const children = await this.client.blocks.children.list({
+        block_id: props.pageId,
+      });
+
+      const childrenValues = Object.values(children.results);
+
+      for (const item of childrenValues) {
+        await this.client.blocks.delete({
+          block_id: item.id,
+        });
+      }
+
+      await this.client.blocks.children.append({
+        block_id: props.pageId,
+        children: [...markdownToBlocks(dedent(props.data.description))],
+      });
+
+      return res.id;
+    } catch (error) {
+      console.log("error: ", error);
+    }
+  }
+
+  async commentedPr(props: NotionPullRequestCommentedModel) {
+    try {
+      const res = await this.client.comments.create({
+        parent: {
+          page_id: props.pageId,
+        },
+        rich_text: [
+          {
+            text: {
+              content: `${props.data.commentAuthorName} has left a comment. (${props.data.commentId})`,
+              link: {
+                url: props.data.commentUrl,
+              },
+            },
+          },
+        ],
+      });
+
+      return res.id;
+    } catch (error) {
+      console.log("error: ", error);
+    }
+  }
+
   async getComponentDatabase() {
     const comp_map: Array<{ id: string; name: string }> = [];
 
