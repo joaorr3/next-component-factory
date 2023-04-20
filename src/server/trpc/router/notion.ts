@@ -9,6 +9,15 @@ import {
 import { protectedProcedure, router } from "../trpc";
 
 export const notionRouter = router({
+  getPrPageByPrId: protectedProcedure
+    .input(
+      z.object({
+        prId: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      return await notion.getPrPageByPrId(input.prId);
+    }),
   getPrDatabase: protectedProcedure.query(async () => {
     return await notion.getPrDatabase();
   }),

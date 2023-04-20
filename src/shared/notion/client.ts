@@ -69,7 +69,7 @@ class Notion {
   }
 
   async getAllPrs() {
-    const comp_map: Array<{ id: string; pullRequestId: string }> = [];
+    const pageMap: Array<{ id: string; pullRequestId: string }> = [];
 
     const get = async (cursor?: string) => {
       const { results, next_cursor } = await this.client.databases.query({
@@ -77,13 +77,13 @@ class Notion {
         start_cursor: cursor,
       });
 
-      results.forEach((page) => {
-        comp_map.push({
+      for (const page of results) {
+        pageMap.push({
           id: page.id,
           // @ts-ignore
-          name: page.properties.pullRequestId.title[0].plain_text,
+          pullRequestId: page.properties?.pullRequestId?.rich_text?.[0]?.plain_text || null,
         });
-      });
+      }
 
       if (next_cursor) {
         await get(next_cursor);
@@ -92,7 +92,7 @@ class Notion {
 
     await get();
 
-    return comp_map;
+    return pageMap;
   }
 
   async getPrPageByPrId(pullRequestId: string) {
@@ -129,9 +129,7 @@ class Notion {
             title: [{ type: "text", text: { content: data.title } }],
           },
           pullRequestId: {
-            rich_text: [
-              { type: "text", text: { content: data.pullRequestId } },
-            ],
+            rich_text: [{ type: "text", text: { content: data.pullRequestId } }],
           },
           Author: {
             rich_text: [{ type: "text", text: { content: data.authorName } }],
@@ -166,19 +164,13 @@ class Notion {
             title: [{ type: "text", text: { content: props.data.title } }],
           },
           Author: {
-            rich_text: [
-              { type: "text", text: { content: props.data.authorName } },
-            ],
+            rich_text: [{ type: "text", text: { content: props.data.authorName } }],
           },
           "Source Branch": {
-            rich_text: [
-              { type: "text", text: { content: props.data.sourceBranch } },
-            ],
+            rich_text: [{ type: "text", text: { content: props.data.sourceBranch } }],
           },
           "Target Branch": {
-            rich_text: [
-              { type: "text", text: { content: props.data.targetBranch } },
-            ],
+            rich_text: [{ type: "text", text: { content: props.data.targetBranch } }],
           },
           "Merge Status": {
             select: {
@@ -408,10 +400,7 @@ class Notion {
                   },
                 },
               ],
-              children: [
-                bookmark(specs, "Specs"),
-                bookmark(codeSnippet, "Code Snippet"),
-              ],
+              children: [bookmark(specs, "Specs"), bookmark(codeSnippet, "Code Snippet")],
             },
           },
           ...spacer(),
@@ -517,10 +506,7 @@ class Notion {
     }
   }
 
-  async updatePageStatus(
-    pageId?: string,
-    status: keyof typeof this.pageStatus = "Not started"
-  ) {
+  async updatePageStatus(pageId?: string, status: keyof typeof this.pageStatus = "Not started") {
     try {
       if (pageId) {
         await this.client.pages.update({
@@ -604,13 +590,7 @@ class Notion {
     }
   }
 
-  async updateAssignTo({
-    pageId,
-    userId,
-  }: {
-    pageId?: string;
-    userId?: string;
-  }) {
+  async updateAssignTo({ pageId, userId }: { pageId?: string; userId?: string }) {
     try {
       if (pageId && userId) {
         await this.client.pages.update({
