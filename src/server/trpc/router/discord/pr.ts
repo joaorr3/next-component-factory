@@ -20,7 +20,6 @@ export const prRouter = router({
       } catch (error) {
         console.log("cant stringify");
       }
-      console.log("create-input-shape: ", input);
       const pullRequestId = String(input.resource.pullRequestId);
       const azureUserId = input.resource.createdBy.id;
       const azureUserName = input.resource.createdBy.displayName;
@@ -48,7 +47,11 @@ export const prRouter = router({
   update: publicProcedure
     .input(z.custom<any>())
     .query(async ({ input, ctx }) => {
-      console.log("update-input-shape: ", input);
+      try {
+        console.log("stringify-update-input-shape: ", JSON.stringify(input));
+      } catch (error) {
+        console.log("cant stringify");
+      }
       const pullRequestId = String(input.resource.pullRequestId);
       const azureUserId = input.resource.createdBy.id;
       const azureUserName = input.resource.createdBy.displayName;
@@ -83,7 +86,11 @@ export const prRouter = router({
       return "OK - PR/UPDATE";
     }),
   commented: publicProcedure.input(z.custom<any>()).query(async ({ input }) => {
-    console.log("commented-input-shape: ", input);
+    try {
+      console.log("stringify-commented-input-shape: ", JSON.stringify(input));
+    } catch (error) {
+      console.log("cant stringify");
+    }
     const pullRequestId = String(input.resource.pullRequest.pullRequestId);
 
     const prPageId = await notion.getPrPageByPrId(pullRequestId);
