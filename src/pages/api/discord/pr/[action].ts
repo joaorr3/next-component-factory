@@ -5,7 +5,7 @@ import { z } from "zod";
 import { createContext } from "../../../../server/trpc/context";
 import { appRouter } from "../../../../server/trpc/router/_app";
 
-const actionValidator = z.enum(["create", "update", "commented"]);
+const actionValidator = z.enum(["create", "updated", "commented"]);
 
 const pr = async (req: NextApiRequest, res: NextApiResponse) => {
   // Create context and caller

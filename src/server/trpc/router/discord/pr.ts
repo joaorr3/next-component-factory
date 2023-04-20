@@ -44,11 +44,11 @@ export const prRouter = router({
 
       return "OK - PR/CREATE";
     }),
-  update: publicProcedure
+  updated: publicProcedure
     .input(z.custom<any>())
     .query(async ({ input, ctx }) => {
       try {
-        console.log("stringify-update-input-shape: ", JSON.stringify(input));
+        console.log("stringify-updated-input-shape: ", JSON.stringify(input));
       } catch (error) {
         console.log("cant stringify");
       }
