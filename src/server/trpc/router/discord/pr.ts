@@ -14,6 +14,7 @@ export const prRouter = router({
   create: publicProcedure
     .input(pullRequestCreatedValidator)
     .query(async ({ input, ctx }) => {
+      console.log("input.resource: ", input.resource);
       const pullRequestId = String(input.resource.pullRequestId);
       const azureUserId = input.resource.createdBy.id;
       const azureUserName = input.resource.createdBy.displayName;

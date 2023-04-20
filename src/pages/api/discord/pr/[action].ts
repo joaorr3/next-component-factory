@@ -14,9 +14,11 @@ const pr = async (req: NextApiRequest, res: NextApiResponse) => {
 
   try {
     const { action } = req.query;
+    console.log("action: ", action);
     const validAction = actionValidator.parse(action);
     if (validAction) {
       const response = await caller.discord.pr[validAction](req.body);
+      console.log("response: ", response);
       res.status(200).json(response);
     }
   } catch (cause) {
