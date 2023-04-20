@@ -56,7 +56,7 @@ export const labsRouter = router({
               },
             },
           },
-          GuildRole: true
+          GuildRole: true,
         },
       });
     }),
@@ -103,20 +103,25 @@ const handleCreateLab = async (displayName?: string | null) => {
           parent: "994876251045122169", // LABS
           type: ChannelType.GuildText,
           topic: `${lab.displayName} Channel`,
-          permissionOverwrites: [
-            {
-              id: newRole.id,
-              allow: [PermissionsBitField.Flags.ViewChannel],
-            },
-            {
-              id: "977206962833997824", //CF
-              allow: [PermissionsBitField.Flags.ViewChannel],
-            },
-            {
-              id: "978344432069927003", //LABS
-              allow: [PermissionsBitField.Flags.ViewChannel],
-            },
-          ],
+          // Maybe we don't need this since we're defining the parent.
+          // permissionOverwrites: [
+          //   {
+          //     id: newRole.id,
+          //     allow: [PermissionsBitField.Flags.ViewChannel],
+          //   },
+          //   {
+          //     id: "977206962833997824", //CF
+          //     allow: [PermissionsBitField.Flags.ViewChannel],
+          //   },
+          //   {
+          //     id: "978344432069927003", //LABS
+          //     allow: [PermissionsBitField.Flags.ViewChannel],
+          //   },
+          //   {
+          //     id: "973878486739591208", //@everyone
+          //     deny: [PermissionsBitField.Flags.ViewChannel],
+          //   },
+          // ],
         });
 
         if (newChannel) {

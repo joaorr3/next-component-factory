@@ -11,6 +11,9 @@ const cleanBranchName = (name: string) => {
   return name.match(reg)?.[0] || name;
 };
 
+const authorAvatarFallback =
+  "https://component-factory-s3-bucket.s3.eu-west-2.amazonaws.com/generic/bb163cab-616f-43d6-9950-b23e7ebc88ca__cf-logo.png";
+
 export const prRouter = router({
   create: publicProcedure
     .input(z.custom<any>())
@@ -34,7 +37,7 @@ export const prRouter = router({
         pullRequestId,
         authorName:
           guildUser?.friendlyName || guildUser?.username || azureUserName || "",
-        authorAvatar: guildUser?.avatarURL || "",
+        authorAvatar: guildUser?.avatarURL || authorAvatarFallback,
         title: input.resource.title,
         description: input.detailedMessage.markdown,
         sourceBranch: cleanBranchName(input.resource.sourceRefName),

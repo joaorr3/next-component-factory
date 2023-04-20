@@ -291,10 +291,11 @@ const createIssueThread = async ({
         });
 
         const labMention = roleMention(lab.guildRoleId);
+        const pmMention = roleMention(discordNext.roleNames.projectManager);
 
         if (thread) {
           await thread?.send({
-            content: `${scopeMentions} ${labMention}`,
+            content: `${pmMention} ${scopeMentions} ${labMention}`,
             embeds: [
               new EmbedBuilder()
                 .setTitle(title)

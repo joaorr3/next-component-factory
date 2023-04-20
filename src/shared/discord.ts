@@ -42,6 +42,7 @@ export class DiscordClient {
   public readonly roleNames = {
     admin: "Admin",
     cf: "CF 🏭",
+    projectManager: "Project Manager 📁",
     dev: "DEV 👨‍💻",
     design: "Design 🎨",
     labs: "LABS 🧪",
