@@ -66,6 +66,7 @@ export const prRouter = router({
       });
 
       const prPageId = await notion.getPrPageByPrId(pullRequestId);
+      console.log("updated:prPageId: ", prPageId);
 
       if (prPageId) {
         await notion.updatePr({
@@ -97,6 +98,7 @@ export const prRouter = router({
     const pullRequestId = String(input.resource.pullRequest.pullRequestId);
 
     const prPageId = await notion.getPrPageByPrId(pullRequestId);
+    console.log("commented:prPageId: ", prPageId);
 
     if (prPageId) {
       await notion.commentedPr({
@@ -104,7 +106,8 @@ export const prRouter = router({
         data: {
           commentId: String(input.resource.comment.id),
           commentAuthorName: input.resource.comment.author.displayName,
-          commentUrl: input.resource.pullRequest._links.web.href,
+          commentUrl: "", // input.resource.pullRequest?._links?.web?.href,
+          markdown: input.message.markdown,
         },
       });
     }

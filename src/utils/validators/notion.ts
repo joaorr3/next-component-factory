@@ -11,9 +11,7 @@ export const notionPullRequestCreatedValidator = z.object({
   mergeStatus: z.string(),
 });
 
-export type NotionPullRequestCreatedModel = z.infer<
-  typeof notionPullRequestCreatedValidator
->;
+export type NotionPullRequestCreatedModel = z.infer<typeof notionPullRequestCreatedValidator>;
 
 export const notionPullRequestUpdatedValidator = z.object({
   pageId: z.string(),
@@ -28,9 +26,7 @@ export const notionPullRequestUpdatedValidator = z.object({
   }),
 });
 
-export type NotionPullRequestUpdatedModel = z.infer<
-  typeof notionPullRequestUpdatedValidator
->;
+export type NotionPullRequestUpdatedModel = z.infer<typeof notionPullRequestUpdatedValidator>;
 
 export const notionPullRequestCommentedValidator = z.object({
   pageId: z.string(),
@@ -38,9 +34,8 @@ export const notionPullRequestCommentedValidator = z.object({
     commentId: z.string(),
     commentAuthorName: z.string(),
     commentUrl: z.string().url(),
+    markdown: z.string(),
   }),
 });
 
-export type NotionPullRequestCommentedModel = z.infer<
-  typeof notionPullRequestCommentedValidator
->;
+export type NotionPullRequestCommentedModel = z.infer<typeof notionPullRequestCommentedValidator>;
