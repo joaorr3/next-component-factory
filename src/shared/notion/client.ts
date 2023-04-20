@@ -128,6 +128,11 @@ class Notion {
           title: {
             title: [{ type: "text", text: { content: data.title } }],
           },
+          pullRequestId: {
+            rich_text: [
+              { type: "text", text: { content: data.pullRequestId } },
+            ],
+          },
           Author: {
             rich_text: [{ type: "text", text: { content: data.authorName } }],
           },
