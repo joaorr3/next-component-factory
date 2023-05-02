@@ -291,7 +291,10 @@ const createIssueThread = async ({
         });
 
         const labMention = roleMention(lab.guildRoleId);
-        const pmMention = roleMention(discordNext.roleNames.projectManager);
+        const projectManagerRole = discordNext.role("projectManager");
+        const pmMention = projectManagerRole
+          ? roleMention(projectManagerRole.id)
+          : "";
 
         if (thread) {
           await thread?.send({
