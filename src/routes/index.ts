@@ -104,6 +104,8 @@ export const routes: Routes = {
       "/manage/components/[id]",
       "/manage/labs",
       "/manage/labs/[id]",
+      "/manage/users",
+      "/manage/roles",
     ],
     roles: {
       anyOf: ["cf", "dev"],

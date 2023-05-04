@@ -32,7 +32,7 @@ export const DataDisplay = ({
   return (
     <div className={cn("relative", className)}>
       {actionButton && (
-        <div className="absolute right-0 -top-12">
+        <div className="absolute right-0 -top-16">
           <InteractionElement
             text={actionButton.label}
             active={actionButton.isActive}

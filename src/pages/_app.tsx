@@ -41,7 +41,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
 
             <main className={montserrat.className}>
               <span className="fixed top-48 z-50 -rotate-90 text-xs font-semibold">
-                v1.1.2
+                v1.1.3
               </span>
 
               <NavBar>
@@ -52,10 +52,12 @@ const MyApp: AppType<{ session: Session | null }> = ({
                 <NavBarActionContainer>
                   <NewIssueShortcut />
 
+                  <UserAvatar />
+
                   <ManageMenu />
 
-                  <UserAvatar />
                   <LoginButton />
+
                   <ThemeSwitcher />
                 </NavBarActionContainer>
               </NavBar>

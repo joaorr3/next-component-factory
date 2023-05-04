@@ -53,7 +53,7 @@ export default withRoles("ManageMedia", () => {
         )}
 
         <div className="relative">
-          <div className="absolute right-0 -top-14">
+          <div className="absolute right-0 -top-16">
             <InteractionElement
               text="Upload"
               onPress={() => navigateUpload()}

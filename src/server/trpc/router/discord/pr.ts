@@ -114,4 +114,7 @@ export const prRouter = router({
 
     return "OK - PR/COMMENTED";
   }),
+  merge: publicProcedure.input(z.custom<any>()).query(async () => {
+    return "OK - PR/MERGE (Not Implemented)";
+  }),
 });

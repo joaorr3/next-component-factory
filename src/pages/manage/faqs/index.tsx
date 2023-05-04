@@ -40,7 +40,7 @@ export default withRoles("ManageFAQs", () => {
         )}
 
         <div className="relative">
-          <div className="absolute right-0 -top-14">
+          <div className="absolute right-0 -top-16">
             <InteractionElement text="Add" onPress={() => addFaq()} />
           </div>
 

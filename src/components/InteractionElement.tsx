@@ -1,8 +1,6 @@
 import Link from "next/link";
 import React from "react";
-import { useTheme } from "../styles/ThemeProvider";
-import { cn } from "../styles/utils";
-import { type ThemeNames } from "../theme";
+import { InteractionWrapper } from "./InteractionWrapper";
 
 export type InteractionElementProps = {
   text: string;
@@ -12,58 +10,20 @@ export type InteractionElementProps = {
   onPress?: () => void;
 };
 
-const base = /*tw*/ `
-  max-w-max
-  cursor-pointer
-  rounded-2xl
-  p-3
-  font-bold
-  transition-colors
-  select-none
-  flex
-  items-center
-`;
-
-const baseDark = /*tw*/ `
-text-white
-bg-neutral-800
-hover:bg-neutral-700
-  active:bg-opacity-80
-`;
-
-const baseLight = /*tw*/ `
-text-black
-bg-neutral-200
-hover:bg-neutral-300
-  active:bg-opacity-80
-`;
-
-const activeDark = /*tw*/ `
-  outline
-outline-neutral-500
-`;
-
-const activeLight = /*tw*/ `
-  outline
-outline-neutral-400
-`;
-
-type Classes = {
-  themeName: ThemeNames;
-  props: {
-    className?: string;
-    active?: boolean;
-  };
+export type WithLinkProps = {
+  link?: boolean;
 };
 
-const classes = ({ themeName, props: { active, className } }: Classes) => {
-  const activeClass = themeName === "dark" ? activeDark : activeLight;
-  return cn(
-    base,
-    themeName === "dark" ? baseDark : baseLight,
-    active ? activeClass : "",
-    className
-  );
+export const WithLink = ({
+  href,
+  children,
+}: React.PropsWithChildren<
+  Pick<InteractionElementProps, "href">
+>): JSX.Element => {
+  if (href) {
+    return <Link href={href}>{children}</Link>;
+  }
+  return <React.Fragment>{children}</React.Fragment>;
 };
 
 export const InteractionElement = ({
@@ -73,21 +33,15 @@ export const InteractionElement = ({
   className,
   onPress,
 }: InteractionElementProps): JSX.Element => {
-  const { themeName } = useTheme();
-  const cls = classes({ themeName, props: { active, className } });
-
-  if (href) {
-    return (
-      <Link href={href}>
-        <div className={cls} onClick={onPress}>
-          {text}
-        </div>
-      </Link>
-    );
-  }
   return (
-    <div className={cls} onClick={onPress}>
-      {text}
-    </div>
+    <WithLink href={href}>
+      <InteractionWrapper
+        active={active}
+        className={className}
+        onPress={onPress}
+      >
+        <p>{text}</p>
+      </InteractionWrapper>
+    </WithLink>
   );
 };

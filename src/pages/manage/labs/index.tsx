@@ -61,7 +61,7 @@ export default withRoles("ManageLabs", () => {
           <p className="m-3 mb-8 mt-12 text-xl font-bold">Labs</p>
 
           <div className="relative">
-            <div className="absolute right-0 -top-14">
+            <div className="absolute right-0 -top-16">
               <InteractionElement
                 text="Add"
                 onPress={() => {

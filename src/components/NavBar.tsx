@@ -9,7 +9,7 @@ import { navBarRouteEntries } from "../routes";
 const NavBar = ({ children }: React.PropsWithChildren) => {
   return (
     <React.Fragment>
-      <div className="fixed z-[100] flex h-16 w-full items-center justify-end backdrop-blur-md">
+      <div className="fixed z-[100] flex h-20 w-full items-center justify-end backdrop-blur-md">
         {children}
       </div>
       <div style={{ height: 80 }} />

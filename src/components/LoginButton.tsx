@@ -5,6 +5,7 @@ import {
   useGlobalState,
   useLoading,
 } from "../utils/GlobalState/GlobalStateProvider";
+import { InteractionWrapper } from "./InteractionWrapper";
 
 export type IconProps = {
   onPress?: () => void;
@@ -57,6 +58,7 @@ export const LogoutIcon = ({ onPress }: IconProps): JSX.Element => {
 
 export const LoginButton = (): JSX.Element => {
   const { data: sessionData } = useSession();
+  const isLoggedIn = !!sessionData;
   const { actions } = useGlobalState();
   const { setLoading } = useLoading("setOnly");
 
@@ -76,8 +78,18 @@ export const LoginButton = (): JSX.Element => {
     });
   }, []);
 
-  if (sessionData) {
-    return <LogoutIcon onPress={handleLogout} />;
-  }
-  return <LoginIcon onPress={handleLogin} />;
+  const handleOnPress = React.useCallback(() => {
+    isLoggedIn ? handleLogout() : handleLogin();
+  }, [handleLogin, handleLogout, isLoggedIn]);
+
+  const icon = React.useMemo(
+    () => (isLoggedIn ? <LogoutIcon /> : <LoginIcon />),
+    [isLoggedIn]
+  );
+
+  return (
+    <InteractionWrapper round onPress={handleOnPress}>
+      {icon}
+    </InteractionWrapper>
+  );
 };

@@ -47,7 +47,7 @@ const Modal = ({ isOpen, onChange, children }: ModalProps) => {
           }}
           className="modal relative m-3 flex w-full max-w-2xl flex-col justify-center rounded-xl bg-neutral-200 dark:bg-neutral-800"
         >
-          <div className="modal absolute -top-14 right-0">
+          <div className="modal absolute -top-16 right-0">
             <InteractionElement text="Close" onPress={close} />
           </div>
 

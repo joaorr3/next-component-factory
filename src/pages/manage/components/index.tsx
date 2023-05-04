@@ -64,7 +64,7 @@ export default withRoles("ManageComponents", () => {
           className="relative rounded-2xl bg-neutral-100 dark:bg-neutral-800"
           style={{ height: "70vh" }}
         >
-          <div className="absolute right-0 -top-14">
+          <div className="absolute right-0 -top-16">
             <InteractionElement
               text="Add"
               onPress={() => {
