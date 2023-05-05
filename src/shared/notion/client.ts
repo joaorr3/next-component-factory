@@ -143,7 +143,6 @@ class Notion {
             people: [
               {
                 id: data.notionUserId,
-                type: "person",
               },
             ],
           },
