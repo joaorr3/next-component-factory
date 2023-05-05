@@ -126,13 +126,13 @@ export const issuesRouter = router({
           type: input.type,
           stepsToReproduce: input.stepsToReproduce,
           component: input.component,
-          severity: input.severity,
+          severity: input.severity || null,
           specs: input.specs,
           codeSnippet: input.codeSnippet,
-          checkTechLead: input.checkTechLead,
-          checkDesign: input.checkDesign,
+          checkTechLead: !!input.checkTechLead,
+          checkDesign: !!input.checkDesign,
           scope: input.scope,
-          azureWorkItem: input.azureWorkItem,
+          azureWorkItem: input.azureWorkItem || "",
           attachment: input.files[0]?.url,
           attachment2: input.files[1]?.url,
 
@@ -144,7 +144,7 @@ export const issuesRouter = router({
           timestamp: new Date(),
           status: "TODO",
           discordThreadId: null,
-          platform: input.platform,
+          platform: input.platform || null,
           componentId: input.componentId,
         };
 

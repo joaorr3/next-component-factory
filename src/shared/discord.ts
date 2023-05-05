@@ -145,7 +145,10 @@ export class DiscordClient {
   public async roleIsAutoAssignable(_role?: Discord.Role) {
     const autoAssignable = await prismaSharedClient.roles.autoAssignable();
     const role = autoAssignable.find((r) => r.id === _role?.id);
-    return Boolean(role && role.isAutoAssignable);
+    return {
+      isAutoAssignable: Boolean(role && role.isAutoAssignable),
+      autoAssignableRoles: autoAssignable,
+    };
   }
 
   public hasRoleById(memberId: string | undefined, roleId: string | undefined) {

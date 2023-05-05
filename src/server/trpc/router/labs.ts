@@ -19,11 +19,14 @@ export const labsRouter = router({
   read: protectedProcedure
     .input(z.object({ id: z.string().optional() }))
     .query(async ({ ctx, input }) => {
-      return await ctx.prisma.lab.findUnique({
-        where: {
-          id: input.id,
-        },
-      });
+      if (input.id) {
+        return await ctx.prisma.lab.findUnique({
+          where: {
+            id: input.id,
+          },
+        });
+      }
+      return null;
     }),
   readMany: protectedProcedure.query(async () => {
     return await prismaNext.labs.readMany();

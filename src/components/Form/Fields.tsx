@@ -110,7 +110,7 @@ export const Description = ({
     );
 
   return (
-    <div className="ml-3 mb-3 flex items-center">
+    <div className="ml-3 mb-3 mt-1 flex items-center">
       <div className="mr-1">💁‍♀️</div>
       {descriptionElement}
     </div>

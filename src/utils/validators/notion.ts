@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const notionPullRequestCreatedValidator = z.object({
+  notionUserId: z.string().optional(),
   pullRequestId: z.string(),
   authorName: z.string(),
   authorAvatar: z.string().url(),
@@ -11,7 +12,9 @@ export const notionPullRequestCreatedValidator = z.object({
   mergeStatus: z.string(),
 });
 
-export type NotionPullRequestCreatedModel = z.infer<typeof notionPullRequestCreatedValidator>;
+export type NotionPullRequestCreatedModel = z.infer<
+  typeof notionPullRequestCreatedValidator
+>;
 
 export const notionPullRequestUpdatedValidator = z.object({
   pageId: z.string(),
@@ -26,7 +29,9 @@ export const notionPullRequestUpdatedValidator = z.object({
   }),
 });
 
-export type NotionPullRequestUpdatedModel = z.infer<typeof notionPullRequestUpdatedValidator>;
+export type NotionPullRequestUpdatedModel = z.infer<
+  typeof notionPullRequestUpdatedValidator
+>;
 
 export const notionPullRequestCommentedValidator = z.object({
   pageId: z.string(),
@@ -38,4 +43,6 @@ export const notionPullRequestCommentedValidator = z.object({
   }),
 });
 
-export type NotionPullRequestCommentedModel = z.infer<typeof notionPullRequestCommentedValidator>;
+export type NotionPullRequestCommentedModel = z.infer<
+  typeof notionPullRequestCommentedValidator
+>;

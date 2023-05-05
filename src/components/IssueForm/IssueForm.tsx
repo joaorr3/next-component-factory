@@ -14,6 +14,7 @@ import { Expandable } from "../Expandable";
 import * as Fields from "../Form/Fields";
 import { IssueCard } from "../Issue/IssueCard";
 import { LabList } from "../LabList";
+import { ScrollView } from "../ScrollView";
 import {
   type FormSchema,
   type FormSchemaKeys,
@@ -119,7 +120,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
           <Fields.Text
             label="Title"
             placeholder="Issue Title"
-            description="Leave the title clean, avoiding prefixes or other type of flag. Ex: [bug] - Example Title ❌ > Example Title ✅"
+            description='Leave the title clean, avoiding prefixes or flags. Ex: "[bug] - Example Title" ❌ > "Example Title" ✅'
             disabled={formState.isSubmitting}
             error={getError("title")}
             required
@@ -146,6 +147,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
             error={getError("type")}
             required
             control={control}
+            description="cr = change request"
           />
 
           <Fields.Area
@@ -160,21 +162,10 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
             register={register("stepsToReproduce")}
           />
 
-          <Fields.Selector
-            fieldName="severity"
-            placeholder="Select a severity"
-            label="Severity"
-            options={["high", "medium", "low"]}
-            disabled={formState.isSubmitting}
-            error={getError("severity")}
-            required
-            control={control}
-          />
-
           <Fields.Text
             label="Code Snippet"
             placeholder="https://dev.azure.com/ptbcp/IT.Ignite/_git/Project.Repo"
-            description="This is important to us, and by providing a correct URL your issue have a big change of being solved more quickly."
+            description="Providing a correct URL increases the chances of a quicker resolution."
             disabled={formState.isSubmitting}
             error={getError("codeSnippet")}
             required
@@ -199,7 +190,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
                   >
                     this faq
                   </Link>{" "}
-                  to get more info.
+                  for more info.
                 </span>
               </div>
             }
@@ -209,13 +200,24 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
             register={register("specs")}
           />
 
-          <Fields.Text
+          <Fields.Selector
+            fieldName="severity"
+            placeholder="Select a severity"
+            label="Severity"
+            options={["high", "medium", "low"]}
+            disabled={formState.isSubmitting}
+            error={getError("severity")}
+            // required
+            control={control}
+          />
+
+          {/* <Fields.Text
             label="Azure Work Item"
             placeholder="Ex: 2365789"
             disabled={formState.isSubmitting}
             error={getError("azureWorkItem")}
             register={register("azureWorkItem")}
-          />
+          /> */}
         </Group>
 
         <Group label="Project Info">
@@ -262,7 +264,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
           <Fields.Text
             label="Package Version"
             placeholder="Ex: 3.3.0-1.0.332128"
-            description="In your terminal run: npm list @bcp-nextgen-dx-component-factory/accolade-design-system --depth=0"
+            description="npm list @bcp-nextgen-dx-component-factory/design-system --depth=0"
             disabled={formState.isSubmitting}
             error={getError("version")}
             required
@@ -273,7 +275,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
             fieldName="platform"
             placeholder="Select a platform"
             label="Platform"
-            description="Where does your code run."
+            description="Where does your code run"
             options={["WEB", "NATIVE", "CROSS"]}
             disabled={formState.isSubmitting}
             error={getError("platform")}
@@ -283,9 +285,9 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
 
           <Fields.Selector
             fieldName="scope"
-            placeholder="Select a scope"
-            label="Team"
-            description="The team to be tagged"
+            placeholder="Select a team"
+            label="Who should be notified?"
+            description="The team to be tagged on Discord"
             options={["dev", "design", "both"]}
             disabled={formState.isSubmitting}
             error={getError("scope")}
@@ -293,7 +295,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
             control={control}
           />
 
-          <div className="flex">
+          {/* <div className="flex">
             <Fields.Toggle
               label="Checked With Tech Lead"
               checked={getValues("checkTechLead")}
@@ -311,7 +313,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
               error={getError("checkDesign")}
               register={() => register("checkDesign")}
             />
-          </div>
+          </div> */}
         </Group>
 
         <Fields.Dropzone
@@ -320,7 +322,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
           disabled={formState.isSubmitting}
           register={() => register("files")}
           error={getError("files")}
-          description="If you don't get a preview after you drop the image, make sure your file has an extension. Ex: my_image.png. Otherwise just use the file dialog by clicking on the drop area."
+          description="Drop your attachments here. If you don't get a preview after you drop the image, make sure your file has an extension. Ex: my_image.png. Otherwise just use the file dialog by clicking on the drop area."
           onChange={(files) => setValue("files", files)}
         />
 
@@ -407,17 +409,19 @@ export const RelatedIssues = ({
         className="mb-0"
       >
         <Accordion headerLabel={related?.length ? "Issues" : ""}>
-          <div className="pt-8">
-            {related?.map((issue, key) => (
-              <IssueCard
-                key={key}
-                className={cn(key === related.length - 1 ? "mb-0" : "")}
-                issue={issue}
-                hoverEffect={false}
-                href={routes.IssueDetail.dynamicPath(String(issue.id))}
-                hrefTarget="_blank"
-              />
-            ))}
+          <div className="h-96 pt-8">
+            <ScrollView className="h-full overflow-y-scroll pr-2">
+              {related?.map((issue, key) => (
+                <IssueCard
+                  key={key}
+                  className={cn(key === related.length - 1 ? "mb-0" : "")}
+                  issue={issue}
+                  hoverEffect={false}
+                  href={routes.IssueDetail.dynamicPath(String(issue.id))}
+                  hrefTarget="_blank"
+                />
+              ))}
+            </ScrollView>
           </div>
         </Accordion>
       </Group>

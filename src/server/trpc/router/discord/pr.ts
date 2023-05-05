@@ -1,9 +1,10 @@
 import { z } from "zod";
 import notion from "../../../../shared/notion";
-// import {
-//   pullRequestCommentedOnValidator,
-//   pullRequestCreatedValidator,
-// } from "../../../../utils/validators/azure";
+import {
+  pullRequestCommentedOnValidator,
+  pullRequestCreatedValidator,
+  pullRequestUpdatedValidator,
+} from "../../../../utils/validators/azure";
 import { publicProcedure, router } from "../../trpc";
 
 const cleanBranchName = (name: string) => {
@@ -14,26 +15,43 @@ const cleanBranchName = (name: string) => {
 const authorAvatarFallback =
   "https://component-factory-s3-bucket.s3.eu-west-2.amazonaws.com/generic/bb163cab-616f-43d6-9950-b23e7ebc88ca__cf-logo.png";
 
+const parseMarkdownLink = (
+  markdownLink: string
+): {
+  label: string;
+  url: string;
+} => {
+  const linkRegex = /\[([^\]]+)\]\(([^\)]+)\)/;
+  const matches = markdownLink.match(linkRegex);
+  if (!matches) {
+    throw new Error(`Invalid markdown link: ${markdownLink}`);
+  }
+  const [, label, url] = matches;
+  return { label, url };
+};
+
 export const prRouter = router({
   create: publicProcedure
-    .input(z.custom<any>())
+    .input(pullRequestCreatedValidator)
     .query(async ({ input, ctx }) => {
-      try {
-        console.log("stringify-create-input-shape: ", JSON.stringify(input));
-      } catch (error) {
-        console.log("cant stringify");
-      }
-      const pullRequestId = String(input.resource.pullRequestId);
-      const azureUserId = input.resource.createdBy.id;
-      const azureUserName = input.resource.createdBy.displayName;
+      const authorId = input.resource.createdBy.id;
 
       const guildUser = await ctx.prisma.guildUser.findUnique({
         where: {
-          azureUserId,
+          azureUserId: authorId,
+        },
+        include: {
+          notionUser: true,
         },
       });
 
+      const notionUserId = guildUser?.notionUser?.notionUserId;
+
+      const pullRequestId = String(input.resource.pullRequestId);
+      const azureUserName = input.resource.createdBy.displayName;
+
       await notion.createPr({
+        notionUserId,
         pullRequestId,
         authorName:
           guildUser?.friendlyName || guildUser?.username || azureUserName || "",
@@ -48,13 +66,8 @@ export const prRouter = router({
       return "OK - PR/CREATE";
     }),
   updated: publicProcedure
-    .input(z.custom<any>())
+    .input(pullRequestUpdatedValidator)
     .query(async ({ input, ctx }) => {
-      try {
-        console.log("stringify-updated-input-shape: ", JSON.stringify(input));
-      } catch (error) {
-        console.log("cant stringify");
-      }
       const pullRequestId = String(input.resource.pullRequestId);
       const azureUserId = input.resource.createdBy.id;
       const azureUserName = input.resource.createdBy.displayName;
@@ -66,7 +79,6 @@ export const prRouter = router({
       });
 
       const prPageId = await notion.getPrPageByPrId(pullRequestId);
-      console.log("updated:prPageId: ", prPageId);
 
       if (prPageId) {
         await notion.updatePr({
@@ -89,31 +101,29 @@ export const prRouter = router({
 
       return "OK - PR/UPDATE";
     }),
-  commented: publicProcedure.input(z.custom<any>()).query(async ({ input }) => {
-    try {
-      console.log("stringify-commented-input-shape: ", JSON.stringify(input));
-    } catch (error) {
-      console.log("cant stringify");
-    }
-    const pullRequestId = String(input.resource.pullRequest.pullRequestId);
+  commented: publicProcedure
+    .input(pullRequestCommentedOnValidator)
+    .query(async ({ input }) => {
+      const pullRequestId = String(input.resource.pullRequest.pullRequestId);
+      const { label, url } = parseMarkdownLink(input.message.markdown);
 
-    const prPageId = await notion.getPrPageByPrId(pullRequestId);
-    console.log("commented:prPageId: ", prPageId);
+      const commentAuthor = input.resource.comment.author.displayName;
+      const prPageId = await notion.getPrPageByPrId(pullRequestId);
 
-    if (prPageId) {
-      await notion.commentedPr({
-        pageId: prPageId,
-        data: {
-          commentId: String(input.resource.comment.id),
-          commentAuthorName: input.resource.comment.author.displayName,
-          commentUrl: "", // input.resource.pullRequest?._links?.web?.href,
-          markdown: input.message.markdown,
-        },
-      });
-    }
+      if (prPageId && label === "commented") {
+        await notion.commentedPr({
+          pageId: prPageId,
+          data: {
+            commentId: String(input.resource.comment.id),
+            commentAuthorName: commentAuthor,
+            commentUrl: url,
+            markdown: input.message.markdown,
+          },
+        });
+      }
 
-    return "OK - PR/COMMENTED";
-  }),
+      return "OK - PR/COMMENTED";
+    }),
   merge: publicProcedure.input(z.custom<any>()).query(async () => {
     return "OK - PR/MERGE (Not Implemented)";
   }),

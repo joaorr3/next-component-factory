@@ -10,13 +10,13 @@ const baseIssueSchema = z.object({
   type: z.enum(["bug", "help", "feat", "cr"]),
   stepsToReproduce: notEmptyString,
   component: notEmptyString,
-  severity: z.enum(["high", "medium", "low"]),
+  severity: z.enum(["high", "medium", "low"]).optional(),
   specs: z.string().url(),
   codeSnippet: z.string().url(),
-  checkTechLead: z.boolean(),
-  checkDesign: z.boolean(),
+  checkTechLead: z.boolean().optional(),
+  checkDesign: z.boolean().optional(),
   scope: z.enum(["dev", "design", "both"]),
-  azureWorkItem: z.string().nullable(),
+  azureWorkItem: z.string().nullable().optional(),
   platform: z.enum(["WEB", "NATIVE", "CROSS"]),
 });
 

@@ -108,7 +108,7 @@ export const registerCommands = () => {
           .setDescription("What do you want to do?")
           .setRequired(true)
           .addChoices(
-            { name: RoleAction.give, value: RoleAction.give },
+            { name: RoleAction.get, value: RoleAction.get },
             { name: RoleAction.remove, value: RoleAction.remove }
           )
       )
@@ -339,10 +339,11 @@ export const commandReactions = async ({
       const hasAlreadyThisRole = discord.hasRoleById(guildUser?.id, role.id);
 
       try {
-        const isAutoAssignable = await discord.roleIsAutoAssignable(role);
+        const { isAutoAssignable, autoAssignableRoles } =
+          await discord.roleIsAutoAssignable(role);
 
         if (isAutoAssignable && guildUser) {
-          if (action === RoleAction.give) {
+          if (action === RoleAction.get) {
             if (hasAlreadyThisRole) {
               await interaction.reply({
                 content: `You already have the role ${role?.name}.`,
@@ -388,8 +389,16 @@ export const commandReactions = async ({
             });
           }
         } else {
+          const rolesName = autoAssignableRoles.map(({ name }) => name);
+
+          const info = [
+            `Sorry, i'm not allowed to assign the role ${role?.name} to you. I'll notify an admin for you.\n`,
+            "Here's a list of the roles you can assign to yourself with the **/roles** command.\n",
+            rolesName.map((r) => `• ${r}`).join("\n"),
+          ];
+
           await interaction.reply({
-            content: `Sorry, can't assign the role ${role?.name} to you. Ask an admin. Thanks`,
+            content: info.join("\n"),
             ephemeral: true,
           });
 

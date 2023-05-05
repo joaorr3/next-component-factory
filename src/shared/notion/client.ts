@@ -113,6 +113,10 @@ class Notion {
   }
 
   async createPr(data: NotionPullRequestCreatedModel) {
+    if (!data.notionUserId) {
+      return null;
+    }
+
     try {
       const res = await this.client.pages.create({
         parent: {
@@ -132,6 +136,15 @@ class Notion {
           pullRequestId: {
             rich_text: [
               { type: "text", text: { content: data.pullRequestId } },
+            ],
+          },
+          Person: {
+            type: "people",
+            people: [
+              {
+                id: data.notionUserId,
+                type: "person",
+              },
             ],
           },
           Author: {
@@ -212,20 +225,22 @@ class Notion {
     }
   }
 
-  async commentedPr(props: NotionPullRequestCommentedModel) {
+  async commentedPr({
+    pageId,
+    data: { commentUrl, commentAuthorName },
+  }: NotionPullRequestCommentedModel) {
     try {
       const res = await this.client.comments.create({
         parent: {
-          page_id: props.pageId,
+          page_id: pageId,
         },
         rich_text: [
           {
             text: {
-              // content: `${props.data.commentAuthorName} has left a comment. (${props.data.commentId})`,
-              content: props.data.markdown,
-              // link: {
-              //   url: props.data.commentUrl,
-              // },
+              content: `${commentAuthorName} has commented`,
+              link: {
+                url: commentUrl,
+              },
             },
           },
         ],

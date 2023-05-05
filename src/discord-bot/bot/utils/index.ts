@@ -23,7 +23,7 @@ export const visitorRole = async ({
   const visitorRole = discord.role("visitor");
 
   if (visitorRole) {
-    if (action === RoleAction.give) {
+    if (action === RoleAction.get) {
       await guildUser?.roles.add(visitorRole);
     } else {
       await guildUser?.roles.remove(visitorRole);

@@ -7,6 +7,7 @@ import { usePathMatch } from "../hooks/usePathMatch";
 import { useRoles } from "../hooks/useRoles";
 import { useSpringPopup } from "../hooks/useSpringPopup";
 import { routes } from "../routes";
+import { cn } from "../styles/utils";
 import { InteractionWrapper } from "./InteractionWrapper";
 
 export const SettingsIcon = (): JSX.Element => {
@@ -26,7 +27,7 @@ export const SettingsIcon = (): JSX.Element => {
 const menuItem = /*tw*/ `
   w-full 
   rounded-none
-  h-12
+  h-14
   flex
   items-center
   justify-center
@@ -43,7 +44,6 @@ hover:bg-neutral-300
   dark:hover:bg-opacity-30
 dark:hover:bg-neutral-700
   dark:active:bg-opacity-80
-  
 `;
 
 export type MenuItemProps = {
@@ -58,11 +58,38 @@ export const MenuItem = ({
   onPress,
 }: MenuItemProps): JSX.Element => {
   return (
-    <Link href={href} className={menuItem} onClick={onPress}>
-      {text}
+    <Link href={href} className={cn(menuItem)} onClick={onPress}>
+      <p className="">{text}</p>
     </Link>
   );
 };
+
+const menuItems = [
+  {
+    text: routes.ManageComponents.label,
+    href: routes.ManageComponents.path,
+  },
+  {
+    text: routes.ManageFAQs.label,
+    href: routes.ManageFAQs.path,
+  },
+  {
+    text: routes.ManageLabs.label,
+    href: routes.ManageLabs.path,
+  },
+  {
+    text: routes.ManageUsers.label,
+    href: routes.ManageUsers.path,
+  },
+  {
+    text: routes.ManageRoles.label,
+    href: routes.ManageRoles.path,
+  },
+  {
+    text: routes.ManageMedia.label,
+    href: routes.ManageMedia.path,
+  },
+];
 
 export const ManageMenu = (): JSX.Element => {
   const { matchPath } = usePathMatch();
@@ -84,45 +111,32 @@ export const ManageMenu = (): JSX.Element => {
       <InteractionWrapper
         round
         onPress={() => setIsOpen(true)}
-        active={matchPath({
-          path: routes.Manage.path,
-          match: routes.Manage.match,
-        })}
+        active={
+          isOpen ||
+          matchPath({
+            path: routes.Manage.path,
+            match: routes.Manage.match,
+          })
+        }
       >
         <SettingsIcon />
       </InteractionWrapper>
 
       <PopUpMenu isOpen={isVisible} value={value} onPressOutside={close}>
-        <MenuItem
-          text={routes.ManageComponents.label}
-          href={routes.ManageComponents.path}
-          onPress={() => close()}
-        />
-        <MenuItem
-          text={routes.ManageFAQs.label}
-          href={routes.ManageFAQs.path}
-          onPress={() => close()}
-        />
-        <MenuItem
-          text={routes.ManageLabs.label}
-          href={routes.ManageLabs.path}
-          onPress={() => close()}
-        />
-        <MenuItem
-          text={routes.ManageUsers.label}
-          href={routes.ManageUsers.path}
-          onPress={() => close()}
-        />
-        <MenuItem
-          text={routes.ManageRoles.label}
-          href={routes.ManageRoles.path}
-          onPress={() => close()}
-        />
-        <MenuItem
-          text={routes.ManageMedia.label}
-          href={routes.ManageMedia.path}
-          onPress={() => close()}
-        />
+        {menuItems.map((item, index) => {
+          return (
+            <React.Fragment key={item.href}>
+              <MenuItem
+                text={item.text}
+                href={item.href}
+                onPress={() => close()}
+              />
+              {index !== menuItems.length - 1 && (
+                <div className="h-px w-4/5 bg-neutral-400 bg-opacity-10" />
+              )}
+            </React.Fragment>
+          );
+        })}
       </PopUpMenu>
     </div>
   );
@@ -154,8 +168,10 @@ export const PopUpMenu = ({
             zIndex: 120,
             scale: value.to([0, 1], [0.9, 1], "clamp"),
             translateY: value.to([0, 1], [-20, 0], "clamp"),
+            right: -50,
+            top: 60,
           }}
-          className="absolute top-14 right-0 flex w-40 flex-col items-end overflow-hidden rounded-2xl border-2 border-solid border-neutral-400 bg-neutral-100 p-0 dark:border-neutral-700 dark:bg-neutral-900"
+          className="absolute flex w-40 flex-col items-center justify-center overflow-hidden rounded-2xl bg-neutral-100 p-0 py-2 shadow-xl dark:border-neutral-700 dark:bg-zinc-800"
         >
           {children}
         </animated.div>

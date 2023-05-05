@@ -13,7 +13,7 @@ export const guildMemberAddHandler = async (member: GuildMember) => {
   });
 
   await visitorRole({
-    action: RoleAction.give,
+    action: RoleAction.get,
     userId: member.user.id,
   });
 };

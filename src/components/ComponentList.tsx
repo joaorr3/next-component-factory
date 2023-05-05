@@ -1,16 +1,11 @@
 import { type Component, type ComponentCategory } from "@prisma/client";
 import { debounce, groupBy, startCase } from "lodash";
 import React from "react";
-import styled from "styled-components";
-import { customScrollBar } from "../styles/GlobalStyles";
 import { cn } from "../styles/utils";
 import { trpc } from "../utils/trpc";
 import { TextField } from "./Form/Fields";
 import Loader from "./Loader";
-
-const ScrollView = styled.div`
-  ${customScrollBar}
-`;
+import { ScrollView } from "./ScrollView";
 
 export type ComponentListProps = {
   selectedComponentName?: Component["name"];
