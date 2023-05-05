@@ -124,7 +124,13 @@ export const prRouter = router({
 
       return "OK - PR/COMMENTED";
     }),
-  merge: publicProcedure.input(z.custom<any>()).query(async () => {
+  merge: publicProcedure.input(z.custom<any>()).query(async ({ input }) => {
+    try {
+      console.log("stringify-merge-input-shape: ", JSON.stringify(input));
+    } catch (error) {
+      console.log("cant stringify");
+    }
+
     return "OK - PR/MERGE (Not Implemented)";
   }),
 });
