@@ -2,12 +2,43 @@ import Discord, {
   ChannelType,
   GatewayIntentBits,
   Partials,
+  roleMention,
+  userMention,
   type Awaitable,
   type ClientEvents,
 } from "discord.js";
 import { env } from "../env/server";
 import { prismaSharedClient } from "./prisma/client";
 import { promisify } from "./utils";
+
+const channelNames = {
+  welcome: "welcome",
+  pr: "pr-approvals",
+  releases: "releases",
+  issueTracking: "issue-tracking",
+  issueValidation: "issue-validation",
+  workItem: "work-item",
+  botLogs: "bot-logs",
+  debugBotLogs: "debug-bot-logs",
+  webhookLogs: "webhook-logs",
+  roles: "roles",
+} as const;
+
+// type ChanelNamesModel = typeof channelNames;
+
+const roleNames = {
+  admin: "Admin",
+  cf: "CF 🏭",
+  projectManager: "Project Manager 📁",
+  dev: "DEV 👨‍💻",
+  design: "Design 🎨",
+  labs: "LABS 🧪",
+  issueValidation: "issue-validation",
+  techLead: "tech-lead",
+  visitor: "Visitors 👽",
+} as const;
+
+type RoleNameModels = typeof roleNames;
 
 export class DiscordClient {
   public client = new Discord.Client({
@@ -26,30 +57,9 @@ export class DiscordClient {
 
   public guild: Discord.Guild | undefined;
 
-  public readonly channelNames = {
-    welcome: "welcome",
-    pr: "pr-approvals",
-    releases: "releases",
-    issueTracking: "issue-tracking",
-    issueValidation: "issue-validation",
-    workItem: "work-item",
-    botLogs: "bot-logs",
-    debugBotLogs: "debug-bot-logs",
-    webhookLogs: "webhook-logs",
-    roles: "roles",
-  } as const;
+  public readonly channelNames = channelNames;
 
-  public readonly roleNames = {
-    admin: "Admin",
-    cf: "CF 🏭",
-    projectManager: "Project Manager 📁",
-    dev: "DEV 👨‍💻",
-    design: "Design 🎨",
-    labs: "LABS 🧪",
-    issueValidation: "issue-validation",
-    techLead: "tech-lead",
-    visitor: "Visitors 👽",
-  } as const;
+  public readonly roleNames = roleNames;
 
   private static _instance: DiscordClient = new DiscordClient();
 
@@ -140,6 +150,47 @@ export class DiscordClient {
     }
 
     return false;
+  }
+
+  public mention({
+    userId,
+    roles,
+  }: {
+    userId?: string | string[];
+    roles?: keyof RoleNameModels | (keyof RoleNameModels)[];
+  }) {
+    const type = !!roles ? "role" : "user";
+
+    const mentionFn = !!roles ? roleMention : userMention;
+    const mentionsIds: string[] = [];
+
+    if (type === "role" && !!roles) {
+      if (Array.isArray(roles)) {
+        for (const roleName of roles) {
+          const role = this.role(roleName);
+          if (role) {
+            mentionsIds.push(role.id);
+          }
+        }
+      } else {
+        const role = this.role(roles);
+        if (role) {
+          mentionsIds.push(role.id);
+        }
+      }
+    } else if (type === "user" && !!userId) {
+      if (Array.isArray(userId)) {
+        for (const id of userId) {
+          mentionsIds.push(id);
+        }
+      } else {
+        mentionsIds.push(userId);
+      }
+    }
+
+    const mentionString = mentionsIds.map((m) => mentionFn(m)).join(" ");
+
+    return mentionString;
   }
 
   public async roleIsAutoAssignable(_role?: Discord.Role) {

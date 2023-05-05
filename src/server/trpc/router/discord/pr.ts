@@ -1,3 +1,4 @@
+import { truncate } from "lodash";
 import { z } from "zod";
 import notion from "../../../../shared/notion";
 import {
@@ -5,12 +6,16 @@ import {
   pullRequestCreatedValidator,
   pullRequestUpdatedValidator,
 } from "../../../../utils/validators/azure";
+import { discordNext } from "../../../discord/client";
 import { publicProcedure, router } from "../../trpc";
 
 const cleanBranchName = (name: string) => {
   const reg = /(?<=refs\/heads\/).*$/g;
   return name.match(reg)?.[0] || name;
 };
+
+export const getPrUrl = (id?: string) =>
+  `https://dev.azure.com/ptbcp/IT.Ignite/_git/BCP.Ignite.Dx.ComponentFactory/pullrequest/${id}`;
 
 const authorAvatarFallback =
   "https://component-factory-s3-bucket.s3.eu-west-2.amazonaws.com/generic/bb163cab-616f-43d6-9950-b23e7ebc88ca__cf-logo.png";
@@ -46,13 +51,12 @@ export const prRouter = router({
       });
 
       const notionUserId = guildUser?.notionUser?.notionUserId;
-
-      const pullRequestId = String(input.resource.pullRequestId);
       const azureUserName = input.resource.createdBy.displayName;
+      const prId = String(input.resource.pullRequestId);
 
-      await notion.createPr({
-        notionUserId,
-        pullRequestId,
+      const prData = {
+        prId: prId,
+        prUrl: getPrUrl(prId),
         authorName:
           guildUser?.friendlyName || guildUser?.username || azureUserName || "",
         authorAvatar: guildUser?.avatarURL || authorAvatarFallback,
@@ -61,6 +65,45 @@ export const prRouter = router({
         sourceBranch: cleanBranchName(input.resource.sourceRefName),
         targetBranch: cleanBranchName(input.resource.targetRefName),
         mergeStatus: input.resource.mergeStatus,
+      } as const;
+
+      await discordNext.sendMessage("pr", {
+        content: discordNext.mention({ roles: "dev" }),
+        embeds: [
+          discordNext.embed({
+            title: prData.title,
+            url: prData.prUrl,
+            author: {
+              name: prData.authorName,
+              iconURL: prData.authorAvatar,
+            },
+            description: truncate(prData.description, {
+              length: 300,
+            }),
+            fields: [
+              {
+                name: "Source Branch",
+                value: prData.sourceBranch,
+              },
+              {
+                name: "Target Branch",
+                value: prData.targetBranch,
+              },
+            ],
+          }),
+        ],
+      });
+
+      await notion.createPr({
+        notionUserId,
+        pullRequestId: prData.prId,
+        authorName: prData.authorName,
+        authorAvatar: prData.authorAvatar,
+        title: prData.title,
+        description: prData.description,
+        sourceBranch: prData.sourceBranch,
+        targetBranch: prData.targetBranch,
+        mergeStatus: prData.mergeStatus,
       });
 
       return "OK - PR/CREATE";
