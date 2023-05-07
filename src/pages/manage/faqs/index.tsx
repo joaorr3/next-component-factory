@@ -6,10 +6,16 @@ import { InteractionElement } from "../../../components/InteractionElement";
 import { ListItem } from "../../../components/ListItem";
 import { routes } from "../../../routes";
 import { useLoading } from "../../../utils/GlobalState/GlobalStateProvider";
-import { withRoles } from "../../../utils/hoc";
+import { authLayer } from "../../../utils/server-side";
 import { trpc } from "../../../utils/trpc";
 
-export default withRoles("ManageFAQs", () => {
+export const getServerSideProps = authLayer("ManageFAQs", async () => {
+  return {
+    props: {},
+  };
+});
+
+export default function ManageFAQs() {
   const { data: faqs, isLoading, fetchStatus } = trpc.faq.readMany.useQuery();
 
   useLoading(isLoading && fetchStatus !== "idle");
@@ -61,4 +67,4 @@ export default withRoles("ManageFAQs", () => {
       </main>
     </React.Fragment>
   );
-});
+}

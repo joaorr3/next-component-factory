@@ -7,10 +7,16 @@ import {
   useGlobalState,
   useLoading,
 } from "../../utils/GlobalState/GlobalStateProvider";
-import { withRoles } from "../../utils/hoc";
+import { authLayer } from "../../utils/server-side";
 import { trpc } from "../../utils/trpc";
 
-export default withRoles("User", () => {
+export const getServerSideProps = authLayer("User", async () => {
+  return {
+    props: {},
+  };
+});
+
+export default function User() {
   const {
     state: { user },
     actions: { setDefaultUserLab },
@@ -105,4 +111,4 @@ export default withRoles("User", () => {
       </main>
     </React.Fragment>
   );
-});
+}

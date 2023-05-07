@@ -12,10 +12,16 @@ import {
   useGlobalState,
   useLoading,
 } from "../../utils/GlobalState/GlobalStateProvider";
-import { withRoles } from "../../utils/hoc";
+import { authLayer } from "../../utils/server-side";
 import { trpc } from "../../utils/trpc";
 
-export default withRoles("Issue", () => {
+export const getServerSideProps = authLayer("Issue", async () => {
+  return {
+    props: {},
+  };
+});
+
+export default function Issue() {
   const {
     state: {
       issues: { searchFilters },
@@ -73,4 +79,4 @@ export default withRoles("Issue", () => {
       </main>
     </React.Fragment>
   );
-});
+}

@@ -10,10 +10,16 @@ import {
   useGlobalState,
   useLoading,
 } from "../../../utils/GlobalState/GlobalStateProvider";
-import { withRoles } from "../../../utils/hoc";
+import { authLayer } from "../../../utils/server-side";
 import { trpc } from "../../../utils/trpc";
 
-export default withRoles("ManageFAQDetail", () => {
+export const getServerSideProps = authLayer("ManageFAQDetail", async () => {
+  return {
+    props: {},
+  };
+});
+
+export default function ManageFAQDetail() {
   const router = useRouter();
   const { slug: _slug } = router.query;
 
@@ -129,4 +135,4 @@ export default withRoles("ManageFAQDetail", () => {
       </main>
     </React.Fragment>
   );
-});
+}

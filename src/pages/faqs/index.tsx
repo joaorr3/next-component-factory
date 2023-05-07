@@ -4,14 +4,20 @@ import React from "react";
 import { ListItem } from "../../components/ListItem";
 import { routes } from "../../routes";
 import { useLoading } from "../../utils/GlobalState/GlobalStateProvider";
-import { withRoles } from "../../utils/hoc";
+import { authLayer } from "../../utils/server-side";
 import { trpc } from "../../utils/trpc";
 
 const handleOnPress = (slug: string) => {
   Router.push(routes.FAQDetail.dynamicPath(slug));
 };
 
-export default withRoles("FAQs", () => {
+export const getServerSideProps = authLayer("FAQs", async () => {
+  return {
+    props: {},
+  };
+});
+
+export default function FAQs() {
   const {
     data: faqs,
     isLoading,
@@ -42,4 +48,4 @@ export default withRoles("FAQs", () => {
       </main>
     </React.Fragment>
   );
-});
+}

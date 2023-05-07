@@ -11,21 +11,21 @@ export const useUser = () => {
     retry: false,
   });
 
-  const roles = trpc.roles.currentUser.useQuery(undefined, {
-    enabled: status === "authenticated",
-    staleTime: 600000,
-    retry: false,
-  });
+  // const roles = trpc.roles.currentUser.useQuery(undefined, {
+  //   enabled: status === "authenticated",
+  //   staleTime: 600000,
+  //   retry: false,
+  // });
 
   const isLoading = derive(() => {
-    const loading = user.isLoading && roles.isLoading;
-    const status = user.fetchStatus !== "idle" && roles.fetchStatus !== "idle";
+    const loading = user.isLoading; //&& roles.isLoading;
+    const status = user.fetchStatus !== "idle"; // && roles.fetchStatus !== "idle";
     return loading && status;
   });
 
   return {
     user: user.data,
-    roles: roles.data,
+    // roles: roles.data,
     isLoading,
   };
 };

@@ -13,10 +13,16 @@ import { ListItemExpanded } from "../../../components/ListItem";
 import { routes } from "../../../routes";
 import { cn } from "../../../styles/utils";
 import { useLoading } from "../../../utils/GlobalState/GlobalStateProvider";
-import { withRoles } from "../../../utils/hoc";
+import { authLayer } from "../../../utils/server-side";
 import { trpc } from "../../../utils/trpc";
 
-export default withRoles("ManageRoles", () => {
+export const getServerSideProps = authLayer("ManageRoles", async () => {
+  return {
+    props: {},
+  };
+});
+
+export default function ManageRoles() {
   return (
     <React.Fragment>
       <Head>
@@ -30,7 +36,7 @@ export default withRoles("ManageRoles", () => {
       </main>
     </React.Fragment>
   );
-});
+}
 
 const GuildRoles = React.memo(() => {
   const {

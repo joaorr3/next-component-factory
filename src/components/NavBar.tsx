@@ -3,8 +3,9 @@ import Link from "next/link";
 import React from "react";
 import styled, { css } from "styled-components";
 import { usePathMatch } from "../hooks/usePathMatch";
-import { useRoles, type UseRoles } from "../hooks/useRoles";
+import { useRoles } from "../hooks/useRoles";
 import { navBarRouteEntries } from "../routes";
+import type { HandleRolesModel } from "../utils/roles";
 
 const NavBar = ({ children }: React.PropsWithChildren) => {
   return (
@@ -42,7 +43,7 @@ export const NavBarContent = (): JSX.Element => {
 export type NavBarItemProps = Pick<LinkProps, "href"> & {
   label: string;
   active?: boolean;
-  roles: UseRoles;
+  roles: HandleRolesModel;
 };
 
 const NavBarItemContainer = styled.div<{ active?: boolean }>`
@@ -94,11 +95,11 @@ export const NavBarItem = ({
   roles,
   active,
 }: NavBarItemProps): JSX.Element => {
-  const { valid } = useRoles(roles);
+  // const { valid } = useRoles(roles);
 
-  if (!valid) {
-    return <React.Fragment />;
-  }
+  // if (!valid) {
+  //   return <React.Fragment />;
+  // }
 
   return (
     <NavBarItemContainer className="navBarItemContainer" active={active}>

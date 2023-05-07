@@ -217,7 +217,7 @@ export const useInitGlobalState = (actions: ContextHandlers["actions"]) => {
   const { parsed: themeName } =
     localStorageActions.get<ThemeNames>("currentTheme");
 
-  const { user, roles, isLoading: isLoadingUser } = useUser();
+  const { user, isLoading: isLoadingUser } = useUser();
 
   React.useEffect(() => {
     actions.setLoading(isLoadingUser);
@@ -226,9 +226,9 @@ export const useInitGlobalState = (actions: ContextHandlers["actions"]) => {
   React.useEffect(() => {
     actions.setUser({
       profile: user,
-      roles,
+      // roles,
     });
-  }, [actions, roles, user]);
+  }, [actions, user]);
 
   React.useEffect(() => {
     if (themeName) {

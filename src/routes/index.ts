@@ -1,11 +1,11 @@
-import { type UseRoles } from "../hooks/useRoles";
+import type { HandleRolesModel } from "../utils/roles";
 
 export type RouteData = {
   label: string;
   path: string;
   match?: string[];
   navBar?: boolean;
-  roles: UseRoles;
+  roles: HandleRolesModel;
 };
 export type RouteDataWithDynamicPath = RouteData & {
   dynamicPath: <T>(param: T) => string;

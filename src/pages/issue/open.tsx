@@ -10,7 +10,7 @@ import { useFileUpload } from "../../hooks/useFileUpload";
 import { routes } from "../../routes";
 import { derive } from "../../shared/utils";
 import { useLoading } from "../../utils/GlobalState/GlobalStateProvider";
-import { withRoles } from "../../utils/hoc";
+import { authLayer } from "../../utils/server-side";
 import { trpc } from "../../utils/trpc";
 import type { CustomFile } from "../../utils/validators/media";
 
@@ -18,7 +18,13 @@ const redirect = (path: string) => {
   Router.push(path);
 };
 
-export default withRoles("IssueOpen", () => {
+export const getServerSideProps = authLayer("IssueOpen", async () => {
+  return {
+    props: {},
+  };
+});
+
+export default function IssueOpen() {
   const { upload } = useFileUpload("ISSUE");
 
   const {
@@ -201,7 +207,7 @@ export default withRoles("IssueOpen", () => {
       </main>
     </React.Fragment>
   );
-});
+}
 
 export const Help = (): JSX.Element => {
   return (

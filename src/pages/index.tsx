@@ -1,9 +1,8 @@
 import Head from "next/head";
 import React from "react";
 import { Kudos } from "../components/Kudos";
-import { withRoles } from "../utils/hoc";
 
-export default withRoles("Home", () => {
+export default function Home() {
   return (
     <React.Fragment>
       <Head>
@@ -25,4 +24,4 @@ export default withRoles("Home", () => {
       </main>
     </React.Fragment>
   );
-});
+}

@@ -50,11 +50,11 @@ const MyApp: AppType<{ session: Session | null }> = ({
                 <NavBarContent />
 
                 <NavBarActionContainer>
-                  <NewIssueShortcut />
-
-                  <UserAvatar />
-
-                  <ManageMenu />
+                  <React.Fragment>
+                    <NewIssueShortcut />
+                    <UserAvatar />
+                    <ManageMenu />
+                  </React.Fragment>
 
                   <LoginButton />
 

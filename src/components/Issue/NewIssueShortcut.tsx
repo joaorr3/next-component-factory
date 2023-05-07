@@ -42,11 +42,11 @@ const base = /*tw*/ `
 `;
 
 export const NewIssueShortcut = (): JSX.Element => {
-  const { valid } = useRoles(routes.IssueOpen.roles);
+  // const { valid } = useRoles(routes.IssueOpen.roles);
 
-  if (!valid) {
-    return <React.Fragment />;
-  }
+  // if (!valid) {
+  //   return <React.Fragment />;
+  // }
 
   return (
     <Link href="/issue/open" className="mr-3">

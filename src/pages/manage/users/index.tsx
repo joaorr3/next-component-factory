@@ -10,10 +10,16 @@ import { Button } from "../../../components/Form/Fields";
 import { ListItemExpanded } from "../../../components/ListItem";
 import { GuildUserAdditionalInfoElement } from "../../../components/UserPage";
 import { useLoading } from "../../../utils/GlobalState/GlobalStateProvider";
-import { withRoles } from "../../../utils/hoc";
+import { authLayer } from "../../../utils/server-side";
 import { trpc } from "../../../utils/trpc";
 
-export default withRoles("ManageUsers", () => {
+export const getServerSideProps = authLayer("ManageUsers", async () => {
+  return {
+    props: {},
+  };
+});
+
+export default function ManageUsers() {
   const { data: users } = trpc.user.labUsersWithoutProjectRole.useQuery();
   const { mutateAsync: notify, isLoading } =
     trpc.user.notifyLabUsersWithoutProjectRole.useMutation();
@@ -56,7 +62,7 @@ export default withRoles("ManageUsers", () => {
       </main>
     </React.Fragment>
   );
-});
+}
 
 const GuildUsers = React.memo(() => {
   const {

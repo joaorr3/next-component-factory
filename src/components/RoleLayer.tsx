@@ -1,9 +1,10 @@
 import React from "react";
-import { useRoles, type UseRoles } from "../hooks/useRoles";
+import { useRoles } from "../hooks/useRoles";
+import type { HandleRolesModel } from "../utils/roles";
 import { UnauthorizedPage } from "./UnauthorizedPage";
 
 export type RoleLayerProps = React.PropsWithChildren<{
-  roles: UseRoles;
+  roles: HandleRolesModel;
 }>;
 
 export const RoleLayer = ({ roles, children }: RoleLayerProps): JSX.Element => {

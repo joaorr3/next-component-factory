@@ -6,14 +6,20 @@ import { InteractionElement } from "../../../components/InteractionElement";
 import { ListMediaItem } from "../../../components/ListItem";
 import { routes } from "../../../routes";
 import { useLoading } from "../../../utils/GlobalState/GlobalStateProvider";
-import { withRoles } from "../../../utils/hoc";
+import { authLayer } from "../../../utils/server-side";
 import { trpc } from "../../../utils/trpc";
 
 const navigateUpload = () => {
   Router.push(routes.ManageMediaUpload.path);
 };
 
-export default withRoles("ManageMedia", () => {
+export const getServerSideProps = authLayer("ManageMedia", async () => {
+  return {
+    props: {},
+  };
+});
+
+export default function ManageMedia() {
   const {
     data: media,
     isLoading,
@@ -87,4 +93,4 @@ export default withRoles("ManageMedia", () => {
       </main>
     </React.Fragment>
   );
-});
+}

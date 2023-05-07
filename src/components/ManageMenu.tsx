@@ -100,11 +100,11 @@ export const ManageMenu = (): JSX.Element => {
 
   useKeyPress({ targetKey: "Escape", cb: close, attach: isOpen });
 
-  const { valid } = useRoles(routes.Manage.roles);
+  // const { valid } = useRoles(routes.Manage.roles);
 
-  if (!valid) {
-    return <React.Fragment />;
-  }
+  // if (!valid) {
+  //   return <React.Fragment />;
+  // }
 
   return (
     <div className="relative">

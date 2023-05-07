@@ -11,10 +11,16 @@ import {
   useGlobalState,
   useLoading,
 } from "../../../utils/GlobalState/GlobalStateProvider";
-import { withRoles } from "../../../utils/hoc";
+import { authLayer } from "../../../utils/server-side";
 import { trpc } from "../../../utils/trpc";
 
-export default withRoles("ManageFAQCreate", () => {
+export const getServerSideProps = authLayer("ManageFAQCreate", async () => {
+  return {
+    props: {},
+  };
+});
+
+export default function ManageFAQCreate() {
   const {
     state: { user },
   } = useGlobalState();
@@ -65,4 +71,4 @@ export default withRoles("ManageFAQCreate", () => {
       </main>
     </React.Fragment>
   );
-});
+}

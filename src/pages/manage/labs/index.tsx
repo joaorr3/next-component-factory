@@ -12,10 +12,16 @@ import { ListItem } from "../../../components/ListItem";
 import Modal from "../../../components/Modal";
 import { routes } from "../../../routes";
 import { useLoading } from "../../../utils/GlobalState/GlobalStateProvider";
-import { withRoles } from "../../../utils/hoc";
+import { authLayer } from "../../../utils/server-side";
 import { trpc } from "../../../utils/trpc";
 
-export default withRoles("ManageLabs", () => {
+export const getServerSideProps = authLayer("ManageLabs", async () => {
+  return {
+    props: {},
+  };
+});
+
+export default function ManageLabs() {
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
 
   const [selectedLab, setSelectedLab] = React.useState<Lab | undefined>(
@@ -101,7 +107,7 @@ export default withRoles("ManageLabs", () => {
       </React.Fragment>
     </React.Fragment>
   );
-});
+}
 
 export type LabFormProps = {
   initialData?: Lab;

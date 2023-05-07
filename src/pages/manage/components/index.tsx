@@ -8,15 +8,25 @@ import {
   ComponentList,
   type ComponentListRef,
 } from "../../../components/ComponentList";
-import { InteractionElement } from "../../../components/InteractionElement";
 import * as Fields from "../../../components/Form/Fields";
+import { InteractionElement } from "../../../components/InteractionElement";
 import Modal from "../../../components/Modal";
 import { useLoading } from "../../../utils/GlobalState/GlobalStateProvider";
-import { withRoles } from "../../../utils/hoc";
+import { authLayer } from "../../../utils/server-side";
 import { trpc } from "../../../utils/trpc";
 import { notEmptyString } from "../../../utils/validators";
 
-export default withRoles("ManageComponents", () => {
+export const getServerSideProps = authLayer(
+  "ManageComponents",
+  async (_, ssg) => {
+    await ssg.components.all.prefetch();
+    return {
+      props: {},
+    };
+  }
+);
+
+export default function ManageComponents() {
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
   const [selectedComponent, setSelectedComponent] = React.useState<
     Component | undefined
@@ -103,7 +113,7 @@ export default withRoles("ManageComponents", () => {
       </main>
     </React.Fragment>
   );
-});
+}
 
 export type ComponentFormProps = {
   initialData?: ComponentFormModel;

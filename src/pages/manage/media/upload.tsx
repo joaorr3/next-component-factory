@@ -9,7 +9,7 @@ import * as Fields from "../../../components/Form/Fields";
 import { useFileUpload } from "../../../hooks/useFileUpload";
 import { routes } from "../../../routes";
 import { useLoading } from "../../../utils/GlobalState/GlobalStateProvider";
-import { withRoles } from "../../../utils/hoc";
+import { authLayer } from "../../../utils/server-side";
 import type { CustomFile } from "../../../utils/validators/media";
 import { rawFileValidator } from "../../../utils/validators/media";
 
@@ -23,7 +23,13 @@ const redirect = () => {
   Router.push(routes.ManageMedia.path);
 };
 
-export default withRoles("ManageMediaUpload", () => {
+export const getServerSideProps = authLayer("ManageMediaUpload", async () => {
+  return {
+    props: {},
+  };
+});
+
+export default function ManageMediaUpload() {
   const { upload } = useFileUpload("GENERIC");
 
   const { setLoading } = useLoading("setOnly");
@@ -91,4 +97,4 @@ export default withRoles("ManageMediaUpload", () => {
       </main>
     </React.Fragment>
   );
-});
+}

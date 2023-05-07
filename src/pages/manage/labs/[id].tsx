@@ -12,10 +12,16 @@ import * as Fields from "../../../components/Form/Fields";
 import { ListItemExpanded } from "../../../components/ListItem";
 import Modal from "../../../components/Modal";
 import { useLoading } from "../../../utils/GlobalState/GlobalStateProvider";
-import { withRoles } from "../../../utils/hoc";
+import { authLayer } from "../../../utils/server-side";
 import { trpc } from "../../../utils/trpc";
 
-export default withRoles("ManageLabsDetail", () => {
+export const getServerSideProps = authLayer("ManageFAQDetail", async () => {
+  return {
+    props: {},
+  };
+});
+
+export default function ManageLabsDetail() {
   const router = useRouter();
   const { id } = router.query;
 
@@ -175,7 +181,7 @@ export default withRoles("ManageLabsDetail", () => {
       )}
     </React.Fragment>
   );
-});
+}
 
 export type LabFormProps = {
   initialData: Lab;
