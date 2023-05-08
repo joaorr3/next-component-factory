@@ -161,7 +161,7 @@ class Notion {
               name: data.mergeStatus,
             },
           },
-          Status: {
+          "PR Status": {
             select: {
               name: data.status,
             },
@@ -204,7 +204,7 @@ class Notion {
               name: props.data.mergeStatus,
             },
           },
-          Status: {
+          "PR Status": {
             select: {
               name: props.data.status,
             },
@@ -245,7 +245,7 @@ class Notion {
               name: props.data.mergeStatus,
             },
           },
-          Status: {
+          "PR Status": {
             select: {
               name: props.data.status,
             },
