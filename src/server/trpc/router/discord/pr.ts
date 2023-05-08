@@ -1,9 +1,9 @@
 import { truncate } from "lodash";
-import { z } from "zod";
 import notion from "../../../../shared/notion";
 import {
   pullRequestCommentedOnValidator,
   pullRequestCreatedValidator,
+  pullRequestMergeValidator,
   pullRequestUpdatedValidator,
 } from "../../../../utils/validators/azure";
 import { discordNext } from "../../../discord/client";
@@ -65,6 +65,7 @@ export const prRouter = router({
         sourceBranch: cleanBranchName(input.resource.sourceRefName),
         targetBranch: cleanBranchName(input.resource.targetRefName),
         mergeStatus: input.resource.mergeStatus,
+        status: input.resource.status,
       } as const;
 
       await discordNext.sendMessage("pr", {
@@ -104,6 +105,7 @@ export const prRouter = router({
         sourceBranch: prData.sourceBranch,
         targetBranch: prData.targetBranch,
         mergeStatus: prData.mergeStatus,
+        status: prData.status,
       });
 
       return "OK - PR/CREATE";
@@ -138,6 +140,7 @@ export const prRouter = router({
             sourceBranch: cleanBranchName(input.resource.sourceRefName),
             targetBranch: cleanBranchName(input.resource.targetRefName),
             mergeStatus: input.resource.mergeStatus,
+            status: input.resource.status,
           },
         });
       }
@@ -167,13 +170,22 @@ export const prRouter = router({
 
       return "OK - PR/COMMENTED";
     }),
-  merge: publicProcedure.input(z.custom<any>()).query(async ({ input }) => {
-    try {
-      console.log("stringify-merge-input-shape: ", JSON.stringify(input));
-    } catch (error) {
-      console.log("cant stringify");
-    }
+  merge: publicProcedure
+    .input(pullRequestMergeValidator)
+    .query(async ({ input }) => {
+      const pullRequestId = String(input.resource.pullRequestId);
+      const prPageId = await notion.getPrPageByPrId(pullRequestId);
 
-    return "OK - PR/MERGE (Not Implemented)";
-  }),
+      if (prPageId) {
+        await notion.updatePrMergeStatus({
+          pageId: prPageId,
+          data: {
+            mergeStatus: input.resource.mergeStatus,
+            status: input.resource.status,
+          },
+        });
+      }
+
+      return "OK - PR/MERGE";
+    }),
 });

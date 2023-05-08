@@ -6,6 +6,7 @@ import type {
   NotionPullRequestCommentedModel,
   NotionPullRequestCreatedModel,
   NotionPullRequestUpdatedModel,
+  NotionPullRequestUpdateMergeStatusModel,
 } from "../../utils/validators/notion";
 import { c18Avatar } from "../dataUtils";
 import logger from "../logger";
@@ -160,6 +161,11 @@ class Notion {
               name: data.mergeStatus,
             },
           },
+          Status: {
+            select: {
+              name: data.status,
+            },
+          },
         },
         children: [...markdownToBlocks(dedent(data.description))],
       });
@@ -198,6 +204,11 @@ class Notion {
               name: props.data.mergeStatus,
             },
           },
+          Status: {
+            select: {
+              name: props.data.status,
+            },
+          },
         },
       });
 
@@ -216,6 +227,30 @@ class Notion {
       await this.client.blocks.children.append({
         block_id: props.pageId,
         children: [...markdownToBlocks(dedent(props.data.description))],
+      });
+
+      return res.id;
+    } catch (error) {
+      console.log("error: ", error);
+    }
+  }
+
+  async updatePrMergeStatus(props: NotionPullRequestUpdateMergeStatusModel) {
+    try {
+      const res = await this.client.pages.update({
+        page_id: props.pageId,
+        properties: {
+          "Merge Status": {
+            select: {
+              name: props.data.mergeStatus,
+            },
+          },
+          Status: {
+            select: {
+              name: props.data.status,
+            },
+          },
+        },
       });
 
       return res.id;

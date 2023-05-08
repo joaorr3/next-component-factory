@@ -368,3 +368,107 @@ export const pullRequestUpdatedValidator = z.object({
 export type PullRequestUpdatedModel = z.infer<
   typeof pullRequestUpdatedValidator
 >;
+
+export const pullRequestMergeValidator = z.object({
+  subscriptionId: z.string(),
+  notificationId: z.number(),
+  id: z.string(),
+  eventType: z.string(),
+  publisherId: z.string(),
+  message: z.object({ markdown: z.string() }),
+  detailedMessage: z.object({ markdown: z.string() }),
+  resource: z.object({
+    repository: z.object({
+      id: z.string(),
+      name: z.string(),
+      url: z.string(),
+      project: z.object({
+        id: z.string(),
+        name: z.string(),
+        description: z.string(),
+        url: z.string(),
+        state: z.string(),
+        revision: z.number(),
+        visibility: z.string(),
+        lastUpdateTime: z.string(),
+      }),
+      size: z.number(),
+      remoteUrl: z.string(),
+      sshUrl: z.string(),
+      webUrl: z.string(),
+      isDisabled: z.boolean(),
+      isInMaintenance: z.boolean(),
+    }),
+    pullRequestId: z.number(),
+    codeReviewId: z.number(),
+    status: z.string(),
+    createdBy: z.object({
+      displayName: z.string(),
+      url: z.string(),
+      _links: z.object({ avatar: z.object({ href: z.string() }) }),
+      id: z.string(),
+      uniqueName: z.string(),
+      imageUrl: z.string(),
+      descriptor: z.string(),
+    }),
+    creationDate: z.string(),
+    title: z.string(),
+    description: z.string(),
+    sourceRefName: z.string(),
+    targetRefName: z.string(),
+    mergeStatus: z.string(),
+    isDraft: z.boolean(),
+    mergeId: z.string(),
+    lastMergeSourceCommit: z.object({ commitId: z.string(), url: z.string() }),
+    lastMergeTargetCommit: z.object({ commitId: z.string(), url: z.string() }),
+    reviewers: z.array(
+      z.union([
+        z.object({
+          reviewerUrl: z.string(),
+          vote: z.number(),
+          hasDeclined: z.boolean(),
+          isFlagged: z.boolean(),
+          displayName: z.string(),
+          url: z.string(),
+          _links: z.object({ avatar: z.object({ href: z.string() }) }),
+          id: z.string(),
+          uniqueName: z.string(),
+          imageUrl: z.string(),
+        }),
+        z.object({
+          reviewerUrl: z.string(),
+          vote: z.number(),
+          hasDeclined: z.boolean(),
+          isRequired: z.boolean(),
+          isFlagged: z.boolean(),
+          displayName: z.string(),
+          url: z.string(),
+          _links: z.object({ avatar: z.object({ href: z.string() }) }),
+          id: z.string(),
+          uniqueName: z.string(),
+          imageUrl: z.string(),
+        }),
+      ])
+    ),
+    url: z.string(),
+    _links: z.object({
+      web: z.object({ href: z.string() }),
+      statuses: z.object({ href: z.string() }),
+    }),
+    completionOptions: z.object({
+      mergeStrategy: z.string(),
+      autoCompleteIgnoreConfigIds: z.array(z.unknown()),
+    }),
+    supportsIterations: z.boolean(),
+    artifactId: z.string(),
+  }),
+  resourceVersion: z.string(),
+  resourceContainers: z.object({
+    collection: z.object({ id: z.string(), baseUrl: z.string() }),
+    account: z.object({ id: z.string(), baseUrl: z.string() }),
+    project: z.object({ id: z.string(), baseUrl: z.string() }),
+  }),
+  createdDate: z.string(),
+});
+
+export type PullRequestMergeModel = z.infer<typeof pullRequestMergeValidator>;
