@@ -15,7 +15,7 @@ const cleanBranchName = (name: string) => {
 };
 
 export const getPrUrl = (id?: string) =>
-  `https://dev.azure.com/ptbcp/IT.Ignite/_git/BCP.Ignite.Dx.ComponentFactory/pullrequest/${id}`;
+  `https://dev.azure.com/ptbcp/IT.Ignite/_git/BCP.Ignite.Dx.DesignSystem/pullrequest/${id}`;
 
 const authorAvatarFallback =
   "https://component-factory-s3-bucket.s3.eu-west-2.amazonaws.com/generic/bb163cab-616f-43d6-9950-b23e7ebc88ca__cf-logo.png";

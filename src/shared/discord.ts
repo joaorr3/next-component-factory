@@ -1,3 +1,4 @@
+import type { GuildUser } from "@prisma/client";
 import Discord, {
   ChannelType,
   GatewayIntentBits,
@@ -7,6 +8,7 @@ import Discord, {
   type Awaitable,
   type ClientEvents,
 } from "discord.js";
+import { DataUtils } from "../discord-bot/data";
 import { env } from "../env/server";
 import { prismaSharedClient } from "./prisma/client";
 import { promisify } from "./utils";
@@ -218,6 +220,18 @@ export class DiscordClient {
     return this.guild?.members.cache.find((m) => m.id === memberId);
   }
 
+  public async fetchMembers() {
+    const rawMembersData = await this.guild?.members.fetch();
+    if (rawMembersData) {
+      const guildUsers: GuildUser[] = rawMembersData.map(
+        DataUtils.transformGuildMemberData
+      );
+
+      return guildUsers;
+    }
+    return [];
+  }
+
   public async sendMessage(
     name: keyof typeof this.channelNames,
     message: Discord.BaseMessageOptions
@@ -238,3 +252,5 @@ export class DiscordClient {
     };
   }
 }
+
+export const discordSharedClient = DiscordClient.Instance;
