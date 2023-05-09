@@ -313,7 +313,7 @@ class Notion {
     return comp_map;
   }
 
-  public readonly pageStatus = {
+  public readonly issuePageStatus = {
     "Not started": {
       id: "}NqP",
       name: "Not started",
@@ -341,23 +341,25 @@ class Notion {
     },
   } as const;
 
-  async addIssue({
-    title,
-    description,
-    lab,
-    author,
-    version,
-    type,
-    stepsToReproduce,
-    component,
-    severity,
-    specs,
-    codeSnippet,
-    scope,
-    createdAt,
-    attachments,
-    componentId,
-  }: NotionIssueDetailsModel) {
+  async addIssue(data: NotionIssueDetailsModel) {
+    const {
+      title,
+      description,
+      lab,
+      author,
+      version,
+      type,
+      stepsToReproduce,
+      component,
+      severity,
+      specs,
+      codeSnippet,
+      scope,
+      createdAt,
+      attachments,
+      componentId,
+    } = data;
+
     try {
       const res = await this.client.pages.create({
         parent: {
@@ -500,7 +502,7 @@ class Notion {
             ],
           },
           Status: {
-            status: this.pageStatus["Not started"],
+            status: this.issuePageStatus["Not started"],
           },
           Type: {
             select: {
@@ -544,7 +546,7 @@ class Notion {
     } catch (error) {
       logger.db.notion({
         level: "error",
-        message: `addIssue: ${error}`,
+        message: `AddIssue: ${error} | Data: ${JSON.stringify(data)}`,
       });
     }
   }
@@ -570,7 +572,7 @@ class Notion {
 
   async updatePageStatus(
     pageId?: string,
-    status: keyof typeof this.pageStatus = "Not started"
+    status: keyof typeof this.issuePageStatus = "Not started"
   ) {
     try {
       if (pageId) {
@@ -578,7 +580,7 @@ class Notion {
           page_id: pageId,
           properties: {
             Status: {
-              status: this.pageStatus[status],
+              status: this.issuePageStatus[status],
             },
           },
         });
