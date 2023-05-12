@@ -10,6 +10,7 @@ import Discord, {
 } from "discord.js";
 import { DataUtils } from "../discord-bot/data";
 import { env } from "../env/server";
+import { ErrorHandler } from "../utils/error";
 import { prismaSharedClient } from "./prisma/client";
 import { promisify } from "./utils";
 
@@ -135,10 +136,12 @@ export class DiscordClient {
     return this.guild?.roles.cache.find((r) => r.name === this.roleNames[name]);
   }
 
+  @ErrorHandler({ code: "DISCORD", message: "roleById" })
   public roleById(roleId?: string) {
     return this.guild?.roles.cache.find((r) => r.id === roleId);
   }
 
+  @ErrorHandler({ code: "DISCORD", message: "hasRole" })
   public hasRole(
     memberId: string | undefined,
     name: keyof typeof this.roleNames
@@ -154,6 +157,7 @@ export class DiscordClient {
     return false;
   }
 
+  @ErrorHandler({ code: "DISCORD", message: "mention" })
   public mention({
     userId,
     roles,
@@ -195,6 +199,7 @@ export class DiscordClient {
     return mentionString;
   }
 
+  @ErrorHandler({ code: "DISCORD", message: "roleIsAutoAssignable" })
   public async roleIsAutoAssignable(_role?: Discord.Role) {
     const autoAssignable = await prismaSharedClient.roles.autoAssignable();
     const role = autoAssignable.find((r) => r.id === _role?.id);
@@ -204,6 +209,7 @@ export class DiscordClient {
     };
   }
 
+  @ErrorHandler({ code: "DISCORD", message: "hasRoleById" })
   public hasRoleById(memberId: string | undefined, roleId: string | undefined) {
     if (memberId) {
       const member = this.member(memberId);
@@ -216,10 +222,12 @@ export class DiscordClient {
     return false;
   }
 
+  @ErrorHandler({ code: "DISCORD", message: "member" })
   public member(memberId: string) {
     return this.guild?.members.cache.find((m) => m.id === memberId);
   }
 
+  @ErrorHandler({ code: "DISCORD", message: "fetchMembers" })
   public async fetchMembers() {
     const rawMembersData = await this.guild?.members.fetch();
     if (rawMembersData) {
@@ -232,6 +240,7 @@ export class DiscordClient {
     return [];
   }
 
+  @ErrorHandler({ code: "DISCORD", message: "sendMessage" })
   public async sendMessage(
     name: keyof typeof this.channelNames,
     message: Discord.BaseMessageOptions
@@ -245,6 +254,7 @@ export class DiscordClient {
   /**
    * Doesn't need an async/await context
    */
+  @ErrorHandler({ code: "DISCORD", message: "logger" })
   public logger(name: keyof typeof this.channelNames) {
     return (messageFn: () => Discord.BaseMessageOptions) => {
       const message: Discord.BaseMessageOptions = messageFn();

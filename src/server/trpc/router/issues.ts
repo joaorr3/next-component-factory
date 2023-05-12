@@ -1,6 +1,5 @@
 import type { GuildUser } from "@prisma/client";
 import { type Issue } from "@prisma/client";
-import { TRPCError } from "@trpc/server";
 import {
   EmbedBuilder,
   roleMention,
@@ -20,22 +19,11 @@ import type {
 } from "../../../shared/models";
 import notion from "../../../shared/notion";
 import { derive } from "../../../shared/utils";
+import { handledProcedure } from "../../../utils/trpc";
 import { prismaNext } from "../../db/client";
 import { discordNext } from "../../discord/client";
 
 import { protectedProcedure, router } from "../trpc";
-
-export const handledProcedure = <T>(fn: () => T, errorMessage?: string): T => {
-  try {
-    return fn();
-  } catch (error) {
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: errorMessage,
-      cause: error,
-    });
-  }
-};
 
 export const issuesRouter = router({
   all: protectedProcedure.query(async ({ ctx }) => {
