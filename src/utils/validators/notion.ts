@@ -10,6 +10,7 @@ export const notionPullRequestCreatedValidator = z.object({
   sourceBranch: z.string(),
   targetBranch: z.string(),
   mergeStatus: z.string(),
+  status: z.string(),
 });
 
 export type NotionPullRequestCreatedModel = z.infer<
@@ -26,12 +27,21 @@ export const notionPullRequestUpdatedValidator = z.object({
     sourceBranch: z.string(),
     targetBranch: z.string(),
     mergeStatus: z.string(),
+    status: z.string(),
   }),
 });
 
 export type NotionPullRequestUpdatedModel = z.infer<
   typeof notionPullRequestUpdatedValidator
 >;
+
+export type NotionPullRequestUpdateMergeStatusModel = {
+  pageId: string;
+  data: {
+    status: string;
+    mergeStatus: string;
+  };
+};
 
 export const notionPullRequestCommentedValidator = z.object({
   pageId: z.string(),
