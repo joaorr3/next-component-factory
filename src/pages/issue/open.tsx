@@ -9,7 +9,6 @@ import Modal from "../../components/Modal";
 import { useFileUpload } from "../../hooks/useFileUpload";
 import { routes } from "../../routes";
 import { derive } from "../../shared/utils";
-import { useLoading } from "../../utils/GlobalState/GlobalStateProvider";
 import { authLayer } from "../../utils/server-side";
 import { trpc } from "../../utils/trpc";
 import type { CustomFile } from "../../utils/validators/media";

@@ -19,13 +19,6 @@ export const serverSchema = z.object({
 
   NODE_ENV: z.enum(["development", "test", "production"]),
 
-  DISCORD_WEBHOOK_WORK_ITEM: z.string().url(),
-  DISCORD_WEBHOOK_PR: z.string().url(),
-  DISCORD_WEBHOOK_BUILD: z.string().url(),
-
-  DISCORD_WEBHOOK_C18_URL: z.string().url(),
-  DISCORD_WEBHOOK_C18_ID: z.string(),
-
   DISCORD_CLIENT_ID: z.string(),
   DISCORD_CLIENT_SECRET: z.string(),
   DISCORD_BOT_TOKEN: z.string(),
@@ -39,12 +32,8 @@ export const serverSchema = z.object({
   NOTION_PR_DB_ID: z.string(),
 
   START_DISCORD: z.string(),
-  START_NOTION: z.string(),
-  START_SERVER: z.string(),
-  START_PRISMA: z.string(),
 
   DATABASE_URL: z.string().url(),
-  // DATABASE_URL_RW: z.string().url(),
 
   AWS_S3_BUCKET: z.string(),
   AWS_S3_USER: z.string(),
