@@ -50,7 +50,8 @@ export const serverSchema = z.object({
  * To expose them to the client, prefix them with `NEXT_PUBLIC_`.
  */
 export const clientSchema = z.object({
-  // NEXT_PUBLIC_BAR: z.string(),
+  NEXT_PUBLIC_PROD_URL: z.string().url(),
+  NEXT_PUBLIC_AWS_S3_PUBLIC_URL: z.string().url(),
 });
 
 /**
@@ -60,5 +61,6 @@ export const clientSchema = z.object({
  * @type {{ [k in keyof z.infer<typeof clientSchema>]: z.infer<typeof clientSchema>[k] | undefined }}
  */
 export const clientEnv = {
-  // NEXT_PUBLIC_BAR: process.env.NEXT_PUBLIC_BAR,
+  NEXT_PUBLIC_PROD_URL: process.env.NEXT_PUBLIC_PROD_URL,
+  NEXT_PUBLIC_AWS_S3_PUBLIC_URL: process.env.NEXT_PUBLIC_AWS_S3_PUBLIC_URL,
 };

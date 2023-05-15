@@ -320,8 +320,7 @@ export const commandReactions = async ({
     },
     issue: async () => {
       await interaction.reply({
-        content:
-          "https://next-cf.up.railway.app/faqs/how_to_use_the_issue_form",
+        content: `${env.NEXT_PROD_URL}/issue/open`,
       });
       return {
         name: "issue",
@@ -699,7 +698,7 @@ export const commandReactions = async ({
       }
 
       await interaction.reply({
-        content: "Thank you! https://next-cf.up.railway.app/kudos",
+        content: `Thank you! ${env.NEXT_PROD_URL}/kudos`,
         ephemeral: true,
       });
 
@@ -720,7 +719,7 @@ export const commandReactions = async ({
           embeds: [
             discord.embed({
               title: "Kudos",
-              url: "https://next-cf.up.railway.app/kudos",
+              url: env.NEXT_PROD_URL,
               description: kudosAnnouncementMessage,
 
               footer: {

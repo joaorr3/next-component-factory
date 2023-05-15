@@ -1,6 +1,7 @@
 import type { GuildUser } from "@prisma/client";
 import { userMention } from "discord.js";
 import { z } from "zod";
+import { env } from "../../../env/server";
 import { rolesParser } from "../../../shared/roles";
 import { wait } from "../../../shared/utils";
 import { discordNext } from "../../discord/client";
@@ -283,8 +284,7 @@ export const userRouter = router({
         content: info.join("\n"),
       });
       await discordNext.sendMessage("roles", {
-        content:
-          "https://component-factory-s3-bucket.s3.eu-west-2.amazonaws.com/generic/d5dd03cc-27c9-4aca-851a-36d85cbd0d14__how_to_roles_cmd.gif",
+        content: `${env.AWS_S3_PUBLIC_URL}/generic/d5dd03cc-27c9-4aca-851a-36d85cbd0d14__how_to_roles_cmd.gif`,
       });
     }),
   tempBatchUpdateUserLabs: protectedProcedure.mutation(async ({ ctx }) => {

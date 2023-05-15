@@ -209,10 +209,7 @@ export default function IssueOpen() {
 export const Help = (): JSX.Element => {
   return (
     <span>
-      <Link
-        target="_blank"
-        href="https://next-cf.up.railway.app/faqs/how_to_use_the_issue_form"
-      >
+      <Link target="_blank" href="/faqs/how_to_open_an_issue">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           height="20"

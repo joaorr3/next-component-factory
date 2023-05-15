@@ -1,4 +1,5 @@
 import Head from "next/head";
+import { env } from "../env/client";
 
 export type MetaHeadProps = {
   title: string;
@@ -6,10 +7,9 @@ export type MetaHeadProps = {
   imageUrl?: string;
 };
 
-const defaultImageUrl =
-  "https://component-factory-s3-bucket.s3.eu-west-2.amazonaws.com/generic/bb163cab-616f-43d6-9950-b23e7ebc88ca__cf-logo.png";
+const defaultImageUrl = `${env.NEXT_PUBLIC_AWS_S3_PUBLIC_URL}/generic/bb163cab-616f-43d6-9950-b23e7ebc88ca__cf-logo.png`;
 
-const basePath = "https://next-cf.up.railway.app";
+const basePath = env.NEXT_PUBLIC_PROD_URL;
 
 export const MetaHead = ({
   title,

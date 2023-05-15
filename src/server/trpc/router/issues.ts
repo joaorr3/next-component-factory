@@ -11,6 +11,7 @@ import { isNaN, truncate } from "lodash";
 import { z } from "zod";
 import { type FiltersModel } from "../../../components/Issue/Filters";
 import { issueProcedureSchema } from "../../../components/IssueForm/validator";
+import { env } from "../../../env/server";
 import { IssueScope } from "../../../shared/enums";
 import type {
   DiscordIssueDetailsModel,
@@ -293,8 +294,7 @@ const createIssueThread = async ({
                 .setURL(notionPageUrl)
                 .setFooter({
                   text: "Follow the issue status on Notion.",
-                  iconURL:
-                    "https://component-factory-s3-bucket.s3.eu-west-2.amazonaws.com/generic/f9db27e5-c347-45c3-a5b9-6ed05de374f7__notion_logo_resized.png",
+                  iconURL: `${env.AWS_S3_PUBLIC_URL}/generic/f9db27e5-c347-45c3-a5b9-6ed05de374f7__notion_logo_resized.png`,
                 })
                 .addFields([
                   {

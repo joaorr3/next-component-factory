@@ -186,7 +186,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
                   <Link
                     target="_blank"
                     className="text-blue-400 underline underline-offset-4"
-                    href="https://next-cf.up.railway.app/faqs/how_to_provide_a_correct_figma_spec_url"
+                    href="/faqs/how_to_provide_a_correct_figma_spec_url"
                   >
                     this faq
                   </Link>{" "}
@@ -237,7 +237,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
                     <Link
                       target="_blank"
                       className="text-blue-400 underline underline-offset-4"
-                      href="https://next-cf.up.railway.app/faqs/select_a_default_lab"
+                      href="/faqs/select_a_default_lab"
                     >
                       this faq
                     </Link>{" "}

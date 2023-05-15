@@ -4,6 +4,7 @@ import { BackButton } from "../../components/BackButton";
 import { IssueDetail } from "../../components/Issue/IssueDetail";
 import { MetaHead } from "../../components/MetaHead";
 import { NotFoundPage } from "../../components/NotFound";
+import { env } from "../../env/client";
 import { routes } from "../../routes";
 import { useLoading } from "../../utils/GlobalState/GlobalStateProvider";
 import { authLayer } from "../../utils/server-side";
@@ -56,7 +57,7 @@ const Page = ({
     <React.Fragment>
       <MetaHead
         title={`Issue ${id}`}
-        url={`https://next-cf.up.railway.app/issue/${id}`}
+        url={`${env.NEXT_PUBLIC_PROD_URL}/issue/${id}`}
       />
 
       <Detail id={id} />

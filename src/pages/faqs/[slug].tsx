@@ -7,6 +7,7 @@ import React from "react";
 import { BackButton } from "../../components/BackButton";
 import MarkdownViewer from "../../components/MarkdownViewer";
 import { MetaHead } from "../../components/MetaHead";
+import { env } from "../../env/client";
 import { useLoading } from "../../utils/GlobalState/GlobalStateProvider";
 import { authLayer } from "../../utils/server-side";
 import { trpc } from "../../utils/trpc";
@@ -43,7 +44,7 @@ export default function FAQDetail({
     <React.Fragment>
       <MetaHead
         title={`FAQ ${faqDetail?.label}`}
-        url={`https://next-cf.up.railway.app/faqs/${faqDetail?.slug}`}
+        url={`${env.NEXT_PUBLIC_PROD_URL}/faqs/${faqDetail?.slug}`}
       />
       <main>
         <BackButton />
