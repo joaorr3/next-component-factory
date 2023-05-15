@@ -4,12 +4,10 @@ import React from "react";
 import { useClickOutside } from "../hooks/useClickOutside";
 import { useKeyPress } from "../hooks/useKeyPress";
 import { usePathMatch } from "../hooks/usePathMatch";
-import { useRoles } from "../hooks/useRoles";
 import { useSpringPopup } from "../hooks/useSpringPopup";
 import { routes } from "../routes";
 import { cn } from "../styles/utils";
 import { InteractionWrapper } from "./InteractionWrapper";
-
 export const SettingsIcon = (): JSX.Element => {
   return (
     <svg
@@ -99,12 +97,6 @@ export const ManageMenu = (): JSX.Element => {
   );
 
   useKeyPress({ targetKey: "Escape", cb: close, attach: isOpen });
-
-  // const { valid } = useRoles(routes.Manage.roles);
-
-  // if (!valid) {
-  //   return <React.Fragment />;
-  // }
 
   return (
     <div className="relative">

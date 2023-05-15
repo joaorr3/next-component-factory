@@ -3,7 +3,6 @@ import Link from "next/link";
 import React from "react";
 import styled, { css } from "styled-components";
 import { usePathMatch } from "../hooks/usePathMatch";
-import { useRoles } from "../hooks/useRoles";
 import { navBarRouteEntries } from "../routes";
 import type { HandleRolesModel } from "../utils/roles";
 
@@ -92,15 +91,8 @@ const ActiveIndicator = styled.div<{ active?: boolean }>`
 export const NavBarItem = ({
   label,
   href,
-  roles,
   active,
 }: NavBarItemProps): JSX.Element => {
-  // const { valid } = useRoles(roles);
-
-  // if (!valid) {
-  //   return <React.Fragment />;
-  // }
-
   return (
     <NavBarItemContainer className="navBarItemContainer" active={active}>
       <div className="inner">

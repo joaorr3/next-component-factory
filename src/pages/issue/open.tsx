@@ -85,8 +85,6 @@ export default function IssueOpen() {
     };
   });
 
-  const { setLoading } = useLoading("setOnly");
-
   const handleFilesUpload = React.useCallback(
     async (files: CustomFile[], issueId: number) => {
       return Promise.all(files.map((file) => upload(file, { issueId }))).then(

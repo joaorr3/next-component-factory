@@ -4,6 +4,7 @@ import { SessionProvider } from "next-auth/react";
 import { type AppType } from "next/app";
 import React from "react";
 import { AppContainer } from "../components/AppContainer";
+import { GLobalProfileLayer } from "../components/GlobalProfileLayer";
 import { HomeButton } from "../components/HomeButton";
 import { NewIssueShortcut } from "../components/Issue/NewIssueShortcut";
 import Loader from "../components/Loader";
@@ -41,7 +42,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
 
             <main className={montserrat.className}>
               <span className="fixed top-48 z-50 -rotate-90 text-xs font-semibold">
-                v1.1.3
+                v1.1.4
               </span>
 
               <NavBar>
@@ -50,11 +51,11 @@ const MyApp: AppType<{ session: Session | null }> = ({
                 <NavBarContent />
 
                 <NavBarActionContainer>
-                  <React.Fragment>
+                  <GLobalProfileLayer>
                     <NewIssueShortcut />
                     <UserAvatar />
                     <ManageMenu />
-                  </React.Fragment>
+                  </GLobalProfileLayer>
 
                   <LoginButton />
 

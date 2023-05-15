@@ -18,7 +18,7 @@ export const componentsRouter = router({
     const components = await ctx.prisma.component.findMany();
     return components;
   }),
-  allNotion: protectedProcedure.query(async ({ ctx }) => {
+  allNotion: protectedProcedure.query(async () => {
     const notion_comps = notion.getComponentDatabase();
     return notion_comps;
   }),

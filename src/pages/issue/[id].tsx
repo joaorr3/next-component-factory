@@ -1,7 +1,4 @@
-import type {
-  GetServerSidePropsContext,
-  InferGetServerSidePropsType,
-} from "next";
+import type { InferGetServerSidePropsType } from "next";
 import React from "react";
 import { BackButton } from "../../components/BackButton";
 import { IssueDetail } from "../../components/Issue/IssueDetail";
@@ -9,10 +6,10 @@ import { MetaHead } from "../../components/MetaHead";
 import { NotFoundPage } from "../../components/NotFound";
 import { routes } from "../../routes";
 import { useLoading } from "../../utils/GlobalState/GlobalStateProvider";
-import { withRoles } from "../../utils/hoc";
+import { authLayer } from "../../utils/server-side";
 import { trpc } from "../../utils/trpc";
 
-const Detail = withRoles("IssueDetail", ({ id }: { id: string }) => {
+const Detail = ({ id }: { id: string }) => {
   const issue = trpc.issues.detail.useQuery({
     id,
   });
@@ -35,19 +32,22 @@ const Detail = withRoles("IssueDetail", ({ id }: { id: string }) => {
   }
 
   return <React.Fragment />;
-});
+};
 
-export async function getServerSideProps(
-  context: GetServerSidePropsContext<{ id: string }>
-) {
-  const id = context.params?.id as string;
+export const getServerSideProps = authLayer<{ id: string }>(
+  "Issue",
+  async (context, ssg) => {
+    const id = context.params?.id as string;
 
-  return {
-    props: {
-      id,
-    },
-  };
-}
+    await ssg.issues.detail.prefetch({ id });
+
+    return {
+      props: {
+        id,
+      },
+    };
+  }
+);
 
 const Page = ({
   id,

@@ -1,8 +1,5 @@
 import Link from "next/link";
-import React from "react";
 import styled, { keyframes } from "styled-components";
-import { useRoles } from "../../hooks/useRoles";
-import { routes } from "../../routes";
 import { cn } from "../../styles/utils";
 
 const translate = keyframes`
@@ -42,12 +39,6 @@ const base = /*tw*/ `
 `;
 
 export const NewIssueShortcut = (): JSX.Element => {
-  // const { valid } = useRoles(routes.IssueOpen.roles);
-
-  // if (!valid) {
-  //   return <React.Fragment />;
-  // }
-
   return (
     <Link href="/issue/open" className="mr-3">
       <div className={cn(base)}>
@@ -60,7 +51,7 @@ export const NewIssueShortcut = (): JSX.Element => {
           }}
         />
 
-        <p className="z-20">New Issue</p>
+        <p className="z-20 min-w-max">New Issue</p>
       </div>
     </Link>
   );

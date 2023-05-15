@@ -88,8 +88,9 @@ export const LoginButton = (): JSX.Element => {
   );
 
   return (
-    <InteractionWrapper round onPress={handleOnPress}>
+    <InteractionWrapper round={isLoggedIn} onPress={handleOnPress}>
       {icon}
+      {!isLoggedIn && <p className="ml-2 font-bold">Sign in</p>}
     </InteractionWrapper>
   );
 };
