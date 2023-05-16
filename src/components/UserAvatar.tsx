@@ -41,7 +41,14 @@ export const UserAvatar = (): JSX.Element => {
           <p className="mr-2 font-bold">{profile.friendlyName}</p>
 
           {profile.avatarURL && (
-            <div style={{ borderRadius: 80, overflow: "hidden" }}>
+            <div
+              style={{
+                borderRadius: 80,
+                overflow: "hidden",
+                minHeight: 24,
+                minWidth: 24,
+              }}
+            >
               <Image
                 src={profile.avatarURL}
                 width={24}

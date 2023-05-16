@@ -1,6 +1,7 @@
 import React from "react";
 import styled, { keyframes } from "styled-components";
-import { useLoading } from "../utils/GlobalState/GlobalStateProvider";
+import { useRouterEvents } from "../hooks/useRouterEvents";
+import { cn } from "../styles/utils";
 import { Overlay, OverlayStyled } from "./Overlay";
 
 const rotate = keyframes`
@@ -92,17 +93,17 @@ export const Loading = ({
 };
 
 const Loader = () => {
-  const { isLoading } = useLoading("setOnly");
-
-  if (isLoading) {
-    return (
-      <Overlay opacity={0.95}>
-        <Loading />
-      </Overlay>
-    );
-  }
+  useRouterEvents();
 
   return <React.Fragment />;
+
+  // if (isLoading) {
+  //   return (
+  //     <Overlay opacity={0.95}>
+  //       <Loading />
+  //     </Overlay>
+  //   );
+  // }
 };
 
 /**
@@ -113,25 +114,30 @@ const LoaderIsland = ({
   zIndex = 120,
   isLoading,
   overlayOpacity = 0.5,
+  className,
 }: {
   size?: LoadingSize;
   zIndex?: number;
   isLoading?: boolean;
   overlayOpacity?: number;
+  className?: string;
 }) => {
-  if (isLoading) {
-    return (
-      <div
-        className="absolute inset-0 flex items-center justify-center"
-        style={{ zIndex }}
-      >
-        {overlayOpacity > 0 && <OverlayStyled opacity={overlayOpacity} />}
-        <Loading size={size} zIndex={140} />
-      </div>
-    );
+  if (!isLoading) {
+    return <React.Fragment />;
   }
 
-  return <React.Fragment />;
+  return (
+    <div
+      className={cn(
+        "absolute inset-0 flex items-center justify-center transition-opacity duration-500",
+        className
+      )}
+      style={{ zIndex }}
+    >
+      {overlayOpacity > 0 && <OverlayStyled opacity={overlayOpacity} />}
+      <Loading size={size} zIndex={140} />
+    </div>
+  );
 };
 
 Loader.Island = LoaderIsland;

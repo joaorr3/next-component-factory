@@ -28,7 +28,8 @@ export const authLayer = <
   gssp: (
     context: GetServerSidePropsContext<T>,
     ssg: Awaited<ReturnType<typeof serverSidePropsHelper>>
-  ) => Promise<R>
+  ) => Promise<R>,
+  bypass?: boolean
 ) => {
   return async (context: GetServerSidePropsContext<T>) => {
     const { req, res } = context;
@@ -38,7 +39,7 @@ export const authLayer = <
 
     const isPublic = routeRoles === "public";
 
-    if (isPublic || (session?.user && routeRoles === "user")) {
+    if (bypass || isPublic || (session?.user && routeRoles === "user")) {
       return await gssp(context, ssg);
     }
 

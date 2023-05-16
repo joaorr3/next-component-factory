@@ -9,7 +9,7 @@ export const BackButton = ({ href }: BackButtonProps): JSX.Element => {
   const router = useRouter();
 
   return (
-    <div className="mb-3 flex">
+    <div className="mb-3 flex -translate-x-5">
       <InteractionElement
         text="Back"
         href={href}

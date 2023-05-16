@@ -7,6 +7,11 @@ export const useUser = () => {
     retry: false,
   });
 
+  const roles = trpc.roles.currentUser.useQuery(undefined, {
+    staleTime: 600000,
+    retry: false,
+  });
+
   const isLoading = derive(() => {
     const loading = user.isLoading;
     const status = user.fetchStatus !== "idle";
@@ -15,6 +20,7 @@ export const useUser = () => {
 
   return {
     user: user.data,
+    roles: roles.data,
     isLoading,
   };
 };

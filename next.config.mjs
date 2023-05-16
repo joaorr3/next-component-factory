@@ -27,6 +27,10 @@ const config = {
         protocol: "https",
         hostname: "component-factory-s3-bucket.s3.eu-west-2.amazonaws.com",
       },
+      {
+        protocol: "https",
+        hostname: "media.tenor.com",
+      },
     ],
   },
   compiler: {

@@ -1,12 +1,15 @@
-import Head from "next/head";
 import Link from "next/link";
 import Router from "next/router";
 import React from "react";
 import { BackButton } from "../../components/BackButton";
 import { IssueForm } from "../../components/IssueForm/IssueForm";
 import { type FormSchema } from "../../components/IssueForm/models";
+import { MetaHead } from "../../components/MetaHead";
 import Modal from "../../components/Modal";
+import { UnauthorizedPage } from "../../components/UnauthorizedPage";
+import { env } from "../../env/client";
 import { useFileUpload } from "../../hooks/useFileUpload";
+import { useRoles } from "../../hooks/useRoles";
 import { routes } from "../../routes";
 import { derive } from "../../shared/utils";
 import { authLayer } from "../../utils/server-side";
@@ -17,11 +20,15 @@ const redirect = (path: string) => {
   Router.push(path);
 };
 
-export const getServerSideProps = authLayer("IssueOpen", async () => {
-  return {
-    props: {},
-  };
-});
+export const getServerSideProps = authLayer(
+  "IssueOpen",
+  async () => {
+    return {
+      props: {},
+    };
+  },
+  true
+);
 
 export default function IssueOpen() {
   const { upload } = useFileUpload("ISSUE");
@@ -142,8 +149,28 @@ export default function IssueOpen() {
     ]
   );
 
+  const { valid } = useRoles(routes.IssueOpen.roles);
+
+  if (!valid) {
+    return (
+      <React.Fragment>
+        <MetaHead
+          title="New Issue"
+          url={`${env.NEXT_PUBLIC_PROD_URL}/issue/open`}
+        />
+
+        <UnauthorizedPage reason="insufficientRoles" />
+      </React.Fragment>
+    );
+  }
+
   return (
     <React.Fragment>
+      <MetaHead
+        title="Open Issue"
+        url={`${env.NEXT_PUBLIC_PROD_URL}/issue/open`}
+      />
+
       <Modal isOpen={hasError}>
         <div className="h-full overflow-y-auto">
           <div className="m-8 flex flex-col justify-center ">
@@ -183,10 +210,6 @@ export default function IssueOpen() {
         </div>
       </Modal>
 
-      <Head>
-        <title>Open Issue</title>
-      </Head>
-
       <main className="mb-40">
         <div className="mb-6">
           <BackButton />
@@ -206,7 +229,7 @@ export default function IssueOpen() {
   );
 }
 
-export const Help = (): JSX.Element => {
+const Help = (): JSX.Element => {
   return (
     <span>
       <Link target="_blank" href="/faqs/how_to_open_an_issue">
