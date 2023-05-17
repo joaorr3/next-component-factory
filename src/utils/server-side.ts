@@ -1,4 +1,5 @@
 import { createProxySSGHelpers } from "@trpc/react-query/ssg";
+import { TRPCError } from "@trpc/server";
 import type { GetServerSidePropsContext } from "next";
 import type { Session } from "next-auth";
 import type { ParsedUrlQuery } from "querystring";
@@ -30,7 +31,7 @@ export const authLayer = <
     ssg: Awaited<ReturnType<typeof serverSidePropsHelper>>,
     hasValidRoles?: boolean
   ) => Promise<R>,
-  bypass?: boolean
+  redirect = true
 ) => {
   return async (context: GetServerSidePropsContext<T>) => {
     const { req, res } = context;
@@ -40,11 +41,11 @@ export const authLayer = <
 
     const isPublic = routeRoles === "public";
 
-    if (bypass || isPublic || (session?.user && routeRoles === "user")) {
+    if (isPublic || (session?.user && routeRoles === "user")) {
       return await gssp(context, ssg);
     }
 
-    if (!session?.user) {
+    if (!session?.user && redirect) {
       return {
         redirect: {
           destination: "/unauthorized/loggedOut",
@@ -53,20 +54,45 @@ export const authLayer = <
       };
     }
 
-    await ssg.user.current.prefetch();
-    const roles = await ssg.roles.currentUser.fetch();
+    try {
+      await ssg.user.current.prefetch();
+      // Will throw TRPCError.UNAUTHORIZED if it doesn't have session
+      const roles = await ssg.roles.currentUser.fetch();
 
-    const { valid } = handleUserRoles(roles, routeRoles);
+      const { valid: hasValidRoles } = handleUserRoles(roles, routeRoles);
 
-    if (!valid) {
-      return {
-        redirect: {
-          destination: "/unauthorized/insufficientRoles",
-          statusCode: 302,
-        },
-      };
+      if (!hasValidRoles && redirect) {
+        /**
+         * Session: TRUE;
+         * REDIRECT: TRUE;
+         * ROLES: FALSE
+         */
+        return {
+          redirect: {
+            destination: "/unauthorized/insufficientRoles",
+            statusCode: 302,
+          },
+        };
+      } else {
+        /**
+         * Session: TRUE;
+         * REDIRECT: FALSE;
+         * ROLES: *
+         */
+        return await gssp(context, ssg, hasValidRoles);
+      }
+    } catch (error) {
+      if (error instanceof TRPCError && error.code === "UNAUTHORIZED") {
+        /**
+         * Session: FALSE;
+         * REDIRECT: FALSE;
+         * ROLES: FALSE
+         */
+        return await gssp(context, ssg, false);
+      }
     }
 
-    return await gssp(context, ssg, valid);
+    // Safety net
+    return await gssp(context, ssg);
   };
 };

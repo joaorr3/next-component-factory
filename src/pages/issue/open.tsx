@@ -28,7 +28,8 @@ export const getServerSideProps = authLayer(
         hasValidRoles: !!hasValidRoles,
       },
     };
-  }
+  },
+  false
 );
 
 export default function IssueOpen({
