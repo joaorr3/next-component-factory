@@ -161,7 +161,7 @@ export default function IssueOpen({
           url={`${env.NEXT_PUBLIC_PROD_URL}/issue/open`}
         />
 
-        <UnauthorizedPage reason="insufficientRoles" />
+        <UnauthorizedPage />
       </React.Fragment>
     );
   }

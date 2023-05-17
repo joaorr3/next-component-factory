@@ -1,7 +1,8 @@
 import Image from "next/image";
 
 const unauthorizedMessages = {
-  default: "You must be signed in or have the right role to view this page.",
+  default:
+    "Sorry, you're either logged out or don't have enough roles to view this page..",
   loggedOut: "You must be signed in to view this page.",
   insufficientRoles: "Sorry, you don't have enough roles to view this page..",
 } as const;
