@@ -27,7 +27,8 @@ export const authLayer = <
   route: RoutesKeys,
   gssp: (
     context: GetServerSidePropsContext<T>,
-    ssg: Awaited<ReturnType<typeof serverSidePropsHelper>>
+    ssg: Awaited<ReturnType<typeof serverSidePropsHelper>>,
+    hasValidRoles?: boolean
   ) => Promise<R>,
   bypass?: boolean
 ) => {
@@ -66,6 +67,6 @@ export const authLayer = <
       };
     }
 
-    return await gssp(context, ssg);
+    return await gssp(context, ssg, valid);
   };
 };

@@ -1,3 +1,4 @@
+import type { InferGetServerSidePropsType } from "next";
 import Link from "next/link";
 import Router from "next/router";
 import React from "react";
@@ -9,7 +10,6 @@ import Modal from "../../components/Modal";
 import { UnauthorizedPage } from "../../components/UnauthorizedPage";
 import { env } from "../../env/client";
 import { useFileUpload } from "../../hooks/useFileUpload";
-import { useRoles } from "../../hooks/useRoles";
 import { routes } from "../../routes";
 import { derive } from "../../shared/utils";
 import { authLayer } from "../../utils/server-side";
@@ -22,15 +22,18 @@ const redirect = (path: string) => {
 
 export const getServerSideProps = authLayer(
   "IssueOpen",
-  async () => {
+  async (_, __, hasValidRoles) => {
     return {
-      props: {},
+      props: {
+        hasValidRoles: !!hasValidRoles,
+      },
     };
-  },
-  true
+  }
 );
 
-export default function IssueOpen() {
+export default function IssueOpen({
+  hasValidRoles,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const { upload } = useFileUpload("ISSUE");
 
   const {
@@ -149,9 +152,7 @@ export default function IssueOpen() {
     ]
   );
 
-  const { valid } = useRoles(routes.IssueOpen.roles);
-
-  if (!valid) {
+  if (!hasValidRoles) {
     return (
       <React.Fragment>
         <MetaHead
