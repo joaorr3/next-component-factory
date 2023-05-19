@@ -320,7 +320,7 @@ export const commandReactions = async ({
     },
     issue: async () => {
       await interaction.reply({
-        content: `${env.NEXT_PROD_URL}/issue/open`,
+        content: `${env.NEXT_PROD_URL}/issue/open \n or https://next-cf-up.vercel.app/issue/open`,
       });
       return {
         name: "issue",
