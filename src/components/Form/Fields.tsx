@@ -268,10 +268,12 @@ type StructuredSelectProps<S extends object> = Omit<
   BaseFieldProps,
   "register"
 > & {
+  selected?: string;
   fieldName: Path<S>;
   options: StructuredSelectOption[];
   control: Control<S>;
   toggleable?: boolean;
+  onSelect?: (value: StructuredSelectOption) => void;
 };
 
 export const SelectInput = ({
@@ -354,7 +356,7 @@ export const Select = <S extends object>({
 };
 
 export const StructuredSelect = <S extends object>({
-  fieldName,
+  selected,
   label,
   description,
   options,
@@ -362,28 +364,14 @@ export const StructuredSelect = <S extends object>({
   error,
   required,
   placeholder,
-  control,
-  toggleable,
+  onSelect,
 }: StructuredSelectProps<S>): JSX.Element => {
-  const { field } = useController({
-    name: fieldName,
-    control,
-  });
-
-  // @ts-expect-error
-  const selectedValue = (field.value?.["value"] || "") as string;
-
   const handleOnChange = React.useCallback(
     (value: string, index: number) => {
       const option = options[index];
-
-      if (toggleable) {
-        field.onChange(value !== selectedValue ? option : undefined);
-      } else {
-        field.onChange(option);
-      }
+      onSelect?.(option);
     },
-    [field, options, selectedValue, toggleable]
+    [onSelect, options]
   );
 
   return (
@@ -394,7 +382,7 @@ export const StructuredSelect = <S extends object>({
       error={error}
     >
       <SelectMenu
-        selectedValue={selectedValue}
+        selectedValue={selected}
         menuItems={options.map((o) => o.value)}
         onSelect={handleOnChange}
       >
@@ -409,8 +397,8 @@ export const StructuredSelect = <S extends object>({
             )}
             onClick={disabled ? undefined : () => setIsOpen(true)}
           >
-            <span className={cn("flex-1", field.value ? "" : "opacity-20")}>
-              {selectedValue || placeholder}
+            <span className={cn("flex-1", selected ? "" : "opacity-20")}>
+              {selected || placeholder}
             </span>
 
             <Arrow disabled={disabled} direction={isOpen ? "up" : "down"} />

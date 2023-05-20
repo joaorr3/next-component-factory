@@ -276,6 +276,7 @@ export const IssueForm = ({
 
           {isPublic && (
             <Fields.StructuredSelect
+              selected={watch("author")?.name}
               label="Author"
               fieldName="author"
               placeholder="John Doe"
@@ -287,6 +288,12 @@ export const IssueForm = ({
                 })) || []
               }
               disabled={formState.isSubmitting || !labUsers}
+              onSelect={(option) => {
+                setValue("author", {
+                  id: option.id,
+                  name: option.value,
+                });
+              }}
               error={getFieldState("author").error}
               control={control}
             />
