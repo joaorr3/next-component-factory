@@ -2,7 +2,7 @@ import { type IssuesMedia } from "@prisma/client";
 import {
   ReactSlipAndSlide,
   type ReactSlipAndSlideRef,
-} from "@react-slip-and-slide/web";
+} from "react-slip-and-slide";
 import React from "react";
 import { MediaPreview } from "./MediaPreview";
 import Modal, { type ModalProps } from "./Modal";

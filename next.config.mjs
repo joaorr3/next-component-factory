@@ -40,10 +40,6 @@ const config = {
     },
   },
   experimental: {
-    transpilePackages: [
-      "@react-slip-and-slide/web",
-      "@react-slip-and-slide/utils",
-    ],
     fontLoaders: [
       { loader: "@next/font/google", options: { subsets: ["latin"] } },
     ],

@@ -1,6 +1,6 @@
 import type { IssueIdMapping } from "@prisma/client";
 import { type Issue, type IssuesMedia } from "@prisma/client";
-import { type ReactSlipAndSlideRef } from "@react-slip-and-slide/web";
+import { type ReactSlipAndSlideRef } from "react-slip-and-slide";
 import dayjs from "dayjs";
 import Image from "next/image";
 import Link from "next/link";
