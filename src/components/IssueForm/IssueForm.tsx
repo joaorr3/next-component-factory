@@ -22,11 +22,14 @@ import {
 } from "./models";
 import { issueFormSchema } from "./validator";
 
-export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
+export const IssueForm = ({
+  isPublic,
+  onSubmit,
+}: IssueFormProps): JSX.Element => {
   const formRef = React.useRef<HTMLFormElement>(null);
 
   const { defaultUserLab, isLoading: isLoadingDefaultUserLab } =
-    useDefaultUserLab();
+    useDefaultUserLab(!isPublic);
 
   const {
     formState,
@@ -47,6 +50,15 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
       },
     },
   });
+
+  const { data: labUsers } = trpc.labs.labWithMembers.useQuery(
+    {
+      id: watch("lab").id,
+    },
+    {
+      enabled: isPublic && !!watch("lab").id,
+    }
+  );
 
   React.useEffect(() => {
     if (defaultUserLab) {
@@ -223,11 +235,11 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
         <Group label="Project Info">
           <Fields.ModalSelect
             label="Lab"
-            disabled={formState.isSubmitting || !defaultUserLab}
+            disabled={formState.isSubmitting || (!defaultUserLab && !isPublic)}
             placeholder="Ex: M2030"
             value={watch("lab")?.name}
             description={
-              !defaultUserLab?.id && !isLoadingDefaultUserLab ? (
+              !defaultUserLab && !isPublic && !isLoadingDefaultUserLab ? (
                 <div className="text-xs">
                   <span>
                     First, you need select your default lab in user settings.
@@ -252,6 +264,7 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
           >
             {({ setIsOpen }) => (
               <LabList
+                queryType={isPublic ? "all" : "user"}
                 selectedLab={watch("lab")}
                 onItemPress={(lab) => {
                   setValue("lab", lab);
@@ -260,6 +273,24 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
               />
             )}
           </Fields.ModalSelect>
+
+          {isPublic && (
+            <Fields.StructuredSelect
+              label="Author"
+              fieldName="author"
+              placeholder="John Doe"
+              required
+              options={
+                labUsers?.LabGuildUser.map((user) => ({
+                  id: user.GuildUser.id,
+                  value: user.GuildUser.friendlyName || user.GuildUser.username,
+                })) || []
+              }
+              disabled={formState.isSubmitting || !labUsers}
+              error={getFieldState("author").error}
+              control={control}
+            />
+          )}
 
           <Fields.Text
             label="Package Version"
@@ -294,26 +325,6 @@ export const IssueForm = ({ onSubmit }: IssueFormProps): JSX.Element => {
             required
             control={control}
           />
-
-          {/* <div className="flex">
-            <Fields.Toggle
-              label="Checked With Tech Lead"
-              checked={getValues("checkTechLead")}
-              onChange={(checked) => setValue("checkTechLead", checked)}
-              disabled={formState.isSubmitting}
-              error={getError("checkTechLead")}
-              register={() => register("checkTechLead")}
-            />
-
-            <Fields.Toggle
-              label="Checked With Design"
-              checked={getValues("checkDesign")}
-              onChange={(checked) => setValue("checkDesign", checked)}
-              disabled={formState.isSubmitting}
-              error={getError("checkDesign")}
-              register={() => register("checkDesign")}
-            />
-          </div> */}
         </Group>
 
         <Fields.Dropzone

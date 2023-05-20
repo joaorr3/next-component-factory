@@ -262,6 +262,18 @@ type SelectProps<S extends object> = Omit<BaseFieldProps, "register"> & {
   toggleable?: boolean;
 };
 
+type StructuredSelectOption = { id: string; value: string };
+
+type StructuredSelectProps<S extends object> = Omit<
+  BaseFieldProps,
+  "register"
+> & {
+  fieldName: Path<S>;
+  options: StructuredSelectOption[];
+  control: Control<S>;
+  toggleable?: boolean;
+};
+
 export const SelectInput = ({
   children,
   ...selectProps
@@ -333,7 +345,75 @@ export const Select = <S extends object>({
               {field.value || placeholder}
             </span>
 
-            <Arrow direction={isOpen ? "up" : "down"} />
+            <Arrow disabled={disabled} direction={isOpen ? "up" : "down"} />
+          </div>
+        )}
+      </SelectMenu>
+    </BaseField>
+  );
+};
+
+export const StructuredSelect = <S extends object>({
+  fieldName,
+  label,
+  description,
+  options,
+  disabled,
+  error,
+  required,
+  placeholder,
+  control,
+  toggleable,
+}: StructuredSelectProps<S>): JSX.Element => {
+  const { field } = useController({
+    name: fieldName,
+    control,
+  });
+
+  // @ts-expect-error
+  const selectedValue = (field.value?.["value"] || "") as string;
+
+  const handleOnChange = React.useCallback(
+    (value: string, index: number) => {
+      const option = options[index];
+
+      if (toggleable) {
+        field.onChange(value !== selectedValue ? option : undefined);
+      } else {
+        field.onChange(option);
+      }
+    },
+    [field, options, selectedValue, toggleable]
+  );
+
+  return (
+    <BaseField
+      required={required}
+      label={label}
+      description={description}
+      error={error}
+    >
+      <SelectMenu
+        selectedValue={selectedValue}
+        menuItems={options.map((o) => o.value)}
+        onSelect={handleOnChange}
+      >
+        {({ isOpen, setIsOpen }) => (
+          <div
+            className={cn(
+              baseField,
+              "relative flex cursor-pointer items-center",
+              isOpen
+                ? "outline outline-neutral-600 dark:outline-neutral-400"
+                : ""
+            )}
+            onClick={disabled ? undefined : () => setIsOpen(true)}
+          >
+            <span className={cn("flex-1", field.value ? "" : "opacity-20")}>
+              {selectedValue || placeholder}
+            </span>
+
+            <Arrow disabled={disabled} direction={isOpen ? "up" : "down"} />
           </div>
         )}
       </SelectMenu>

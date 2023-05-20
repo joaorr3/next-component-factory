@@ -2,6 +2,7 @@ import { Montserrat } from "@next/font/google";
 import { type Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
 import { type AppType } from "next/app";
+import { useRouter } from "next/router";
 import React from "react";
 import { AppContainer } from "../components/AppContainer";
 import { GLobalProfileLayer } from "../components/GlobalProfileLayer";
@@ -16,6 +17,7 @@ import NavBar, {
 } from "../components/NavBar";
 import ThemeSwitcher from "../components/ThemeSwitcher";
 import { UserAvatar } from "../components/UserAvatar";
+import { routes } from "../routes";
 import "../styles/globals.css";
 import { GlobalStyle } from "../styles/GlobalStyles";
 import ThemeProvider from "../styles/ThemeProvider";
@@ -32,6 +34,9 @@ const MyApp: AppType<{ session: Session | null }> = ({
   Component,
   pageProps: { session, ...pageProps },
 }) => {
+  const router = useRouter();
+  const isStandAlonePage = router.pathname === routes.PublicIssueOpen.path;
+
   return (
     <React.Suspense>
       <GlobalStyle />
@@ -45,7 +50,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
                 v1.2.2
               </span>
 
-              <NavBar>
+              <NavBar hide={isStandAlonePage}>
                 <HomeButton />
 
                 <NavBarContent />

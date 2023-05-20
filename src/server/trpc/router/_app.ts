@@ -9,6 +9,7 @@ import { kudosRouter } from "./kudos";
 import { labsRouter } from "./labs";
 import { mediaRouter } from "./media";
 import { notionRouter } from "./notion";
+import { publicIssuesRouter } from "./public-issues";
 import { rolesRouter } from "./roles";
 import { userRouter } from "./user";
 
@@ -16,6 +17,7 @@ export const appRouter = router({
   example: exampleRouter,
   auth: authRouter,
   issues: issuesRouter,
+  publicIssues: publicIssuesRouter,
   kudos: kudosRouter,
   discord: discordRouter,
   user: userRouter,

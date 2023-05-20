@@ -6,7 +6,14 @@ import { usePathMatch } from "../hooks/usePathMatch";
 import { navBarRouteEntries } from "../routes";
 import type { HandleRolesModel } from "../utils/roles";
 
-const NavBar = ({ children }: React.PropsWithChildren) => {
+const NavBar = ({
+  hide,
+  children,
+}: React.PropsWithChildren<{ hide?: boolean }>) => {
+  if (hide) {
+    return <React.Fragment />;
+  }
+
   return (
     <React.Fragment>
       <div className="fixed z-[100] flex h-20 w-full items-center justify-end backdrop-blur-md">

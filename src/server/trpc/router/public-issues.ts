@@ -7,9 +7,8 @@ import {
   userMention,
   type Role,
 } from "discord.js";
-import { isNaN, truncate } from "lodash";
+import { truncate } from "lodash";
 import { z } from "zod";
-import { type FiltersModel } from "../../../components/Issue/Filters";
 import { issueProcedureSchema } from "../../../components/IssueForm/validator";
 import { env } from "../../../env/server";
 import { IssueScope } from "../../../shared/enums";
@@ -19,122 +18,61 @@ import type {
   NotionIssueDetailsModel,
 } from "../../../shared/models";
 import notion from "../../../shared/notion";
-import { derive } from "../../../shared/utils";
 import { handledProcedure } from "../../../utils/trpc";
 import { prismaNext } from "../../db/client";
 import { discordNext } from "../../discord/client";
+import { publicProcedure, router } from "../trpc";
 
-import { protectedProcedure, router } from "../trpc";
-
-export const issuesRouter = router({
-  all: protectedProcedure.query(async ({ ctx }) => {
-    const all = await ctx.prisma.issue.findMany();
-
-    return all.reverse();
-  }),
-  detail: protectedProcedure
-    .input(z.object({ id: z.string() }))
-    .query(async ({ ctx, input: { id } }) => {
-      return await ctx.prisma.issue.findFirst({
-        where: {
-          id: Number(id),
-        },
-        include: {
-          IssuesMedia: true,
-          IssueMapping: true,
-        },
-      });
-    }),
-  search: protectedProcedure
-    .input(z.custom<FiltersModel>())
-    .query(async ({ ctx, input: { id, title, author, type, component } }) => {
-      const validId = derive(() => {
-        if (id) {
-          const parsed = parseInt(id);
-          return !isNaN(parsed) ? parsed : undefined;
-        }
-
-        return undefined;
-      });
-
-      if (!!validId || !!title || !!author || !!type || !!component) {
-        return await ctx.prisma.issue.findMany({
-          where: {
-            id: validId,
-            title: {
-              contains: title,
-            },
-            author: {
-              contains: author,
-            },
-            type: {
-              contains: type,
-            },
-            component: {
-              contains: component,
-            },
-          },
-          orderBy: {
-            createdAt: "desc",
-          },
-        });
-      }
-
-      return await ctx.prisma.issue.findMany({
-        orderBy: {
-          createdAt: "desc",
-        },
-      });
-    }),
-  createIssue: protectedProcedure
-    .input(issueProcedureSchema)
-    .mutation(async ({ ctx, input }) => {
+export const publicIssuesRouter = router({
+  createIssue: publicProcedure
+    .input(
+      z.object({
+        secret: z.string().optional(),
+        issue: issueProcedureSchema,
+      })
+    )
+    .mutation(async ({ ctx, input: { issue, secret } }) => {
       return handledProcedure(async () => {
-        const user = await ctx.prisma.user.findUnique({
-          where: {
-            id: ctx.session.user.id,
-          },
-          include: {
-            GuildUser: true,
-          },
-        });
+        if (secret !== env.ISSUES_FORM_SECRET) {
+          throw Error("Invalid Secret");
+        }
 
         const mapping = await ctx.prisma.issueIdMapping.create({
           data: {
-            author: user?.name,
-            title: input.title,
+            author: issue.author.name,
+            title: issue.title,
           },
         });
 
         const prepareData: Omit<Issue, "id"> = {
-          title: input.title,
-          description: input.description,
-          lab: input.lab.name,
-          labId: input.lab.id,
-          version: input.version,
-          type: input.type,
-          stepsToReproduce: input.stepsToReproduce,
-          component: input.component,
-          severity: input.severity || null,
-          specs: input.specs,
-          codeSnippet: input.codeSnippet,
-          checkTechLead: !!input.checkTechLead,
-          checkDesign: !!input.checkDesign,
-          scope: input.scope,
-          azureWorkItem: input.azureWorkItem || "",
-          attachment: input.files[0]?.url,
-          attachment2: input.files[1]?.url,
+          title: issue.title,
+          description: issue.description,
+          lab: issue.lab.name,
+          labId: issue.lab.id,
+          version: issue.version,
+          type: issue.type,
+          stepsToReproduce: issue.stepsToReproduce,
+          component: issue.component,
+          severity: issue.severity || null,
+          specs: issue.specs,
+          codeSnippet: issue.codeSnippet,
+          checkTechLead: !!issue.checkTechLead,
+          checkDesign: !!issue.checkDesign,
+          scope: issue.scope,
+          azureWorkItem: issue.azureWorkItem || "",
+          attachment: issue.files[0]?.url,
+          attachment2: issue.files[1]?.url,
 
           issueIdMappingId: mapping.id,
 
-          author: user?.name || null,
+          author: issue.author.name || null,
 
           createdAt: new Date(),
           timestamp: new Date(),
           status: "TODO",
           discordThreadId: null,
-          platform: input.platform || null,
-          componentId: input.componentId,
+          platform: issue.platform || null,
+          componentId: issue.componentId,
         };
 
         const issueResponse = await ctx.prisma.issue.create({
@@ -147,17 +85,26 @@ export const issuesRouter = router({
         };
       }, "Phase 1: createIssue error");
     }),
-  createNotionIssue: protectedProcedure
-    .input(z.custom<NotionIssueDetailsModel>())
-    .mutation(async ({ ctx, input }) => {
+  createNotionIssue: publicProcedure
+    .input(
+      z.object({
+        secret: z.string().optional(),
+        issue: z.custom<NotionIssueDetailsModel>(),
+      })
+    )
+    .mutation(async ({ ctx, input: { issue, secret } }) => {
       return handledProcedure(async () => {
+        if (secret !== env.ISSUES_FORM_SECRET) {
+          throw Error("Invalid Secret");
+        }
+
         const component = await ctx.prisma.component.findUnique({
           where: {
-            id: input.componentId || "",
+            id: issue.componentId || "",
           },
         });
         const pageId = await notion.addIssue({
-          ...input,
+          ...issue,
           componentId: component?.notion_id || null,
         });
         const pageUrl = pageId ? await notion?.getPageUrl(pageId) : undefined;
@@ -165,70 +112,100 @@ export const issuesRouter = router({
         return { pageId, pageUrl };
       }, "Phase 2: createNotionIssue error");
     }),
-  openThread: protectedProcedure
-    .input(z.custom<DiscordIssueDetailsModel>())
-    .mutation(async ({ ctx, input: { issue, notionPageUrl } }) => {
-      return handledProcedure(async () => {
-        const user = await ctx.prisma.user.findUnique({
-          where: {
-            id: ctx.session.user.id,
-          },
-          include: {
-            GuildUser: true,
-          },
-        });
-
-        const thread = await createIssueThread({
-          issue,
-          notionPageUrl,
-          user: user?.GuildUser,
-        });
-
-        return {
-          threadId: thread?.id,
-          threadUrl: thread?.url,
-        };
-      }, "Phase 3: openThread error");
-    }),
-  updateNotionPage: protectedProcedure
+  openThread: publicProcedure
     .input(
       z.object({
-        pageId: z.string().optional(),
-        threadUrl: z.string().optional(),
-      })
-    )
-    .mutation(async ({ input: { pageId, threadUrl } }) => {
-      return handledProcedure(async () => {
-        await notion.updatePageThread(pageId, threadUrl);
-      }, "Phase 4: updateNotionPage error");
-    }),
-
-  updateIssueMapping: protectedProcedure
-    .input(
-      z.object({
-        mappingId: z.number(),
-        issueAuthor: z.string().nullable(),
-        issueTitle: z.string().nullable(),
-        notionPageId: z.string().optional(),
-        notionPageUrl: z.string().optional(),
-        threadId: z.string().optional(),
-        threadUrl: z.string().optional(),
+        secret: z.string().optional(),
+        userId: z.string(),
+        data: z.custom<DiscordIssueDetailsModel>(),
       })
     )
     .mutation(
       async ({
         ctx,
         input: {
-          mappingId,
-          notionPageId,
-          notionPageUrl,
-          threadId,
-          threadUrl,
-          issueAuthor,
-          issueTitle,
+          data: { issue, notionPageUrl },
+          userId,
+          secret,
         },
       }) => {
         return handledProcedure(async () => {
+          if (secret !== env.ISSUES_FORM_SECRET) {
+            throw Error("Invalid Secret");
+          }
+
+          const user = await ctx.prisma.guildUser.findUnique({
+            where: {
+              id: userId,
+            },
+          });
+
+          const thread = await createIssueThread({
+            issue,
+            notionPageUrl,
+            user,
+          });
+
+          return {
+            threadId: thread?.id,
+            threadUrl: thread?.url,
+          };
+        }, "Phase 3: openThread error");
+      }
+    ),
+  updateNotionPage: publicProcedure
+    .input(
+      z.object({
+        secret: z.string().optional(),
+        pageId: z.string().optional(),
+        threadUrl: z.string().optional(),
+      })
+    )
+    .mutation(async ({ input: { pageId, threadUrl, secret } }) => {
+      return handledProcedure(async () => {
+        if (secret !== env.ISSUES_FORM_SECRET) {
+          throw Error("Invalid Secret");
+        }
+
+        await notion.updatePageThread(pageId, threadUrl);
+      }, "Phase 4: updateNotionPage error");
+    }),
+  updateIssueMapping: publicProcedure
+    .input(
+      z.object({
+        secret: z.string().optional(),
+        data: z.object({
+          mappingId: z.number(),
+          issueAuthor: z.string().nullable(),
+          issueTitle: z.string().nullable(),
+          notionPageId: z.string().optional(),
+          notionPageUrl: z.string().optional(),
+          threadId: z.string().optional(),
+          threadUrl: z.string().optional(),
+        }),
+      })
+    )
+    .mutation(
+      async ({
+        ctx,
+        input: {
+          secret,
+          data: {
+            mappingId,
+            notionPageId,
+            notionPageUrl,
+            threadId,
+            threadUrl,
+            issueAuthor,
+            issueTitle,
+          },
+        },
+      }) => {
+        return handledProcedure(async () => {
+          if (secret !== env.ISSUES_FORM_SECRET) {
+            throw Error("Invalid Secret");
+          }
+
           await ctx.prisma.issueIdMapping.update({
             where: {
               id: mappingId,

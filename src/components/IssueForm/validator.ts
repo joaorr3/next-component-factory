@@ -26,6 +26,10 @@ export const issueFormSchema = baseIssueSchema.merge(
       id: z.string(),
       name: z.string(),
     }),
+    author: z.object({
+      id: z.string(),
+      name: z.string(),
+    }),
     files: rawFileValidator,
     componentId: z.string().nullable(),
   })
@@ -33,8 +37,14 @@ export const issueFormSchema = baseIssueSchema.merge(
 
 export const issueProcedureSchema = baseIssueSchema.merge(
   z.object({
-    lab: notEmptyString,
-    labId: notEmptyString,
+    lab: z.object({
+      id: notEmptyString,
+      name: notEmptyString,
+    }),
+    author: z.object({
+      id: notEmptyString,
+      name: notEmptyString,
+    }),
     files: z.array(z.custom<ImageResponseModel>()),
     componentId: z.string().nullable(),
   })

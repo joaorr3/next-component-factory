@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { notEmptyString } from "../../../utils/validators";
 import notion from "../../../shared/notion";
-import { router, protectedProcedure } from "../trpc";
+import { router, protectedProcedure, publicProcedure } from "../trpc";
 import { wait } from "../../../shared/utils";
 
 export const componentFormSchema = z.object({
@@ -14,7 +14,7 @@ export const componentFormSchema = z.object({
 export type ComponentFormModel = z.infer<typeof componentFormSchema>;
 
 export const componentsRouter = router({
-  all: protectedProcedure.query(async ({ ctx }) => {
+  all: publicProcedure.query(async ({ ctx }) => {
     const components = await ctx.prisma.component.findMany();
     return components;
   }),

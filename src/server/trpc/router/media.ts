@@ -102,7 +102,7 @@ export const mediaRouter = router({
 
       return { image, presignedPost };
     }),
-  uploadIssueMedia: protectedProcedure
+  uploadIssueMedia: publicProcedure
     .input(issueMediaSchemaValidator)
     .mutation(async ({ ctx, input: { fileType, fileName, metadata } }) => {
       const imageId = uuid();

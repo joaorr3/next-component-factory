@@ -18,6 +18,7 @@ type Routes = {
   Issue: RouteData;
   IssueDetail: RouteDataWithDynamicPath;
   IssueOpen: RouteData;
+  PublicIssueOpen: RouteData;
   FAQs: RouteData;
   FAQDetail: RouteDataWithDynamicPath;
   // Manage
@@ -88,6 +89,11 @@ export const routes: Routes = {
     roles: {
       anyOf: ["cf", "labs"],
     },
+  },
+  PublicIssueOpen: {
+    label: "Open",
+    path: "/issue/form/[secret]",
+    roles: "public",
   },
   // Manage
   Manage: {

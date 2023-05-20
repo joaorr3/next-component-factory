@@ -8,7 +8,7 @@ import { InteractionSelectElement } from "../InteractionSelectElement";
 type SelectMenuProps = {
   selectedValue?: string;
   menuItems: string[];
-  onSelect?: (value: string) => void;
+  onSelect?: (value: string, index: number) => void;
   children: (props: {
     isOpen: boolean;
     setIsOpen: (status: boolean) => void;
@@ -29,9 +29,9 @@ export const SelectMenu = ({
   useKeyPress({ targetKey: "Escape", cb: close, attach: isOpen });
 
   const handleOnItemPress = React.useCallback(
-    (item: string) => {
+    (item: string, index: number) => {
       close();
-      onSelect?.(item);
+      onSelect?.(item, index);
     },
     [close, onSelect]
   );
@@ -49,7 +49,7 @@ export const SelectMenu = ({
                   className="w-full"
                   text={item}
                   active={item === selectedValue}
-                  onPress={() => handleOnItemPress(item)}
+                  onPress={() => handleOnItemPress(item, key)}
                 />
                 {key < menuItems.length - 1 && (
                   <div

@@ -6,7 +6,7 @@ import type { PickRequired } from "../../../shared/utilityTypes";
 import { normalizeLabLabel } from "../../../shared/utils";
 import { prismaNext } from "../../db/client";
 import { discordNext } from "../../discord/client";
-import { protectedProcedure, router } from "../trpc";
+import { protectedProcedure, publicProcedure, router } from "../trpc";
 
 const labSchema = z.custom<PickRequired<Lab, "displayName">>();
 
@@ -28,6 +28,9 @@ export const labsRouter = router({
       }
       return null;
     }),
+  all: publicProcedure.query(async ({ ctx }) => {
+    return await ctx.prisma.lab.findMany();
+  }),
   readMany: protectedProcedure.query(async () => {
     return await prismaNext.labs.readMany();
   }),
@@ -42,7 +45,7 @@ export const labsRouter = router({
         },
       });
     }),
-  labWithMembers: protectedProcedure
+  labWithMembers: publicProcedure
     .input(z.object({ id: z.string().optional() }))
     .query(async ({ ctx, input: { id } }) => {
       return await ctx.prisma.lab.findUnique({

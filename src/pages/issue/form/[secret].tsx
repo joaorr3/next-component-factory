@@ -1,39 +1,39 @@
-import type { InferGetServerSidePropsType } from "next";
+import type {
+  GetServerSidePropsContext,
+  InferGetServerSidePropsType,
+} from "next";
 import Link from "next/link";
 import Router from "next/router";
 import React from "react";
-import { BackButton } from "../../components/BackButton";
-import { IssueForm } from "../../components/IssueForm/IssueForm";
-import { type FormSchema } from "../../components/IssueForm/models";
-import { MetaHead } from "../../components/MetaHead";
-import Modal from "../../components/Modal";
-import { UnauthorizedPage } from "../../components/UnauthorizedPage";
-import { env } from "../../env/client";
-import { useFileUpload } from "../../hooks/useFileUpload";
-import { routes } from "../../routes";
-import { derive } from "../../shared/utils";
-import { authLayer } from "../../utils/server-side";
-import { trpc } from "../../utils/trpc";
-import type { CustomFile } from "../../utils/validators/media";
+import { BackButton } from "../../../components/BackButton";
+import { IssueForm } from "../../../components/IssueForm/IssueForm";
+import { type FormSchema } from "../../../components/IssueForm/models";
+import { MetaHead } from "../../../components/MetaHead";
+import Modal from "../../../components/Modal";
+import { UnauthorizedPage } from "../../../components/UnauthorizedPage";
+import { env } from "../../../env/client";
+import { useFileUpload } from "../../../hooks/useFileUpload";
+import { routes } from "../../../routes";
+import { derive } from "../../../shared/utils";
+import { trpc } from "../../../utils/trpc";
+import type { CustomFile } from "../../../utils/validators/media";
 
 const redirect = (path: string) => {
   Router.push(path);
 };
 
-export const getServerSideProps = authLayer(
-  "IssueOpen",
-  async (_, __, hasValidRoles) => {
-    return {
-      props: {
-        hasValidRoles: !!hasValidRoles,
-      },
-    };
-  },
-  false
-);
+export const getServerSideProps = async ({
+  params,
+}: GetServerSidePropsContext<{ secret: string }>) => {
+  return {
+    props: {
+      secret: params?.secret,
+    },
+  };
+};
 
 export default function IssueOpen({
-  hasValidRoles,
+  secret,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const { upload } = useFileUpload("ISSUE");
 
@@ -42,35 +42,35 @@ export default function IssueOpen({
     error: createIssueError,
     isError: hasCreateIssueError,
     isSuccess: hasCreateIssueSuccess,
-  } = trpc.issues.createIssue.useMutation();
+  } = trpc.publicIssues.createIssue.useMutation();
 
   const {
     mutateAsync: createNotionIssue,
     error: createNotionIssueError,
     isError: hasCreateNotionIssueError,
     isSuccess: hasCreateNotionIssueSuccess,
-  } = trpc.issues.createNotionIssue.useMutation();
+  } = trpc.publicIssues.createNotionIssue.useMutation();
 
   const {
     mutateAsync: openThread,
     error: openThreadError,
     isError: hasOpenThreadError,
     isSuccess: hasOpenThreadSuccess,
-  } = trpc.issues.openThread.useMutation();
+  } = trpc.publicIssues.openThread.useMutation();
 
   const {
     mutateAsync: updateNotionPage,
     error: updateNotionPageError,
     isError: hasUpdateNotionPageError,
     isSuccess: hasUpdateNotionPageSuccess,
-  } = trpc.issues.updateNotionPage.useMutation();
+  } = trpc.publicIssues.updateNotionPage.useMutation();
 
   const {
     mutateAsync: updateIssueMapping,
     error: updateIssueMappingError,
     isError: hasUpdateIssueMappingError,
     isSuccess: hasUpdateIssueMappingSuccess,
-  } = trpc.issues.updateIssueMapping.useMutation();
+  } = trpc.publicIssues.updateIssueMapping.useMutation();
 
   const [isProceduresModalOpen, setIsProceduresModalOpen] =
     React.useState<boolean>(false);
@@ -107,42 +107,57 @@ export default function IssueOpen({
   );
 
   const handleOnSubmit = React.useCallback(
-    async ({ lab, ...data }: FormSchema) => {
+    async ({ lab, author, ...data }: FormSchema) => {
       setIsProceduresModalOpen(true);
       const { issue, issueMapping } = await createIssue({
-        ...data,
-        lab,
-        files: [],
+        secret,
+        issue: {
+          ...data,
+          lab,
+          author,
+          files: [],
+        },
       });
       if (issue.id) {
         const attachments = await handleFilesUpload(data.files, issue.id);
 
         const { pageId, pageUrl } = await createNotionIssue({
-          ...issue,
-          attachments: attachments.map((a) => a.url),
+          secret,
+          issue: {
+            ...issue,
+            attachments: attachments.map((a) => a.url),
+          },
         });
 
         const { threadId, threadUrl } = await openThread({
-          issue,
-          notionPageUrl: pageUrl,
+          secret,
+          userId: author.id,
+          data: {
+            issue,
+            notionPageUrl: pageUrl,
+          },
         });
 
-        await updateNotionPage({ pageId, threadUrl });
+        await updateNotionPage({ secret, pageId, threadUrl });
 
         await updateIssueMapping({
-          mappingId: issueMapping.id,
-          issueAuthor: issue.author,
-          issueTitle: issue.title,
-          notionPageId: pageId,
-          notionPageUrl: pageUrl,
-          threadId,
-          threadUrl,
+          secret,
+          data: {
+            mappingId: issueMapping.id,
+            issueAuthor: issue.author,
+            issueTitle: issue.title,
+            notionPageId: pageId,
+            notionPageUrl: pageUrl,
+            threadId,
+            threadUrl,
+          },
         });
 
         redirect(routes.IssueDetail.dynamicPath(String(issue.id)));
       }
     },
     [
+      secret,
       createIssue,
       handleFilesUpload,
       createNotionIssue,
@@ -152,7 +167,7 @@ export default function IssueOpen({
     ]
   );
 
-  if (!hasValidRoles) {
+  if (secret !== env.NEXT_PUBLIC_ISSUES_FORM_SECRET) {
     return (
       <React.Fragment>
         <MetaHead
@@ -212,10 +227,6 @@ export default function IssueOpen({
       </Modal>
 
       <main className="mb-40">
-        <div className="mb-6">
-          <BackButton />
-        </div>
-
         <div className="mb-8 ">
           <div className="mb-2 flex items-center">
             <span className="mr-2 text-3xl font-semibold">New Issue</span>
@@ -224,7 +235,7 @@ export default function IssueOpen({
           <p className="text-xs">Required field *</p>
         </div>
 
-        <IssueForm onSubmit={handleOnSubmit} />
+        <IssueForm isPublic onSubmit={handleOnSubmit} />
       </main>
     </React.Fragment>
   );
