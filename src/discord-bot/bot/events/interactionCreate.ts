@@ -196,7 +196,7 @@ export const interactionCreateHandler = async (
           const { guildUsers } = response;
 
           for (const guildUser of guildUsers) {
-            await prisma?.guildUser.updateGuildUser(guildUser);
+            await prisma?.guildUser.upsertGuildUser(guildUser);
             await wait(200);
           }
 

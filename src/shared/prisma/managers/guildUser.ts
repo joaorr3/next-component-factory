@@ -1,4 +1,5 @@
 import type { GuildUser, PrismaClient } from "@prisma/client";
+import { pick } from "lodash";
 
 export class GuildUserManager {
   private client: PrismaClient;
@@ -6,36 +7,26 @@ export class GuildUserManager {
     this.client = _client;
   }
 
-  async updateGuildUser(data: GuildUser) {
+  async upsertGuildUser(data: GuildUser) {
     try {
-      const user = await this.client.guildUser.findFirst({
+      const guildUser = await this.client.guildUser.upsert({
         where: {
           id: data.id,
         },
+        create: data,
+        update: pick(data, [
+          "username",
+          "avatarURL",
+          "friendlyName",
+          "roles",
+          "color",
+        ]),
       });
-      if (user) {
-        const { notionUserId: _, id: __, azureUserId: ___, ...restData } = data;
-        const guildUser = await this.client.guildUser.update({
-          where: {
-            id: user.id,
-          },
-          data: restData,
-        });
 
-        return {
-          action: "updated",
-          guildUser,
-        } as const;
-      } else {
-        const guildUser = await this.client.guildUser.create({
-          data,
-        });
-
-        return {
-          action: "created",
-          guildUser,
-        } as const;
-      }
+      return {
+        action: "upsert",
+        guildUser,
+      } as const;
     } catch (error) {
       console.log("prisma:error:updateGuildUser: ", error);
     }

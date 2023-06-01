@@ -26,10 +26,12 @@ export const issueFormSchema = baseIssueSchema.merge(
       id: z.string(),
       name: z.string(),
     }),
-    author: z.object({
-      id: z.string(),
-      name: z.string(),
-    }),
+    author: z
+      .object({
+        id: z.string(),
+        name: z.string(),
+      })
+      .optional(),
     files: rawFileValidator,
     componentId: z.string().nullable(),
   })
@@ -41,10 +43,12 @@ export const issueProcedureSchema = baseIssueSchema.merge(
       id: notEmptyString,
       name: notEmptyString,
     }),
-    author: z.object({
-      id: notEmptyString,
-      name: notEmptyString,
-    }),
+    author: z
+      .object({
+        id: notEmptyString,
+        name: notEmptyString,
+      })
+      .optional(),
     files: z.array(z.custom<ImageResponseModel>()),
     componentId: z.string().nullable(),
   })

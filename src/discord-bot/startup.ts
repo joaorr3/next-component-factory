@@ -21,7 +21,7 @@ const updateGuildUsers = async (guildUsers: GuildUser[]) => {
 
   return new Promise<number>(async (res) => {
     for (const guildUser of guildUsers) {
-      await prismaSharedClient?.guildUser.updateGuildUser(guildUser);
+      await prismaSharedClient?.guildUser.upsertGuildUser(guildUser);
       await wait(500);
       index++;
       if (index === guildUsers.length) {

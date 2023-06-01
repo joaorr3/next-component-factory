@@ -10,18 +10,20 @@ export class LabsManager extends CrudHandler<Lab> {
 
   async updateLabByChannelId(channelId: string, data: Partial<Lab>) {
     try {
-      this.client.lab.findFirstOrThrow({
+      const lab = await this.client.lab.findFirst({
         where: {
           channelId,
         },
       });
 
-      return await this.client.lab.update({
-        where: {
-          channelId,
-        },
-        data,
-      });
+      if (lab) {
+        return await this.client.lab.update({
+          where: {
+            channelId,
+          },
+          data,
+        });
+      }
     } catch (error) {
       console.log("error -> [LabsManager.updateLabByChannelId]: ", error);
     }

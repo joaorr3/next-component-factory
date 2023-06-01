@@ -11,7 +11,7 @@ export const guildMemberUpdateHandler = async (
     if (cachedGuildMember) {
       const guildMember = await cachedGuildMember.fetch();
       const guildUser = DataUtils.transformGuildMemberData(guildMember);
-      const response = await prisma?.guildUser.updateGuildUser(guildUser);
+      const response = await prisma?.guildUser.upsertGuildUser(guildUser);
       if (response) {
         logger.db.discord({
           level: "info",

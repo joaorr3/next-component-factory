@@ -131,7 +131,7 @@ export default function IssueOpen({
 
         const { threadId, threadUrl } = await openThread({
           secret,
-          userId: author.id,
+          userId: author?.id || "1098331569581732001",
           data: {
             issue,
             notionPageUrl: pageUrl,

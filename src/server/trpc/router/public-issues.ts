@@ -39,7 +39,7 @@ export const publicIssuesRouter = router({
 
         const mapping = await ctx.prisma.issueIdMapping.create({
           data: {
-            author: issue.author.name,
+            author: issue.author?.name,
             title: issue.title,
           },
         });
@@ -65,7 +65,7 @@ export const publicIssuesRouter = router({
 
           issueIdMappingId: mapping.id,
 
-          author: issue.author.name || null,
+          author: issue.author?.name || null,
 
           createdAt: new Date(),
           timestamp: new Date(),
