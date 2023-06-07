@@ -178,7 +178,12 @@ export default function IssueOpen({
         url={`${env.NEXT_PUBLIC_PROD_URL}/issue/open`}
       />
 
-      <Modal isOpen={hasError}>
+      <Modal
+        isOpen={hasError}
+        onChange={() => {
+          setIsProceduresModalOpen(false);
+        }}
+      >
         <div className="h-full overflow-y-auto">
           <div className="m-8 flex flex-col justify-center ">
             <p className="mb-12 text-xl">Ups...</p>

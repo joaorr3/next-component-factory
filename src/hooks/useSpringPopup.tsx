@@ -20,11 +20,13 @@ export const useSpringPopup = (
       onStart: () => {
         if (isOpen) {
           setIsVisible(true);
+          onChange?.(true);
         }
       },
       onRest: () => {
         if (!isOpen) {
           setIsVisible(false);
+          onChange?.(false);
         }
       },
     });
