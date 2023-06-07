@@ -20,7 +20,10 @@ export const OpenPhases = ({ phases }: OpenPhasesProps): JSX.Element => {
           <div key={index} className="mb-1 flex flex-1">
             <p className="flex-1 text-lg font-semibold">{label}</p>
 
-            <div className="relative flex items-center justify-center">
+            <div
+              className="relative flex items-center justify-center"
+              style={{ minWidth: 16, minHeight: 16 }}
+            >
               {isSuccess && <span>✅</span>}
               {isError && <span>❌</span>}
 
