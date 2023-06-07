@@ -17,12 +17,12 @@ import { ErrorHandler } from "../../utils/error";
 import {
   bookmark,
   getPublicUrl,
-  image,
   paragraph,
   parseToNumberedList,
   scopeToLabel,
   severityLevelToEmoji,
   spacer,
+  videoOrImage,
 } from "./utils";
 
 class Notion {
@@ -465,7 +465,7 @@ class Notion {
                 },
               },
             ],
-            children: attachments?.map((url) => image(url)),
+            children: attachments?.map((url) => videoOrImage(url)),
           },
         },
         ...spacer(),

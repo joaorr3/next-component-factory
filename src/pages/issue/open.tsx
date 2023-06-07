@@ -158,6 +158,12 @@ export default function IssueOpen({
     ]
   );
 
+  React.useEffect(() => {
+    if (hasError) {
+      setIsProceduresModalOpen(false);
+    }
+  }, [hasError]);
+
   if (!hasValidRoles) {
     return (
       <React.Fragment>
@@ -178,12 +184,7 @@ export default function IssueOpen({
         url={`${env.NEXT_PUBLIC_PROD_URL}/issue/open`}
       />
 
-      <Modal
-        isOpen={hasError}
-        onChange={() => {
-          setIsProceduresModalOpen(false);
-        }}
-      >
+      <Modal isOpen={hasError}>
         <div className="h-full overflow-y-auto">
           <div className="m-8 flex flex-col justify-center ">
             <p className="mb-12 text-xl">Ups...</p>

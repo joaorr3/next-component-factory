@@ -110,3 +110,13 @@ export type Image = {
     };
   };
 };
+
+export type Video = {
+  type: "video";
+  video: {
+    type: "external";
+    external: {
+      url: string;
+    };
+  };
+};

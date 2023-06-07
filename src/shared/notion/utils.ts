@@ -1,6 +1,7 @@
 import { range } from "lodash";
-import type * as NotionModels from "./models";
 import { IssueScope, IssueSeverityLevel } from "../../shared/enums";
+import { getFileTypeFromUrl } from "../utils";
+import type * as NotionModels from "./models";
 
 export const guildChannelUrl = (id: string) =>
   `https://discord.com/channels/973878486739591208/${id}`;
@@ -124,6 +125,30 @@ export const image = (
       },
     },
   };
+};
+
+export const video = (url: string): NotionModels.Video => {
+  return {
+    type: "video",
+    video: {
+      type: "external",
+      external: {
+        url,
+      },
+    },
+  };
+};
+
+export const videoOrImage = (
+  url: string
+): NotionModels.Video | NotionModels.Image => {
+  const fileType = getFileTypeFromUrl(url);
+
+  if (fileType === "video") {
+    return video(url);
+  } else {
+    return image(url) as NotionModels.Image;
+  }
 };
 
 const public_URL = "https://xdteamwiki.notion.site";

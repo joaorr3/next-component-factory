@@ -1,5 +1,6 @@
 import { kebabCase, lowerCase } from "lodash";
 import slugify from "slugify";
+import { acceptedFileTypes } from "./dataUtils";
 
 export const derive = <T>(fn: () => T): T => fn();
 
@@ -38,3 +39,16 @@ export const slug = (text: string) =>
     replacement: "_",
     lower: true,
   });
+
+export const getFileTypeFromUrl = (url: string) => {
+  const acceptedFileTypesMap = acceptedFileTypes.map((item) => item.split("/"));
+  const extensionMatch = url.match(/\.([^.?]+)(?:\?|$)/);
+  if (extensionMatch) {
+    const extension = extensionMatch[1];
+    const ft = acceptedFileTypesMap.find(([ft, ext]) =>
+      ext === extension ? ft : false
+    );
+    return ft?.[0] as "image" | "video";
+  }
+  return null;
+};

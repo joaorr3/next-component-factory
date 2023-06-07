@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { acceptedFileTypes } from "../../shared/dataUtils";
 
 export const baseMediaMetadataSchemaValidator = z.object({
   fileSize: z.number().optional(),
@@ -46,17 +47,6 @@ const validateFiles = <T extends keyof Pick<CustomFile, "size" | "type">>(
   return !fst;
 };
 
-// Are we being too restrictive?
-export const acceptedFileTypes = [
-  "image/png",
-  "image/jpeg",
-  "image/gif",
-  "video/mp4",
-  "video/webm",
-  "video/mpeg",
-  "video/quicktime",
-];
-
 export const rawFileValidator = z
   .array(z.custom<CustomFile>())
   .refine((files) => files.length !== 0, {
@@ -80,7 +70,7 @@ export const rawFileValidator = z
         validate: (v) => +v <= 10000000,
       });
     },
-    { message: "File size must be less than or equal to 10MB" }
+    { message: "File size must be less or equal to 10MB" }
   );
 
 export type FileSchemaValidator = z.infer<typeof rawFileValidator>;

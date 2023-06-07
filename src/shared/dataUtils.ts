@@ -71,3 +71,14 @@ export const npmInstallHint = (version?: string) =>
 
 export const c18Avatar =
   "https://cdn.discordapp.com/avatars/1000309925643309127/b40e96bd5967560f43a4762379c086f6";
+
+// Are we being too restrictive?
+export const acceptedFileTypes = [
+  "image/png",
+  "image/jpeg",
+  "image/gif",
+  "video/mp4",
+  "video/webm",
+  "video/mpeg",
+  "video/quicktime",
+];
