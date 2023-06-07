@@ -5,6 +5,7 @@ import React from "react";
 import { BackButton } from "../../components/BackButton";
 import { IssueForm } from "../../components/IssueForm/IssueForm";
 import { type FormSchema } from "../../components/IssueForm/models";
+import { OpenPhases } from "../../components/IssueForm/OpenPhases";
 import { MetaHead } from "../../components/MetaHead";
 import Modal from "../../components/Modal";
 import { UnauthorizedPage } from "../../components/UnauthorizedPage";
@@ -42,6 +43,7 @@ export default function IssueOpen({
     error: createIssueError,
     isError: hasCreateIssueError,
     isSuccess: hasCreateIssueSuccess,
+    isLoading: isLoadingCreateIssue,
   } = trpc.issues.createIssue.useMutation();
 
   const {
@@ -49,6 +51,7 @@ export default function IssueOpen({
     error: createNotionIssueError,
     isError: hasCreateNotionIssueError,
     isSuccess: hasCreateNotionIssueSuccess,
+    isLoading: isLoadingCreateNotionIssue,
   } = trpc.issues.createNotionIssue.useMutation();
 
   const {
@@ -56,6 +59,7 @@ export default function IssueOpen({
     error: openThreadError,
     isError: hasOpenThreadError,
     isSuccess: hasOpenThreadSuccess,
+    isLoading: isLoadingOpenThread,
   } = trpc.issues.openThread.useMutation();
 
   const {
@@ -63,6 +67,7 @@ export default function IssueOpen({
     error: updateNotionPageError,
     isError: hasUpdateNotionPageError,
     isSuccess: hasUpdateNotionPageSuccess,
+    isLoading: isLoadingUpdateNotionPage,
   } = trpc.issues.updateNotionPage.useMutation();
 
   const {
@@ -70,6 +75,7 @@ export default function IssueOpen({
     error: updateIssueMappingError,
     isError: hasUpdateIssueMappingError,
     isSuccess: hasUpdateIssueMappingSuccess,
+    isLoading: isLoadingUpdateIssueMapping,
   } = trpc.issues.updateIssueMapping.useMutation();
 
   const [isProceduresModalOpen, setIsProceduresModalOpen] =
@@ -186,29 +192,41 @@ export default function IssueOpen({
         </div>
       </Modal>
 
-      <Modal isOpen={isProceduresModalOpen}>
-        <div className="m-8 flex flex-col justify-center">
-          <p>
-            {"Phase 1: createIssue "}
-            {hasCreateIssueSuccess ? "✅" : ""}
-          </p>
-          <p>
-            {"Phase 2: createNotionIssue "}
-            {hasCreateNotionIssueSuccess ? "✅" : ""}
-          </p>
-          <p>
-            {"Phase 3: openThread "}
-            {hasOpenThreadSuccess ? "✅" : ""}
-          </p>
-          <p>
-            {"Phase 4: updateNotionPage "}
-            {hasUpdateNotionPageSuccess ? "✅" : ""}
-          </p>
-          <p>
-            {"Phase 5: updateIssueMapping "}
-            {hasUpdateIssueMappingSuccess ? "✅" : ""}
-          </p>
-        </div>
+      <Modal isOpen={isProceduresModalOpen && !hasError}>
+        <OpenPhases
+          phases={[
+            {
+              label: "Phase 1: createIssue",
+              isSuccess: hasCreateIssueSuccess,
+              isError: hasCreateIssueError,
+              isLoading: isLoadingCreateIssue,
+            },
+            {
+              label: "Phase 2: createNotionIssue",
+              isSuccess: hasCreateNotionIssueSuccess,
+              isError: hasCreateNotionIssueError,
+              isLoading: isLoadingCreateNotionIssue,
+            },
+            {
+              label: "Phase 3: openThread",
+              isSuccess: hasOpenThreadSuccess,
+              isError: hasOpenThreadError,
+              isLoading: isLoadingOpenThread,
+            },
+            {
+              label: "Phase 4: updateNotionPage",
+              isSuccess: hasUpdateNotionPageSuccess,
+              isError: hasUpdateNotionPageError,
+              isLoading: isLoadingUpdateNotionPage,
+            },
+            {
+              label: "Phase 5: updateIssueMapping",
+              isSuccess: hasUpdateIssueMappingSuccess,
+              isError: hasUpdateIssueMappingError,
+              isLoading: isLoadingUpdateIssueMapping,
+            },
+          ]}
+        />
       </Modal>
 
       <main className="mb-40">
