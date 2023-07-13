@@ -21,6 +21,7 @@ type Routes = {
   PublicIssueOpen: RouteData;
   FAQs: RouteData;
   FAQDetail: RouteDataWithDynamicPath;
+  Storybook: RouteData;
   // Manage
   Manage: RouteData;
   ManageMedia: RouteData;
@@ -93,6 +94,12 @@ export const routes: Routes = {
   PublicIssueOpen: {
     label: "Open",
     path: "/issue/form/[secret]",
+    roles: "public",
+  },
+  Storybook: {
+    label: "Storybook",
+    path: "/storybook",
+    navBar: true,
     roles: "public",
   },
   // Manage
