@@ -39,14 +39,29 @@ const syncGuildUsers = async () => {
   });
 };
 
-// once a week at midnight on sundays
-// const cronExpression = "0 0 * * 0";
+const notifyDevTeam = async () => {
+  await discord.sendMessage("DEV-SYNC", {
+    content: `Hey ${discord.mention({ roles: "dev" })}! Lets sync.`,
+  });
+};
+
+// Every week day at 17:30
+const devSyncExp = "30 17 * * 1-5";
+const devSyncTask = cron.schedule(
+  devSyncExp,
+  () => {
+    notifyDevTeam();
+  },
+  {
+    timezone: "Europe/Lisbon",
+    name: "Announce Dev Sync",
+  }
+);
 
 // everyday at 4am
-const cronExpression2 = "0 4 * * *";
-
-const task = cron.schedule(
-  cronExpression2,
+const syncGuildUsersExp = "0 4 * * *";
+const syncGuildUsersTask = cron.schedule(
+  syncGuildUsersExp,
   () => {
     syncGuildUsers();
   },
@@ -56,6 +71,7 @@ const task = cron.schedule(
   }
 );
 
-task.start();
+syncGuildUsersTask.start();
+devSyncTask.start();
 
 startApp();

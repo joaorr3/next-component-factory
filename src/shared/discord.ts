@@ -106,9 +106,17 @@ export class DiscordClient {
     return new Discord.EmbedBuilder(info).setColor("Gold").setTimestamp();
   }
 
-  public channel(name: keyof typeof this.channelNames) {
-    const ch = this.findChannel((ch) => ch.name === this.channelNames[name]);
-    if (ch?.type === ChannelType.GuildText) {
+  public channel(name: keyof typeof this.channelNames | (string & {})) {
+    const ch = this.findChannel(
+      (ch) =>
+        ch.name ===
+        (this.channelNames[name as keyof typeof this.channelNames] || name)
+    );
+
+    if (
+      ch?.type === ChannelType.GuildText ||
+      ch?.type === ChannelType.GuildVoice
+    ) {
       return ch;
     }
     return undefined;
@@ -242,7 +250,7 @@ export class DiscordClient {
 
   @ErrorHandler({ code: "DISCORD", message: "sendMessage" })
   public async sendMessage(
-    name: keyof typeof this.channelNames,
+    name: keyof typeof this.channelNames | (string & {}),
     message: Discord.BaseMessageOptions
   ) {
     const channel = this.channel(name);

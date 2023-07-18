@@ -1,6 +1,11 @@
 import { REST } from "@discordjs/rest";
 import type { GuildUser } from "@prisma/client";
-import Discord, { roleMention, Routes, userMention } from "discord.js";
+import Discord, {
+  ChannelType,
+  roleMention,
+  Routes,
+  userMention,
+} from "discord.js";
 import { camelCase } from "lodash";
 import { env } from "../../../env/server";
 import { derive } from "../../../shared/utils";
@@ -456,7 +461,7 @@ export const commandReactions = async ({
 
       const fullTitle = `[${pr_size} - ${title}] - ${pr_id}`;
 
-      if (prChannel) {
+      if (prChannel && prChannel.type === ChannelType.GuildText) {
         logger.db.discord({
           level: "info",
           message: `Discord: Created PR: ${title} for ${user.username}`,
@@ -466,30 +471,30 @@ export const commandReactions = async ({
           content: `Hi ${userMention(user.id)}, thank you for opening a PR.`,
           ephemeral: true,
         });
+
+        const thread = await prChannel.threads.create({
+          name: fullTitle,
+          autoArchiveDuration: Discord.ThreadAutoArchiveDuration.OneWeek,
+          reason: fullTitle,
+        });
+
+        const issueSummary = discord.embed({
+          title,
+          url: prUrl,
+          author: {
+            name: user.username,
+            iconURL: user.avatarURL() ?? user.avatar ?? "",
+          },
+          footer: {
+            text: "Nice job!",
+          },
+        });
+
+        await thread?.send({
+          content: guildDevRole ? roleMention(guildDevRole.id) : undefined,
+          embeds: [issueSummary],
+        });
       }
-
-      const thread = await prChannel?.threads.create({
-        name: fullTitle,
-        autoArchiveDuration: Discord.ThreadAutoArchiveDuration.OneWeek,
-        reason: fullTitle,
-      });
-
-      const issueSummary = discord.embed({
-        title,
-        url: prUrl,
-        author: {
-          name: user.username,
-          iconURL: user.avatarURL() ?? user.avatar ?? "",
-        },
-        footer: {
-          text: "Nice job!",
-        },
-      });
-
-      await thread?.send({
-        content: guildDevRole ? roleMention(guildDevRole.id) : undefined,
-        embeds: [issueSummary],
-      });
 
       return {
         name: "pr",
