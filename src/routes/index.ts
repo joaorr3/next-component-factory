@@ -22,6 +22,7 @@ type Routes = {
   FAQs: RouteData;
   FAQDetail: RouteDataWithDynamicPath;
   Storybook: RouteData;
+  PullRequests: RouteData;
   // Manage
   Manage: RouteData;
   ManageMedia: RouteData;
@@ -99,6 +100,12 @@ export const routes: Routes = {
   Storybook: {
     label: "Storybook",
     path: "/storybook",
+    navBar: true,
+    roles: "public",
+  },
+  PullRequests: {
+    label: "Pull Requests",
+    path: "/pullrequests",
     navBar: true,
     roles: "public",
   },

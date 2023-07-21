@@ -28,6 +28,8 @@ export const montserrat = Montserrat({
   weight: "variable",
   subsets: ["latin"],
   preload: true,
+  // variable: "--font-montserrat",
+  display: "swap",
 });
 
 const MyApp: AppType<{ session: Session | null }> = ({
@@ -38,44 +40,51 @@ const MyApp: AppType<{ session: Session | null }> = ({
   const isStandAlonePage = router.pathname === routes.PublicIssueOpen.path;
 
   return (
-    <React.Suspense>
-      <GlobalStyle />
-      <SessionProvider session={session}>
-        <GlobalStateProvider>
-          <ThemeProvider>
-            <Loader />
+    <React.Fragment>
+      <style jsx global>{`
+        html {
+          font-family: ${montserrat.style.fontFamily} !important;
+        }
+      `}</style>
+      <React.Suspense>
+        <GlobalStyle />
+        <SessionProvider session={session}>
+          <GlobalStateProvider>
+            <ThemeProvider>
+              <Loader />
 
-            <main className={montserrat.className}>
-              <span className="fixed top-48 z-50 -rotate-90 text-xs font-semibold">
-                v1.3.2
-              </span>
+              <main className={montserrat.className}>
+                <span className="fixed top-48 z-50 -rotate-90 text-xs font-semibold">
+                  v1.3.2
+                </span>
 
-              <NavBar hide={isStandAlonePage}>
-                <HomeButton />
+                <NavBar hide={isStandAlonePage}>
+                  <HomeButton />
 
-                <NavBarContent />
+                  <NavBarContent />
 
-                <NavBarActionContainer>
-                  <GLobalProfileLayer>
-                    <NewIssueShortcut />
-                    <UserAvatar />
-                    <ManageMenu />
-                  </GLobalProfileLayer>
+                  <NavBarActionContainer>
+                    <GLobalProfileLayer>
+                      <NewIssueShortcut />
+                      <UserAvatar />
+                      <ManageMenu />
+                    </GLobalProfileLayer>
 
-                  <LoginButton />
+                    <LoginButton />
 
-                  <ThemeSwitcher />
-                </NavBarActionContainer>
-              </NavBar>
+                    <ThemeSwitcher />
+                  </NavBarActionContainer>
+                </NavBar>
 
-              <AppContainer>
-                <Component {...pageProps} />
-              </AppContainer>
-            </main>
-          </ThemeProvider>
-        </GlobalStateProvider>
-      </SessionProvider>
-    </React.Suspense>
+                <AppContainer>
+                  <Component {...pageProps} />
+                </AppContainer>
+              </main>
+            </ThemeProvider>
+          </GlobalStateProvider>
+        </SessionProvider>
+      </React.Suspense>
+    </React.Fragment>
   );
 };
 

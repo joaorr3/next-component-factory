@@ -1,5 +1,6 @@
 import { router } from "../trpc";
 import { authRouter } from "./auth";
+import { azureRouter } from "./azure";
 import { componentsRouter } from "./components";
 import { discordRouter } from "./discord";
 import { exampleRouter } from "./example";
@@ -27,6 +28,7 @@ export const appRouter = router({
   labs: labsRouter,
   faq: faqRouter,
   notion: notionRouter,
+  azure: azureRouter,
 });
 
 // export type definition of API

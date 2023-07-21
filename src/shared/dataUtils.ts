@@ -63,6 +63,9 @@ export const parseKudos = (kudos?: Input) => {
   return results;
 };
 
+export const getPrUrl = (id?: string) =>
+  `https://dev.azure.com/ptbcp/IT.DIT/_git/BCP.DesignSystem/pullrequest/${id}`;
+
 export const getArtifactUrl = (id?: string) =>
   `https://dev.azure.com/ptbcp/IT.Ignite/_artifacts/feed/BCP.Ignite.Dx.ComponentFactory/Npm/@bcp-nextgen-dx-component-factory%2Faccolade-design-system/overview/${id}`;
 
