@@ -44,6 +44,7 @@ export const serverSchema = z.object({
   NEXT_PROD_URL: z.string().url(),
 
   ISSUES_FORM_SECRET: z.string(),
+  AZURE_TOKEN: z.string(),
 });
 
 /**

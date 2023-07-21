@@ -1,12 +1,9 @@
 import * as Azure from "azure-devops-node-api";
-import * as Graph from "azure-devops-node-api/interfaces/GraphInterfaces";
+import { env } from "../env/server";
 
 const orgUrl = "https://dev.azure.com/ptbcp";
-// const orgUrl = "https://vssps.dev.azure.com/ptbcp";
 
-const token = "2gl7xkr2g7l2iamzrg23nw5vf3nrfhvuds7i3zgaw6333pdmwxxa"; //process.env.AZURE_PERSONAL_ACCESS_TOKEN;
-
-const authHandler = Azure.getPersonalAccessTokenHandler(token);
+const authHandler = Azure.getPersonalAccessTokenHandler(env.AZURE_TOKEN);
 
 export class AzureClient {
   public client = new Azure.WebApi(orgUrl, authHandler);
