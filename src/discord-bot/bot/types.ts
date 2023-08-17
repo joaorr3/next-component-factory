@@ -57,7 +57,8 @@ export type CommandName =
   | "kudos"
   | "list_kudos"
   | "sync_guild_users"
-  | "announce";
+  | "announce"
+  | "schedules";
 
 type IssueCommandModel = {
   thread?: Discord.ThreadChannel<boolean>;
@@ -174,6 +175,13 @@ type AnnounceCommand =
     }
   | undefined;
 
+type SchedulesCommand =
+  | {
+      name: "schedules";
+      response: undefined;
+    }
+  | undefined;
+
 export type DiscordCommandObject = {
   ping: () => Promise<PingCommand>;
   gif: () => Promise<GifCommand>;
@@ -190,6 +198,7 @@ export type DiscordCommandObject = {
   list_kudos: () => Promise<ListKudosCommand>;
   sync_guild_users: () => Promise<SyncGuildUsersCommand>;
   announce: () => Promise<AnnounceCommand>;
+  schedules: () => Promise<SchedulesCommand>;
 };
 
 export type CommandReactionsArgs = {
@@ -218,6 +227,7 @@ export type CommandsResponse = Promise<
   | ListKudosCommand
   | SyncGuildUsersCommand
   | AnnounceCommand
+  | SchedulesCommand
 >;
 
 export type KudosType = {

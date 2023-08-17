@@ -7,10 +7,11 @@ import Discord, {
   userMention,
 } from "discord.js";
 import { camelCase } from "lodash";
+import cron from "node-cron";
 import { env } from "../../../env/server";
+import logger from "../../../shared/logger";
 import { derive } from "../../../shared/utils";
 import { DataUtils } from "../../data";
-import logger from "../../../shared/logger";
 import { randomInt } from "../../utils";
 import discord from "../client";
 import { kudosTypes } from "../constants";
@@ -231,6 +232,7 @@ export const registerCommands = () => {
 
     command("list_kudos"),
     command("sync_guild_users"),
+    command("schedules"),
     command("announce")
       .addStringOption((option) =>
         option.setName(Announce.title).setDescription("Announcement title")
@@ -844,6 +846,25 @@ export const commandReactions = async ({
         content: "Can't do that..",
         ephemeral: true,
       });
+    },
+    schedules: async () => {
+      const tasks = cron.getTasks().entries();
+
+      const currentSchedules = [];
+
+      for (const [key] of tasks) {
+        currentSchedules.push(key);
+      }
+
+      await interaction.reply({
+        content: currentSchedules.join("\n"),
+        ephemeral: true,
+      });
+
+      return {
+        name: "schedules",
+        response: undefined,
+      };
     },
   };
 

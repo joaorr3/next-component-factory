@@ -1,7 +1,8 @@
 import type { GuildUser } from "@prisma/client";
+import { CronTime } from "cron-time-generator";
 import dotenv from "dotenv";
-import cron from "node-cron";
 import { env } from "../env/server";
+import { Cron } from "../shared/Cron";
 import { prismaSharedClient } from "../shared/prisma/client";
 import { wait } from "../shared/utils";
 import discord, { initializeBot } from "./bot";
@@ -14,6 +15,9 @@ export const startApp = () => {
   if (env.START_DISCORD === "true") {
     initializeBot();
   }
+
+  Cron(CronTime.everyDayAt(4), syncGuildUsers, "syncGuildUsers");
+  Cron(CronTime.everyWeekDayAt(17, 30), notifyDevTeam, "notifyDevTeam");
 };
 
 const updateGuildUsers = async (guildUsers: GuildUser[]) => {
@@ -44,34 +48,5 @@ const notifyDevTeam = async () => {
     content: `Hey ${discord.mention({ roles: "dev" })}! Lets sync.`,
   });
 };
-
-// Every week day at 17:30
-const devSyncExp = "30 17 * * 1-5";
-const devSyncTask = cron.schedule(
-  devSyncExp,
-  () => {
-    notifyDevTeam();
-  },
-  {
-    timezone: "Europe/Lisbon",
-    name: "Announce Dev Sync",
-  }
-);
-
-// everyday at 4am
-const syncGuildUsersExp = "0 4 * * *";
-const syncGuildUsersTask = cron.schedule(
-  syncGuildUsersExp,
-  () => {
-    syncGuildUsers();
-  },
-  {
-    timezone: "Europe/Lisbon",
-    name: "Sync Guild Users",
-  }
-);
-
-syncGuildUsersTask.start();
-devSyncTask.start();
 
 startApp();

@@ -1,4 +1,9 @@
 import { z } from "zod";
+import dotenv from "dotenv";
+
+dotenv.config({
+  path: `.env.${process.env.NODE_ENV || "local"}`,
+});
 
 /**
  * Specify your server-side environment variables schema here.
