@@ -18,6 +18,8 @@ const roleValidator = z.object({
   hexColor: z.string(),
 });
 
+export type UserRole = z.infer<typeof roleValidator>;
+
 const rolesValidator = z.array(roleValidator);
 
 export type Role = z.infer<typeof roleValidator>;

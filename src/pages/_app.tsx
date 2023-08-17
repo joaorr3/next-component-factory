@@ -1,6 +1,8 @@
 import { Montserrat } from "@next/font/google";
+import type { GuildUser } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { type Session } from "next-auth";
-import { SessionProvider } from "next-auth/react";
+import { getSession, SessionProvider } from "next-auth/react";
 import { type AppType } from "next/app";
 import { useRouter } from "next/router";
 import React from "react";
@@ -18,6 +20,9 @@ import NavBar, {
 import ThemeSwitcher from "../components/ThemeSwitcher";
 import { UserAvatar } from "../components/UserAvatar";
 import { routes } from "../routes";
+
+import type { UserRole } from "../shared/roles";
+import { getUserRoles } from "../shared/roles";
 import "../styles/globals.css";
 import { GlobalStyle } from "../styles/GlobalStyles";
 import ThemeProvider from "../styles/ThemeProvider";
@@ -32,10 +37,11 @@ export const montserrat = Montserrat({
   display: "swap",
 });
 
-const MyApp: AppType<{ session: Session | null }> = ({
-  Component,
-  pageProps: { session, ...pageProps },
-}) => {
+const MyApp: AppType<{
+  session?: Session | null;
+  roles?: UserRole[];
+  profile?: GuildUser;
+}> = ({ Component, pageProps: { session, roles, profile, ...pageProps } }) => {
   const router = useRouter();
   const isStandAlonePage = router.pathname === routes.PublicIssueOpen.path;
 
@@ -49,7 +55,19 @@ const MyApp: AppType<{ session: Session | null }> = ({
       <React.Suspense>
         <GlobalStyle />
         <SessionProvider session={session}>
-          <GlobalStateProvider>
+          <GlobalStateProvider
+            initialState={{
+              themeName: "dark",
+              isLoading: true,
+              user: {
+                profile,
+                roles,
+              },
+              issues: {
+                searchFilters: {},
+              },
+            }}
+          >
             <ThemeProvider>
               <Loader />
 
@@ -86,6 +104,44 @@ const MyApp: AppType<{ session: Session | null }> = ({
       </React.Suspense>
     </React.Fragment>
   );
+};
+
+MyApp.getInitialProps = async (context) => {
+  if (context.ctx.req && typeof window === "undefined") {
+    const session = await getSession({
+      ctx: {
+        req: context.ctx.req,
+      },
+    });
+
+    if (session) {
+      const prisma = new PrismaClient();
+
+      const user = await prisma.user.findUnique({
+        where: {
+          id: session?.user?.id,
+        },
+        include: {
+          GuildUser: true,
+        },
+      });
+
+      const roles = await getUserRoles(session, prisma);
+
+      return {
+        session: null,
+        pageProps: {
+          profile: user?.GuildUser,
+          roles,
+          session,
+        },
+      };
+    }
+  }
+
+  return {
+    session: null,
+  };
 };
 
 export default trpc.withTRPC(MyApp);

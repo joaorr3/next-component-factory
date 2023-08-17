@@ -194,7 +194,7 @@ export function GlobalStateProvider({
     []
   );
 
-  useInitGlobalState(actions);
+  useInitGlobalState(state, actions);
 
   const contextHandlers: ContextHandlers = React.useMemo(
     () => ({ state, actions, dispatch }),
@@ -213,21 +213,29 @@ export const useGlobalState = (): ContextHandlers => {
   return { state, actions, dispatch };
 };
 
-export const useInitGlobalState = (actions: ContextHandlers["actions"]) => {
+export const useInitGlobalState = (
+  state: ContextHandlers["state"],
+  actions: ContextHandlers["actions"]
+) => {
   const { parsed: themeName } =
     localStorageActions.get<ThemeNames>("currentTheme");
 
-  const { user, roles, isLoading: isLoadingUser } = useUser();
+  const fetchUser = !state.user.profile && !state.user.roles?.length;
+
+  const { user, roles, isLoading: isLoadingUser } = useUser(fetchUser);
 
   React.useEffect(() => {
     actions.setLoading(isLoadingUser);
   }, [actions, isLoadingUser]);
 
   React.useEffect(() => {
-    actions.setUser({
-      profile: user,
-      roles: roles,
-    });
+    if (fetchUser) {
+      actions.setUser({
+        profile: user,
+        roles: roles,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actions, user, roles]);
 
   React.useEffect(() => {
