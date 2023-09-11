@@ -117,7 +117,7 @@ const handleCreateLab = async (displayName?: string | null) => {
     });
 
     if (newRole) {
-      const newRoleSave = await prismaNext.roles.create({
+      const newRoleSave = await prismaNext.roles.upsertRole({
         id: newRole.id,
         name: newRole?.name,
         isAutoAssignable: true,
