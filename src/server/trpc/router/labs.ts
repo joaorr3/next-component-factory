@@ -101,7 +101,7 @@ const handleCreateLab = async (displayName?: string | null) => {
 
     logger.console.server({
       level: "info",
-      message: `lab: ${lab}`,
+      message: `lab: ${JSON.stringify(lab, undefined, 2)}`,
     });
 
     const newRole = await discordNext.guild?.roles.create({
@@ -125,7 +125,7 @@ const handleCreateLab = async (displayName?: string | null) => {
 
       logger.console.server({
         level: "info",
-        message: `newRoleSave: ${newRoleSave}`,
+        message: `newRoleSave: ${JSON.stringify(newRoleSave, undefined, 2)}`,
       });
 
       if (newRoleSave) {
@@ -171,7 +171,7 @@ const handleCreateLab = async (displayName?: string | null) => {
 
           logger.console.server({
             level: "info",
-            message: `newLab: ${newLab}`,
+            message: `newLab: ${JSON.stringify(newLab, undefined, 2)}`,
           });
 
           console.log(" ");
