@@ -118,7 +118,7 @@ const handleCreateLab = async (displayName?: string | null) => {
 
     if (newRole) {
       // This is a bit optimistic, but lets try waiting for discord to sync the guild role we've just created before trying to upsert it manually.
-      await wait(3000);
+      await wait(5000);
       const newRoleSave = await prismaNext.roles.upsertRole({
         id: newRole.id,
         name: newRole?.name,
