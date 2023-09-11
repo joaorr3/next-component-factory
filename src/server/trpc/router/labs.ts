@@ -2,6 +2,7 @@ import type { Lab } from "@prisma/client";
 import { ChannelType, PermissionsBitField } from "discord.js";
 import { startCase } from "lodash";
 import { z } from "zod";
+import logger from "../../../shared/logger";
 import type { PickRequired } from "../../../shared/utilityTypes";
 import { normalizeLabLabel } from "../../../shared/utils";
 import { prismaNext } from "../../db/client";
@@ -82,12 +83,26 @@ const handleCreateLab = async (displayName?: string | null) => {
   if (!displayName) {
     return undefined;
   }
+
+  console.log(" ");
+  console.log(" ");
+
+  logger.console.server({
+    level: "info",
+    message: `handleCreateLab.displayName: ${displayName}`,
+  });
+
   try {
     const lab = {
       name: normalizeLabLabel(displayName, true),
       displayName: startCase(displayName),
       channelName: normalizeLabLabel(displayName),
     } as const;
+
+    logger.console.server({
+      level: "info",
+      message: `lab: ${lab}`,
+    });
 
     const newRole = await discordNext.guild?.roles.create({
       color: "DarkAqua",
@@ -96,11 +111,21 @@ const handleCreateLab = async (displayName?: string | null) => {
       permissions: [PermissionsBitField.Flags.ViewChannel],
     });
 
+    logger.console.server({
+      level: "info",
+      message: `newRole:: id:${newRole?.id} / name:${newRole?.name}`,
+    });
+
     if (newRole) {
       const newRoleSave = await prismaNext.roles.create({
         id: newRole.id,
         name: newRole?.name,
         isAutoAssignable: true,
+      });
+
+      logger.console.server({
+        level: "info",
+        message: `newRoleSave: ${newRoleSave}`,
       });
 
       if (newRoleSave) {
@@ -130,6 +155,11 @@ const handleCreateLab = async (displayName?: string | null) => {
           // ],
         });
 
+        logger.console.server({
+          level: "info",
+          message: `newChannel:: id:${newChannel?.id} / name:${newChannel?.name}`,
+        });
+
         if (newChannel) {
           const newLab = await prismaNext.labs.create({
             name: lab.name,
@@ -138,6 +168,14 @@ const handleCreateLab = async (displayName?: string | null) => {
             channelId: newChannel.id,
             guildRoleId: newRole.id,
           });
+
+          logger.console.server({
+            level: "info",
+            message: `newLab: ${newLab}`,
+          });
+
+          console.log(" ");
+          console.log(" ");
 
           if (newLab) {
             return newLab;
