@@ -4,7 +4,7 @@ import { startCase } from "lodash";
 import { z } from "zod";
 import logger from "../../../shared/logger";
 import type { PickRequired } from "../../../shared/utilityTypes";
-import { normalizeLabLabel } from "../../../shared/utils";
+import { normalizeLabLabel, wait } from "../../../shared/utils";
 import { prismaNext } from "../../db/client";
 import { discordNext } from "../../discord/client";
 import { protectedProcedure, publicProcedure, router } from "../trpc";
@@ -117,6 +117,8 @@ const handleCreateLab = async (displayName?: string | null) => {
     });
 
     if (newRole) {
+      // This is a bit optimistic, but lets try waiting for discord to sync the guild role we've just created before trying to upsert it manually.
+      await wait(3000);
       const newRoleSave = await prismaNext.roles.upsertRole({
         id: newRole.id,
         name: newRole?.name,
