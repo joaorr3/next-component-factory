@@ -115,7 +115,7 @@ export const ManageMenu = (): JSX.Element => {
       </InteractionWrapper>
 
       <PopUpMenu isOpen={isVisible} value={value} onPressOutside={close}>
-        {menuItems.map((item, index) => {
+        {menuItems.map((item) => {
           return (
             <React.Fragment key={item.href}>
               <MenuItem

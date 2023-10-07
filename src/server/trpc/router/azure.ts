@@ -5,10 +5,10 @@ import { protectedProcedure, router } from "../trpc";
 
 export const azureRouter = router({
   work: protectedProcedure.query(async () => {
-    const coreApi = await azureSharedClient.client.getCoreApi();
-    const projects = await coreApi.getProjects();
-    const teams = await coreApi.getAllTeams(true);
-    const workApi = await azureSharedClient.client.getWorkApi();
+    // const coreApi = await azureSharedClient.client.getCoreApi();
+    // const projects = await coreApi.getProjects();
+    // const teams = await coreApi.getAllTeams(true);
+    // const workApi = await azureSharedClient.client.getWorkApi();
     const workItemApi = await azureSharedClient.client.getWorkItemTrackingApi();
 
     const query = `
@@ -19,14 +19,14 @@ export const azureRouter = router({
       ORDER BY [System.CreatedDate] DESC
     `;
 
-    const query2 = `
-      SELECT [System.Id], [System.Title]
-      FROM WorkItems
-      WHERE [System.AssignedTo] CONTAINS "Ricardo" 
-        AND [System.AreaPath] UNDER "IT.DIT\\DIT\\DesignSystem"
-        AND [System.WorkItemType] = "User Story"
-      ORDER BY [System.CreatedDate] DESC
-    `;
+    // const query2 = `
+    //   SELECT [System.Id], [System.Title]
+    //   FROM WorkItems
+    //   WHERE [System.AssignedTo] CONTAINS "Ricardo"
+    //     AND [System.AreaPath] UNDER "IT.DIT\\DIT\\DesignSystem"
+    //     AND [System.WorkItemType] = "User Story"
+    //   ORDER BY [System.CreatedDate] DESC
+    // `;
 
     const { workItems } = await workItemApi.queryByWiql({
       query,

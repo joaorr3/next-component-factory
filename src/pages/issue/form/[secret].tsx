@@ -5,7 +5,6 @@ import type {
 import Link from "next/link";
 import Router from "next/router";
 import React from "react";
-import { BackButton } from "../../../components/BackButton";
 import { IssueForm } from "../../../components/IssueForm/IssueForm";
 import { type FormSchema } from "../../../components/IssueForm/models";
 import { MetaHead } from "../../../components/MetaHead";

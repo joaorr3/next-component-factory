@@ -15,10 +15,10 @@ export const formatErrors = (
 
 if (!_clientEnv.success) {
   console.error(
-    "❌ Invalid environment variables:\n",
+    "❌ Invalid client environment variables:\n",
     ...formatErrors(_clientEnv.error.format())
   );
-  throw new Error("Invalid environment variables");
+  throw new Error("Invalid client environment variables");
 }
 
 for (const key of Object.keys(_clientEnv.data)) {

@@ -4,7 +4,7 @@
  */
 import dotenv from "dotenv";
 import { serverSchema } from "./schema";
-import { env as clientEnv, formatErrors } from "./client";
+// import { env as clientEnv, formatErrors } from "./client";
 
 dotenv.config({
   path: `.env.${process.env.NODE_ENV || "local"}`,
@@ -14,10 +14,10 @@ const _serverEnv = serverSchema.safeParse(process.env);
 
 if (!_serverEnv.success) {
   console.error(
-    "❌ Invalid environment variables:\n",
-    ...formatErrors(_serverEnv.error.format())
+    "❌ Invalid server environment variables:\n"
+    // ...formatErrors(_serverEnv.error.format())
   );
-  throw new Error("Invalid environment variables");
+  throw new Error("Invalid server environment variables");
 }
 
 for (const key of Object.keys(_serverEnv.data)) {
@@ -28,4 +28,4 @@ for (const key of Object.keys(_serverEnv.data)) {
   }
 }
 
-export const env = { ..._serverEnv.data, ...clientEnv };
+export const env = { ..._serverEnv.data };
