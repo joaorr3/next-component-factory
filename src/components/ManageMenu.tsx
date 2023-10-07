@@ -24,7 +24,7 @@ export const SettingsIcon = (): JSX.Element => {
 
 const menuItem = /*tw*/ `
   w-full 
-  rounded-none
+  rounded-xl
   h-14
   flex
   items-center
@@ -123,9 +123,9 @@ export const ManageMenu = (): JSX.Element => {
                 href={item.href}
                 onPress={() => close()}
               />
-              {index !== menuItems.length - 1 && (
+              {/* {index !== menuItems.length - 1 && (
                 <div className="h-px w-4/5 bg-neutral-400 bg-opacity-10" />
-              )}
+              )} */}
             </React.Fragment>
           );
         })}
@@ -163,7 +163,7 @@ export const PopUpMenu = ({
             right: -50,
             top: 60,
           }}
-          className="absolute flex w-40 flex-col items-center justify-center overflow-hidden rounded-2xl bg-neutral-100 p-0 py-2 shadow-xl dark:border-neutral-700 dark:bg-zinc-800"
+          className="absolute flex w-40 flex-col items-center justify-center overflow-hidden rounded-2xl bg-neutral-100 p-2 shadow-xl dark:border-neutral-700 dark:bg-zinc-800"
         >
           {children}
         </animated.div>
