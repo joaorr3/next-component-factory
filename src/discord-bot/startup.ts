@@ -18,7 +18,7 @@ const startApp = () => {
     res.status(200).json({ endPoint: req.url });
   });
 
-  app.listen(env.PORT, () => {
+  app.listen(+env.PORT, "0.0.0.0", () => {
     console.log(`Example app listening on port ${env.PORT}`);
 
     if (env.START_DISCORD === "true") {
