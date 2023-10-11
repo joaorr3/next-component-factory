@@ -6,7 +6,7 @@ import {
   notionPullRequestUpdatedValidator,
 } from "../../../utils/validators/notion";
 
-import { protectedProcedure, router } from "../trpc";
+import { protectedProcedure, publicProcedure, router } from "../trpc";
 
 export const notionRouter = router({
   getPrPageByPrId: protectedProcedure
@@ -21,6 +21,18 @@ export const notionRouter = router({
   getPrDatabase: protectedProcedure.query(async () => {
     return await notion.getPrDatabase();
   }),
+  getComponentDatabase: protectedProcedure.query(async () => {
+    return await notion.getComponentDatabase();
+  }),
+  getComponentMetadata: publicProcedure
+    .input(
+      z.object({
+        name: z.string().optional(),
+      })
+    )
+    .query(async ({ input: { name } }) => {
+      return await notion.getComponentMetadata({ name });
+    }),
   getPrDatabaseItems: protectedProcedure
     .input(
       z.object({

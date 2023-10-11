@@ -298,6 +298,56 @@ class Notion {
     return comp_map;
   }
 
+  @ErrorHandler({ code: "NOTION", message: "getComponentPageById" })
+  async getComponentPageById(props: { id?: string; name?: string }) {
+    const components = await this.getComponentDatabase();
+    const componentPage = components.find(
+      (item) => item.id === props.id || item.name === props.name
+    );
+
+    if (componentPage) {
+      const res = await this.client.pages.retrieve({
+        page_id: componentPage.id,
+      });
+      return res as PageObjectResponse;
+    }
+  }
+  async getComponentMetadata(props: { name?: string }) {
+    if (!props.name) {
+      return {};
+    }
+
+    const res = await this.client.databases.query({
+      database_id: env.NOTION_COMPONENTS_DB_ID,
+      filter: {
+        property: "title",
+        type: "title",
+        title: {
+          equals: props.name,
+        },
+      },
+    });
+
+    const data = (res.results as PageObjectResponse[])[0];
+
+    if (
+      data &&
+      data.object === "page" &&
+      data.properties["Description"].type === "rich_text" &&
+      data.properties["Figma Url"].type === "url"
+    ) {
+      return {
+        description: data.properties["Description"].rich_text[0].plain_text,
+        figmaUrl: data.properties["Figma Url"].url,
+      };
+    }
+
+    return {
+      description: "",
+      figmaUrl: "",
+    };
+  }
+
   public readonly issuePageStatus = {
     "Not started": {
       id: "}NqP",
