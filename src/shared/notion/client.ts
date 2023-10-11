@@ -1,5 +1,8 @@
 import { Client } from "@notionhq/client";
-import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
+import type {
+  BlockObjectResponse,
+  PageObjectResponse,
+} from "@notionhq/client/build/src/api-endpoints";
 import { markdownToBlocks } from "@tryfabric/martian";
 import { env } from "../../env/server";
 import type {
@@ -312,6 +315,87 @@ class Notion {
       return res as PageObjectResponse;
     }
   }
+
+  extractComponentMetaProperties = (pageResponse: PageObjectResponse) => {
+    const pageProps = pageResponse.properties;
+    const entries = Object.entries(pageProps).filter(([key]) =>
+      key.startsWith("_meta_")
+    );
+
+    const metaProps = entries.reduce((acc, [key, val]) => {
+      let temp;
+
+      switch (val.type) {
+        case "url":
+          temp = val.url;
+          break;
+        case "rich_text":
+          temp = val.rich_text[0]?.plain_text;
+          break;
+        case "last_edited_time":
+          temp = val.last_edited_time;
+          break;
+        case "checkbox":
+          temp = val.checkbox ? "true" : "";
+          break;
+        case "select":
+          temp = val.select?.name;
+          break;
+      }
+
+      acc[key.replace(/_meta_/g, "")] = temp || "";
+      return acc;
+    }, {} as Record<string, string>);
+
+    return metaProps;
+  };
+
+  extractPageBlocks = (blocksResponse: BlockObjectResponse[]) => {
+    const blocksMap = blocksResponse.map((block) => {
+      let temp = { type: "paragraph", data: "" } as {
+        type: typeof block.type;
+        data: string;
+      };
+
+      switch (block.type) {
+        case "code":
+          temp = {
+            type: block.type,
+            data: block.code.rich_text[0]?.plain_text || "",
+          };
+          break;
+        case "paragraph":
+          temp = {
+            type: block.type,
+            data: block.paragraph.rich_text[0]?.plain_text || "",
+          };
+          break;
+        case "heading_1":
+          temp = {
+            type: block.type,
+            data: block.heading_1.rich_text[0]?.plain_text || "",
+          };
+          break;
+        case "heading_2":
+          temp = {
+            type: block.type,
+            data: block.heading_2.rich_text[0]?.plain_text || "",
+          };
+          break;
+        case "heading_3":
+          temp = {
+            type: block.type,
+            data: block.heading_3.rich_text[0]?.plain_text || "",
+          };
+          break;
+      }
+
+      return temp;
+    });
+
+    return blocksMap;
+  };
+
   async getComponentMetadata(props: { name?: string }) {
     if (!props.name) {
       return {};
@@ -330,23 +414,17 @@ class Notion {
 
     const data = (res.results as PageObjectResponse[])[0];
 
-    if (
-      data &&
-      data.object === "page" &&
-      data.properties["Description"].type === "rich_text" &&
-      data.properties["Figma Url"].type === "url"
-    ) {
-      return {
-        description:
-          data.properties["Description"].rich_text[0]?.plain_text || "",
-        figmaUrl: data.properties["Figma Url"].url || "",
-      };
-    }
+    const blocks = await this.client.blocks.children.list({
+      block_id: data.id,
+    });
 
-    return {
-      description: "",
-      figmaUrl: "",
-    };
+    const pageContent = this.extractPageBlocks(
+      blocks.results as BlockObjectResponse[]
+    );
+
+    const metaProps = this.extractComponentMetaProperties(data);
+
+    return { ...metaProps, content: pageContent };
   }
 
   public readonly issuePageStatus = {
