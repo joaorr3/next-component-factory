@@ -28,7 +28,7 @@ const NextCors = initMiddleware(cors);
 
 const actionValidator = z.enum(["getComponentMetadata"]);
 
-const ONE_DAY_IN_SECONDS = 60 * 60 * 24;
+// const ONE_DAY_IN_SECONDS = 60 * 60 * 24;
 
 const action = async (req: NextApiRequest, res: NextApiResponse) => {
   // Create context and caller
@@ -40,10 +40,10 @@ const action = async (req: NextApiRequest, res: NextApiResponse) => {
     origin: "*",
   });
 
-  res.setHeader(
-    "cache-control",
-    `s-maxage=1, stale-while-revalidate=${ONE_DAY_IN_SECONDS}`
-  );
+  // res.setHeader(
+  //   "cache-control",
+  //   `s-maxage=1, stale-while-revalidate=${ONE_DAY_IN_SECONDS}`
+  // );
 
   try {
     const { action, name } = req.query;

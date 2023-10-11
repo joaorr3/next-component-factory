@@ -337,8 +337,9 @@ class Notion {
       data.properties["Figma Url"].type === "url"
     ) {
       return {
-        description: data.properties["Description"].rich_text[0].plain_text,
-        figmaUrl: data.properties["Figma Url"].url,
+        description:
+          data.properties["Description"].rich_text[0]?.plain_text || "",
+        figmaUrl: data.properties["Figma Url"].url || "",
       };
     }
 
