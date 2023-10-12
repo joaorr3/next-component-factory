@@ -346,11 +346,14 @@ class Notion {
         case "select":
           temp = val.select?.name;
           break;
+        case "multi_select":
+          temp = val.multi_select.map(({ name }) => name);
+          break;
       }
 
       acc[key.replace(/_meta_/g, "")] = temp || "";
       return acc;
-    }, {} as Record<string, string>);
+    }, {} as Record<string, any>);
 
     return metaProps;
   };
