@@ -365,10 +365,20 @@ class Notion {
           };
           break;
         case "paragraph":
-          temp = {
-            type: block.type,
-            data: block.paragraph.rich_text[0]?.plain_text || "",
-          };
+          const paragraphContent = block.paragraph.rich_text[0]?.plain_text;
+
+          if (paragraphContent) {
+            temp = {
+              type: block.type,
+              data: paragraphContent,
+            };
+          } else {
+            temp = {
+              type: "lineBreak" as typeof block.type,
+              data: "\n",
+            };
+          }
+
           break;
         case "heading_1":
           temp = {
