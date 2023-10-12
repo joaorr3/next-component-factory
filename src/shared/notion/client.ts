@@ -335,6 +335,11 @@ class Notion {
         case "last_edited_time":
           temp = val.last_edited_time;
           break;
+        case "last_edited_by":
+          if ("name" in val?.last_edited_by) {
+            temp = val.last_edited_by.name;
+          }
+          break;
         case "checkbox":
           temp = val.checkbox ? "true" : "";
           break;
