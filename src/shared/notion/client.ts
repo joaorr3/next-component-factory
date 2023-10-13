@@ -363,6 +363,7 @@ class Notion {
       let temp = { type: "paragraph", data: "" } as {
         type: typeof block.type;
         data: string;
+        caption?: string;
       };
 
       switch (block.type) {
@@ -370,6 +371,7 @@ class Notion {
           temp = {
             type: block.type,
             data: block.code.rich_text[0]?.plain_text || "",
+            caption: block.code.caption[0]?.plain_text || "",
           };
           break;
         case "paragraph":
