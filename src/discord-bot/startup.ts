@@ -24,7 +24,7 @@ const startApp = () => {
     if (env.START_DISCORD === "true") {
       initializeBot();
 
-      Cron(CronTime.everyDayAt(4), syncGuildUsers, "syncGuildUsers");
+      Cron(CronTime.everyWeek(), syncGuildUsers, "syncGuildUsers");
       Cron(CronTime.everyWeekDayAt(17, 30), notifyDevTeam, "notifyDevTeam");
     }
   });
