@@ -33,6 +33,15 @@ export const notionRouter = router({
     .query(async ({ input: { name } }) => {
       return await notion.getComponentMetadata({ name });
     }),
+  getComponentDetails: publicProcedure
+    .input(
+      z.object({
+        name: z.string().optional(),
+      })
+    )
+    .query(async ({ input: { name } }) => {
+      return await notion.getComponentDetails({ name });
+    }),
   getPrDatabaseItems: protectedProcedure
     .input(
       z.object({

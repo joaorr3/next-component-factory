@@ -26,7 +26,7 @@ function initMiddleware(middleware: typeof cors) {
 
 const NextCors = initMiddleware(cors);
 
-const actionValidator = z.enum(["getComponentMetadata"]);
+const actionValidator = z.enum(["getComponentMetadata", "getComponentDetails"]);
 
 const ONE_HOUR_IN_SECONDS = 60 * 60 * 24;
 
@@ -49,7 +49,7 @@ const action = async (req: NextApiRequest, res: NextApiResponse) => {
     const { action, name } = req.query;
     const validAction = actionValidator.parse(action);
     if (validAction) {
-      const response = await caller.notion.getComponentMetadata({
+      const response = await caller.notion[validAction]({
         name: name as string,
       });
       res.status(200).json(response);

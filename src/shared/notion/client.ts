@@ -27,6 +27,7 @@ import {
   spacer,
   videoOrImage,
 } from "./utils";
+import { camelCase } from "lodash";
 
 class Notion {
   public client: Client;
@@ -316,16 +317,53 @@ class Notion {
     }
   }
 
+  //region Component Metadata
+
+  async getAllComponentMetadata() {
+    const pageMap: Array<Record<string, any>> = [];
+
+    const get = async (cursor?: string) => {
+      const { results, next_cursor } = await this.client.databases.query({
+        database_id: env.NOTION_COMPONENTS_DB_ID,
+        start_cursor: cursor,
+        filter: {
+          property: "_is_parent",
+          type: "checkbox",
+          checkbox: {
+            equals: false,
+          },
+        },
+      });
+
+      for (const page of results) {
+        pageMap.push(
+          this.extractComponentMetaProperties(page as PageObjectResponse)
+        );
+      }
+
+      if (next_cursor) {
+        await get(next_cursor);
+      }
+    };
+
+    await get();
+
+    return pageMap;
+  }
+
   extractComponentMetaProperties = (pageResponse: PageObjectResponse) => {
     const pageProps = pageResponse.properties;
-    const entries = Object.entries(pageProps).filter(([key]) =>
-      key.startsWith("_meta_")
+    const entries = Object.entries(pageProps).filter(
+      ([key, val]) => key.startsWith("_meta_") || val.type === "title"
     );
 
     const metaProps = entries.reduce((acc, [key, val]) => {
       let temp;
 
       switch (val.type) {
+        case "title":
+          temp = val.title[0].plain_text;
+          break;
         case "url":
           temp = val.url;
           break;
@@ -351,7 +389,7 @@ class Notion {
           break;
       }
 
-      acc[key.replace(/_meta_/g, "")] = temp || "";
+      acc[camelCase(key.replace(/_meta_/g, ""))] = temp || "";
       return acc;
     }, {} as Record<string, any>);
 
@@ -418,6 +456,38 @@ class Notion {
 
   async getComponentMetadata(props: { name?: string }) {
     if (!props.name) {
+      return this.getAllComponentMetadata();
+    }
+
+    const res = await this.client.databases.query({
+      database_id: env.NOTION_COMPONENTS_DB_ID,
+      filter: {
+        property: "title",
+        type: "title",
+        title: {
+          equals: props.name,
+        },
+      },
+    });
+
+    const data = (res.results as PageObjectResponse[])[0];
+    console.log("data: ", data);
+
+    const blocks = await this.client.blocks.children.list({
+      block_id: data.id,
+    });
+
+    const pageContent = this.extractPageBlocks(
+      blocks.results as BlockObjectResponse[]
+    );
+
+    const metaProps = this.extractComponentMetaProperties(data);
+
+    return { ...metaProps, content: pageContent };
+  }
+
+  async getComponentDetails(props: { name?: string }) {
+    if (!props.name) {
       return {};
     }
 
@@ -442,10 +512,10 @@ class Notion {
       blocks.results as BlockObjectResponse[]
     );
 
-    const metaProps = this.extractComponentMetaProperties(data);
-
-    return { ...metaProps, content: pageContent };
+    return { content: pageContent };
   }
+
+  //endregion
 
   public readonly issuePageStatus = {
     "Not started": {
