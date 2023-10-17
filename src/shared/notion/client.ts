@@ -471,7 +471,6 @@ class Notion {
     });
 
     const data = (res.results as PageObjectResponse[])[0];
-    console.log("data: ", data);
 
     const blocks = await this.client.blocks.children.list({
       block_id: data.id,
