@@ -354,7 +354,8 @@ class Notion {
   extractComponentMetaProperties = (pageResponse: PageObjectResponse) => {
     const pageProps = pageResponse.properties;
     const entries = Object.entries(pageProps).filter(
-      ([key, val]) => key.startsWith("_meta_") || val.type === "title"
+      ([key, val]) =>
+        key.startsWith("_meta_") || (val.type === "title" && val.title.length)
     );
 
     const metaProps = entries.reduce((acc, [key, val]) => {
@@ -362,7 +363,7 @@ class Notion {
 
       switch (val.type) {
         case "title":
-          temp = val.title[0].plain_text;
+          temp = val.title[0]?.plain_text;
           break;
         case "url":
           temp = val.url;
