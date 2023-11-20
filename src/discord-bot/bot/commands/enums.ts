@@ -25,6 +25,7 @@ export enum IssueType {
 }
 
 export enum RoleAction {
+  list = "list",
   get = "get",
   remove = "remove",
 }

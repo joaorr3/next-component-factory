@@ -114,6 +114,7 @@ export const registerCommands = () => {
           .setDescription("What do you want to do?")
           .setRequired(true)
           .addChoices(
+            { name: RoleAction.list, value: RoleAction.list },
             { name: RoleAction.get, value: RoleAction.get },
             { name: RoleAction.remove, value: RoleAction.remove }
           )
@@ -124,7 +125,7 @@ export const registerCommands = () => {
           .setDescription(
             "You probably want LABS and the role of the project you're working on."
           )
-          .setRequired(true)
+          .setRequired(false)
       ),
     command("pr")
       .addStringOption((option) =>
@@ -342,9 +343,33 @@ export const commandReactions = async ({
       const role = options.getRole("role") as Discord.Role;
       const guildAdminRole = discord.role("admin");
 
-      const hasAlreadyThisRole = discord.hasRoleById(guildUser?.id, role.id);
-
       try {
+        if (action === RoleAction.list) {
+          const autoAssignableRolesName = (
+            await discord.getAutoAssignableRoles()
+          ).map(({ name }) => name);
+
+          const info = [
+            "Here's a list of the roles you can assign to yourself with the **/roles** command.\n",
+            autoAssignableRolesName
+              .map((r) => `• ${r}`)
+              .sort((a, b) => a.localeCompare(b))
+              .join("\n"),
+          ];
+
+          await interaction.reply({
+            content: info.join("\n"),
+            ephemeral: true,
+          });
+
+          return {
+            name: "roles",
+            response: undefined,
+          };
+        }
+
+        const hasAlreadyThisRole = discord.hasRoleById(guildUser?.id, role.id);
+
         const { isAutoAssignable, autoAssignableRoles } =
           await discord.roleIsAutoAssignable(role);
 
@@ -373,7 +398,7 @@ export const commandReactions = async ({
               level: "info",
               message: `Assigned ${role.name} to ${guildUser.displayName}`,
             });
-          } else {
+          } else if (action === RoleAction.remove) {
             if (!hasAlreadyThisRole) {
               // If the user tries to remove a role that it doesn't have,
               await interaction.reply({
@@ -398,9 +423,12 @@ export const commandReactions = async ({
           const rolesName = autoAssignableRoles.map(({ name }) => name);
 
           const info = [
-            `Sorry, i'm not allowed to assign the role ${role?.name} to you. I'll notify an admin for you.\n`,
+            `Sorry, i'm not allowed to assign the role ${role?.name} to you. Don't worry, i'll notify an admin.\n`,
             "Here's a list of the roles you can assign to yourself with the **/roles** command.\n",
-            rolesName.map((r) => `• ${r}`).join("\n"),
+            rolesName
+              .map((r) => `• ${r}`)
+              .sort((a, b) => a.localeCompare(b))
+              .join("\n"),
           ];
 
           await interaction.reply({
@@ -418,7 +446,7 @@ export const commandReactions = async ({
         }
       } catch (error) {
         await interaction.reply({
-          content: `Sorry, something went wrong with me. 😔`,
+          content: `Sorry, something went wrong with me. Try again later.. 😔`,
           ephemeral: true,
         });
         logger.db.discord({

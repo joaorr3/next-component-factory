@@ -33,9 +33,9 @@ const roleNames = {
   admin: "Admin",
   cf: "CF 🏭",
   projectManager: "Project Manager 📁",
-  dev: "DEV 👨‍💻",
+  dev: "DEV-CF 👨‍💻",
   design: "Design 🎨",
-  labs: "LABS 🧪",
+  labs: "DEV-LABS 🧪",
   issueValidation: "issue-validation",
   techLead: "tech-lead",
   visitor: "Visitors 👽",
@@ -207,9 +207,14 @@ export class DiscordClient {
     return mentionString;
   }
 
+  @ErrorHandler({ code: "DISCORD", message: "getAutoAssignableRoles" })
+  public async getAutoAssignableRoles() {
+    return await prismaSharedClient.roles.autoAssignable();
+  }
+
   @ErrorHandler({ code: "DISCORD", message: "roleIsAutoAssignable" })
   public async roleIsAutoAssignable(_role?: Discord.Role) {
-    const autoAssignable = await prismaSharedClient.roles.autoAssignable();
+    const autoAssignable = await this.getAutoAssignableRoles();
     const role = autoAssignable.find((r) => r.id === _role?.id);
     return {
       isAutoAssignable: Boolean(role && role.isAutoAssignable),
