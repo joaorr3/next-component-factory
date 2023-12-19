@@ -19,6 +19,9 @@ const config = {
 
   "João": "FirstName",
   "Ribeiro": "LastName",
+
+  "Catarina": "FirstName",
+  "Paulo de Matos": "LastName",
 }
 
 export default config

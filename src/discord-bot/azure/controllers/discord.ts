@@ -5,10 +5,7 @@ import config from "../config/discord"
 
 import type { Client, MessageCreateOptions, TextChannel} from "discord.js";
 import { roleMention} from "discord.js";
-import { Embed } from '../../bot/messages';
-import { getRole } from '../../bot/roles';
-import { getGuild } from '../../bot/utils';
-import { GuildChannelName, GuildRoles } from '../../bot/constants';
+import { discordSharedClient } from '../../../shared/discord';
 
 class AzureDiscord {
 
@@ -46,7 +43,7 @@ class AzureDiscord {
     })
 
     const channelName = config.pullRequestChannelName
-    const channel = this.getChannelByName(GuildChannelName.pr)
+    const channel = this.getChannelByName(channelName)
     
     if(!channel){
       throw new Error(`Channel [${channelName}] not found`)
@@ -155,7 +152,7 @@ class AzureDiscord {
       reviewersFields.push(...reviwers)
     }
 
-    const embedMessage = Embed({
+    const embedMessage = discordSharedClient.embed({
       title,
       url: mail.pullRequest.url,
       description,
@@ -174,9 +171,8 @@ class AzureDiscord {
       },
     });
 
-    const guild = getGuild(this.client);
 
-    const guildDevRole = getRole(guild, { name: GuildRoles.dev });
+    const guildDevRole = discordSharedClient.role('dev')
 
     const payload: MessageCreateOptions = {
       content: guildDevRole ? roleMention(guildDevRole.id) : undefined,
