@@ -1,8 +1,7 @@
 import type { GuildUser } from "@prisma/client";
 import type Discord from "discord.js";
-import type { IssueDetailsModel } from "../models";
-import type { EnvConfig } from "../utils";
-import type { IssueSeverityLevel } from "./commands/enums";
+import type { IssueSeverityLevel } from "../../shared/enums";
+import type { IssueDetailsModel } from "../../shared/models";
 
 export type ChannelType =
   | Discord.ChannelType.GuildText
@@ -11,9 +10,9 @@ export type ChannelType =
   | Discord.ChannelType.GuildPublicThread;
 
 export type RegisterCommandsArgs = {
-  DISCORD_BOT_TOKEN: EnvConfig["DISCORD_BOT_TOKEN"];
-  DISCORD_CLIENT_ID: EnvConfig["DISCORD_CLIENT_ID"];
-  GUILD_ID: string;
+  discordBotToken: string;
+  discordClientId: string;
+  guildId: string;
 };
 
 export type IssueInfo = {
@@ -40,22 +39,26 @@ export type Roles =
   | "credit-experience"
   | "e-commerce"
   | "Visitors 👽"
-  | "personal-credit";
+  | "personal-credit"
+  | "T4G";
 
 export type CommandName =
   | "ping"
   | "gif"
   | "quote"
   | "issue"
+  | "issue_legacy"
   | "roles"
   | "pr"
   | "archive"
   | "publish"
-  | "open"
+  | "assign"
   | "notion_batch_update"
   | "kudos"
   | "list_kudos"
-  | "sync_guild_users";
+  | "sync_guild_users"
+  | "announce"
+  | "schedules";
 
 type IssueCommandModel = {
   thread?: Discord.ThreadChannel<boolean>;
@@ -78,9 +81,14 @@ type QuoteCommand = {
   response: undefined;
 };
 
-export type IssueCommand =
+type IssueCommand = {
+  name: "issue";
+  response: undefined;
+};
+
+export type IssueLegacyCommand =
   | {
-      name: "issue";
+      name: "issue_legacy";
       response: IssueCommandModel;
     }
   | undefined;
@@ -111,10 +119,14 @@ type PublishCommand =
     }
   | undefined;
 
-type OpenCommand =
+type AssignCommand =
   | {
-      name: "open";
-      response: { thread?: Discord.AnyThreadChannel };
+      name: "assign";
+      response: {
+        thread?: Discord.AnyThreadChannel;
+        user: Discord.User;
+        assignee?: Discord.User;
+      };
     }
   | undefined;
 
@@ -156,20 +168,37 @@ type SyncGuildUsersCommand =
     }
   | undefined;
 
+type AnnounceCommand =
+  | {
+      name: "announce";
+      response: undefined;
+    }
+  | undefined;
+
+type SchedulesCommand =
+  | {
+      name: "schedules";
+      response: undefined;
+    }
+  | undefined;
+
 export type DiscordCommandObject = {
   ping: () => Promise<PingCommand>;
   gif: () => Promise<GifCommand>;
   quote: () => Promise<QuoteCommand>;
   issue: () => Promise<IssueCommand>;
+  issue_legacy: () => Promise<IssueLegacyCommand>;
   roles: () => Promise<RolesCommand>;
   pr: () => Promise<PrCommand>;
   archive: () => Promise<ArchiveCommand>;
   publish: () => Promise<PublishCommand>;
-  open: () => Promise<OpenCommand>;
+  assign: () => Promise<AssignCommand>;
   notion_batch_update: () => Promise<NotionBatchUpdateCommand>;
   kudos: () => Promise<KudosCommand>;
   list_kudos: () => Promise<ListKudosCommand>;
   sync_guild_users: () => Promise<SyncGuildUsersCommand>;
+  announce: () => Promise<AnnounceCommand>;
+  schedules: () => Promise<SchedulesCommand>;
 };
 
 export type CommandReactionsArgs = {
@@ -187,15 +216,18 @@ export type CommandsResponse = Promise<
   | GifCommand
   | QuoteCommand
   | IssueCommand
+  | IssueLegacyCommand
   | RolesCommand
   | PrCommand
   | ArchiveCommand
   | PublishCommand
-  | OpenCommand
+  | AssignCommand
   | NotionBatchUpdateCommand
   | KudosCommand
   | ListKudosCommand
   | SyncGuildUsersCommand
+  | AnnounceCommand
+  | SchedulesCommand
 >;
 
 export type KudosType = {

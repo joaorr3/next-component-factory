@@ -39,6 +39,9 @@ export const parseKudos = (kudos?: Input) => {
       color: to?.color || "",
       isBot: !!to?.isBot,
       roles: to?.roles || "",
+      notionUserId: to?.notionUserId || null,
+      azureUserId: to?.azureUserId || null,
+      defaultLabId: to?.defaultLabId || null,
     })
   );
   const grouped = groupBy(kudos, "toId");
@@ -60,8 +63,25 @@ export const parseKudos = (kudos?: Input) => {
   return results;
 };
 
+export const getPrUrl = (id?: string) =>
+  `https://dev.azure.com/ptbcp/IT.DIT/_git/BCP.DesignSystem/pullrequest/${id}`;
+
 export const getArtifactUrl = (id?: string) =>
   `https://dev.azure.com/ptbcp/IT.Ignite/_artifacts/feed/BCP.Ignite.Dx.ComponentFactory/Npm/@bcp-nextgen-dx-component-factory%2Faccolade-design-system/overview/${id}`;
 
 export const npmInstallHint = (version?: string) =>
   `npm install @bcp-nextgen-dx-component-factory/accolade-design-system@${version}`;
+
+export const c18Avatar =
+  "https://cdn.discordapp.com/avatars/1000309925643309127/b40e96bd5967560f43a4762379c086f6";
+
+// Are we being too restrictive?
+export const acceptedFileTypes = [
+  "image/png",
+  "image/jpeg",
+  "image/gif",
+  "video/mp4",
+  "video/webm",
+  "video/mpeg",
+  "video/quicktime",
+];

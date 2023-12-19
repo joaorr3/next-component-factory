@@ -1,6 +1,10 @@
 import { httpBatchLink, loggerLink } from "@trpc/client";
 import { createTRPCNext } from "@trpc/next";
-import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
+import {
+  TRPCError,
+  type inferRouterInputs,
+  type inferRouterOutputs,
+} from "@trpc/server";
 import superjson from "superjson";
 
 import { type AppRouter } from "../server/trpc/router/_app";
@@ -40,3 +44,15 @@ export type RouterInputs = inferRouterInputs<AppRouter>;
  * @example type HelloOutput = RouterOutputs['example']['hello']
  **/
 export type RouterOutputs = inferRouterOutputs<AppRouter>;
+
+export const handledProcedure = <T>(fn: () => T, errorMessage?: string): T => {
+  try {
+    return fn();
+  } catch (error) {
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: errorMessage,
+      cause: error,
+    });
+  }
+};

@@ -1,44 +1,47 @@
-import type Discord from "discord.js";
-import { getTextChannel } from "../channels";
+import { type CacheType, type Interaction } from "discord.js";
+import logger from "../../../shared/logger";
+import discord from "../client";
+import { type CommandName } from "../types";
 
-function getErrorStack(error: unknown) {
-  if (typeof error === "string") return error;
-  if (error instanceof Error) return error.stack;
-  return "Unknown Error";
-}
+export const log = discord.logger("debugBotLogs");
+export const publicLog = discord.logger("botLogs");
 
-export function log(
-  guild: Discord.Guild,
-  messageFn: () => string | Discord.EmbedBuilder
-) {
-  const botsChannel = getTextChannel(guild, { name: "bot-logs" });
-  if (!botsChannel) return;
+export const prLog = discord.logger("pr");
+export const buildLog = discord.logger("releases");
+export const workItemLog = discord.logger("workItem");
 
-  let message: Discord.BaseMessageOptions;
-  try {
-    const result = messageFn();
-    if (typeof result === "string") {
-      message = { content: result };
-    } else {
-      message = { embeds: [result] };
+export const webhooksLog = discord.logger("webhookLogs");
+
+export const logInteraction = ({
+  commandName,
+  interaction,
+  commandResponse,
+}: {
+  interaction: Interaction<CacheType>;
+  commandName: CommandName;
+  commandResponse: unknown;
+}) => {
+  if (discord.guild) {
+    const requestor = discord.member(interaction.user.id);
+
+    const logMessage = {
+      requestedBy: requestor?.displayName,
+      commandName,
+      commandResponse,
+      channelUrl: interaction.channel?.url,
+      channelId: interaction.channel?.id,
+    };
+
+    try {
+      logger.db.discord({
+        level: "info",
+        message: `[Interaction] -> ${JSON.stringify(logMessage)}`,
+      });
+    } catch (error) {
+      logger.console.discord({
+        level: "error",
+        message: JSON.stringify(error),
+      });
     }
-  } catch (error: unknown) {
-    console.error(`Unable to get message for bot log`, getErrorStack(error));
-    return;
   }
-
-  const callerStack = new Error("Caller stack:");
-
-  // make sure sync errors don't crash the bot
-  return Promise.resolve()
-    .then(() => botsChannel.send(message))
-    .catch((error: unknown) => {
-      const messageSummary = message.content;
-
-      console.error(
-        `Unable to log message: "${messageSummary}"`,
-        getErrorStack(error),
-        callerStack
-      );
-    });
-}
+};

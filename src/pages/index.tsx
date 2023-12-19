@@ -1,66 +1,26 @@
-import { type NextPage } from "next";
-import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
-import Link from "next/link";
-
 import React from "react";
-import { A, P } from "../components/base";
-import { useLoading } from "../utils/LoadingProvider";
-import { trpc } from "../utils/trpc";
+import { Kudos } from "../components/Kudos";
 
-const Home: NextPage = () => {
-  const hello = trpc.example.hello.useQuery({ text: "from tRPC" });
-  useLoading(!hello.data);
-
+export default function Home() {
   return (
     <React.Fragment>
       <Head>
         <title>Home</title>
       </Head>
       <main>
-        <div>
-          <div>
-            <P>{hello.data ? hello.data.greeting : "Loading tRPC query..."}</P>
-            <Link href="/dashboard">
-              <A>dashboard</A>
-            </Link>
+        <iframe
+          src="https://discord.com/widget?id=973878486739591208&theme=dark"
+          width="100%"
+          height="500"
+          frameBorder="0"
+          sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
+        ></iframe>
 
-            <AuthShowcase />
-          </div>
+        <div className="mt-24">
+          <Kudos />
         </div>
       </main>
     </React.Fragment>
   );
-};
-
-export default Home;
-
-const AuthShowcase: React.FC = () => {
-  const { data: sessionData } = useSession();
-
-  const { data: secretMessage } = trpc.auth.getSecretMessage.useQuery(
-    undefined, // no input
-    { enabled: sessionData?.user !== undefined }
-  );
-
-  return (
-    <div>
-      <p>
-        {sessionData && <span>Logged in as {sessionData.user?.name}</span>}
-        {secretMessage && <span> - {secretMessage}</span>}
-      </p>
-      <button
-        onClick={
-          sessionData
-            ? () => signOut()
-            : () =>
-                signIn("discord", {
-                  callbackUrl: "/dashboard",
-                })
-        }
-      >
-        {sessionData ? "Sign out" : "Sign in"}
-      </button>
-    </div>
-  );
-};
+}

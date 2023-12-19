@@ -1,11 +1,8 @@
 import Discord, { channelMention, userMention } from "discord.js";
+import logger from "../../../../shared/logger";
 import { csvToNumberedList, isValidURL, randomInt } from "../../../utils";
-import { logger } from "../../../utils/logger";
-import { getTextChannel } from "../../channels";
-import { GuildChannelName, GuildRoles } from "../../constants";
-import { getRole, hasRole } from "../../roles";
-import type { IssueCommand } from "../../types";
-import { getUserById } from "../../users";
+import discord from "../../client";
+import type { IssueLegacyCommand } from "../../types";
 import { angryC18Gif, tenor } from "../../utils/gifs";
 import { c18AngryQuotes } from "../../utils/quotes";
 import { getColor, mentionsByScope } from "../utils";
@@ -14,23 +11,18 @@ import { optionsDataExtractor } from "./optionsDataExtractor";
 
 type IssueCommandParams = {
   interaction: Discord.ChatInputCommandInteraction<Discord.CacheType>;
-  guild: Discord.Guild;
 };
 
 export const issueCommand = async ({
   interaction,
-  guild,
-}: IssueCommandParams): Promise<IssueCommand> => {
+}: IssueCommandParams): Promise<IssueLegacyCommand> => {
   const { channelId, options, user } = interaction;
 
-  const guildUser = getUserById(guild, user.id);
-  const currentChannel = getTextChannel(guild, { id: channelId });
-  const guildLabsRole = getRole(guild, { name: GuildRoles.labs });
-  const devRole = getRole(guild, { name: GuildRoles.dev });
-  const designRole = getRole(guild, { name: GuildRoles.design });
-  const issueChannel = getTextChannel(guild, {
-    name: GuildChannelName.issueTracking,
-  });
+  const guildUser = discord.member(user.id);
+  const currentChannel = discord.channelById(channelId);
+  const devRole = discord.role("dev");
+  const designRole = discord.role("design");
+  const issueChannel = discord.channel("issueTracking");
 
   const guildUserInfo = {
     name:
@@ -45,7 +37,7 @@ export const issueCommand = async ({
       user.avatar ||
       undefined,
     mention: userMention(guildUser?.id || user.id),
-    hasLabRole: hasRole(guildUser, guildLabsRole),
+    hasLabRole: discord.hasRole(guildUser?.id, "labs"),
   };
 
   if (currentChannel?.isThread()) {
@@ -115,6 +107,7 @@ export const issueCommand = async ({
       : "invalid URL",
     checkTechLead,
     checkDesign,
+    componentId: null,
   });
 
   await interaction
@@ -189,7 +182,7 @@ export const issueCommand = async ({
   }
 
   return {
-    name: "issue",
+    name: "issue_legacy",
     response: {
       thread,
       hasLabRole: !!guildUserInfo.hasLabRole,
@@ -199,6 +192,7 @@ export const issueCommand = async ({
         attachment2: optionData.attachment2?.url || null,
         author: guildUserInfo.name,
         lab: currentChannel?.name || null,
+        labId: "",
         discordThreadId: thread?.id,
         createdAt: new Date(),
         status: "TODO",

@@ -1,5 +1,5 @@
 import Discord, { roleMention } from "discord.js";
-import { IssueScope, IssueSeverityLevel } from "./enums";
+import { IssueScope, IssueSeverityLevel } from "../../../shared/enums";
 
 export const getPrUrl = (id?: string) =>
   `https://dev.azure.com/ptbcp/IT.Ignite/_git/BCP.Ignite.Dx.ComponentFactory/pullrequest/${id}`;

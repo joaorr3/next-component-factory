@@ -1,5 +1,5 @@
 import Discord from "discord.js";
-import type { EmbeddedIssueBuilderModel } from "../../../models";
+import type { EmbeddedIssueBuilderModel } from "../../../../shared/models";
 import { getColor } from "../utils";
 
 const np = "not provided";

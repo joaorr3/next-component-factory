@@ -1,11 +1,7 @@
 import Discord from "discord.js";
+import { IssueScope, IssueSeverityLevel } from "../../../shared/enums";
 import type { CommandName } from "../types";
-import {
-  IssueCommandOptions,
-  IssueScope,
-  IssueSeverityLevel,
-  IssueType,
-} from "./enums";
+import { IssueCommandOptions, IssueType } from "./enums";
 
 export const command = (name: CommandName) =>
   new Discord.SlashCommandBuilder()
@@ -131,7 +127,7 @@ export const issueStepsToReproduceStringOptions = () => {
     option
       .setName(IssueCommandOptions.steps)
       .setDescription(
-        "Steps to reproduce: Provide a CVS like string. Ex: Did this; Did that;"
+        "Steps to reproduce: Provide a CSV like string. Ex: Did this; Did that;"
       )
       .setRequired(true);
 };

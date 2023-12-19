@@ -1,5 +1,6 @@
 import type Discord from "discord.js";
-import type { OptionsDataExtractorModel } from "../../../models";
+import type { OptionsDataExtractorModel } from "../../../../shared/models";
+
 import { IssueCommandOptions } from "../enums";
 
 export const optionsDataExtractor = (
@@ -24,5 +25,6 @@ export const optionsDataExtractor = (
     attachment: options.getAttachment(IssueCommandOptions.attachment, true),
     attachment2: options.getAttachment(IssueCommandOptions.attachment2),
     azureWorkItem: options.getString(IssueCommandOptions.azure_work_item),
+    componentId: "",
   };
 };

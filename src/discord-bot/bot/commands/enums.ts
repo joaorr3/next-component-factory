@@ -24,14 +24,9 @@ export enum IssueType {
   help_v2 = "help_v2",
 }
 
-export enum IssueSeverityLevel {
-  high = "high",
-  medium = "medium",
-  low = "low",
-}
-
 export enum RoleAction {
-  give = "give",
+  list = "list",
+  get = "get",
   remove = "remove",
 }
 
@@ -56,12 +51,6 @@ export enum ThreadArchiveOptionChoices {
   "1d" = "1d",
 }
 
-export enum IssueScope {
-  dev = "dev",
-  design = "design",
-  both = "both",
-}
-
 export enum BatchOptions {
   start_date = "start_date",
   end_date = "end_date",
@@ -70,4 +59,18 @@ export enum BatchOptions {
 export enum KudosOption {
   to = "to",
   type = "type",
+  public = "public",
+}
+
+export enum AssignOption {
+  assignee = "assignee",
+}
+
+export enum Announce {
+  title = "title",
+  announcement = "announcement",
+  extra = "extra",
+  url = "url",
+  attachment = "attachment",
+  mention = "mention",
 }

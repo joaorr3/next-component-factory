@@ -47,6 +47,9 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+
+  GuildUser     GuildUser @relation(fields: [discordUserId], references: [id])
+  discordUserId String    @unique
 }
 
 model VerificationToken {
@@ -60,13 +63,15 @@ model VerificationToken {
 // --
 
 model IssueIdMapping {
-  id                Int      @id @default(autoincrement())
-  notion_page_id    String?  @unique
-  discord_thread_id String?  @unique
-  author            String?  @db.Text
-  title             String?  @db.Text
-  createdAt         DateTime @default(now())
-  Issue             Issue?
+  id                 Int      @id @default(autoincrement())
+  notion_page_id     String?  @unique
+  notion_page_url    String?
+  discord_thread_id  String?  @unique
+  discord_thread_url String?
+  author             String?  @db.Text
+  title              String?  @db.Text
+  createdAt          DateTime @default(now())
+  Issue              Issue?
 
   @@index([notion_page_id, discord_thread_id])
 }
@@ -87,9 +92,15 @@ enum IssueStatus {
   CLOSED
 }
 
+enum Platform {
+  WEB
+  NATIVE
+  CROSS
+}
+
 model Issue {
   id               Int            @id @default(autoincrement())
-  issueMapping     IssueIdMapping @relation(fields: [issueIdMappingId], references: [id])
+  IssueMapping     IssueIdMapping @relation(fields: [issueIdMappingId], references: [id])
   issueIdMappingId Int            @unique
   title            String?        @db.Text
   description      String?        @db.Text
@@ -110,10 +121,16 @@ model Issue {
   attachment       String?        @db.Text
   attachment2      String?        @db.Text
   azureWorkItem    String?        @db.Text
+  platform         Platform?
   timestamp        DateTime       @default(now()) @db.Timestamp(0)
   createdAt        DateTime?
+  IssuesMedia      IssuesMedia[]
+  Lab              Lab?           @relation(fields: [labId], references: [id])
+  Component        Component?     @relation(fields: [componentId], references: [id])
+  labId            String?
+  componentId      String?
 
-  @@index([issueIdMappingId])
+  @@index([issueIdMappingId, labId])
 }
 
 model Kudos {
@@ -131,13 +148,142 @@ model Kudos {
 
 model GuildUser {
   id           String   @id
+  notionUserId Int?     @unique
+  azureUserId  String?  @unique
   username     String   @db.Text
   avatarURL    String?  @db.Text
   isBot        Boolean? @default(false)
   friendlyName String?  @db.Text
   roles        String?  @db.Text
   color        String?  @db.Text
+  from         Kudos[]  @relation("from")
+  to           Kudos[]  @relation("to")
 
-  from Kudos[] @relation("from")
-  to   Kudos[] @relation("to")
+  DefaultLab   Lab?    @relation(fields: [defaultLabId], references: [id])
+  defaultLabId String?
+
+  notionUser   NotionUser?    @relation(fields: [notionUserId], references: [id])
+  PullRequest  PullRequest[]
+  User         User?
+  LabGuildUser LabGuildUser[]
+}
+
+model NotionUser {
+  id           Int        @id
+  notionUserId String     @unique
+  username     String?    @db.Text
+  GuildUser    GuildUser?
+}
+
+model PullRequest {
+  id               Int       @id @default(autoincrement())
+  pullRequestId    String    @unique
+  webhookMessageId String    @unique
+  guildUser        GuildUser @relation(fields: [guildUserId], references: [id])
+  guildUserId      String
+
+  @@index([guildUserId])
+}
+
+model FAQ {
+  id              Int      @id @default(autoincrement())
+  slug            String   @unique
+  label           String
+  type            String?
+  markdown        String   @db.LongText
+  publish         Boolean  @default(false)
+  sortingPriority Int?     @default(0)
+  createdBy       String?
+  timestamp       DateTime @default(now()) @db.Timestamp(0)
+}
+
+enum MediaType {
+  ISSUE
+  GENERIC
+}
+
+model Media {
+  id String @id @default(cuid())
+
+  media_id   String    @unique
+  media_type MediaType
+  s3_key     String    @unique
+
+  IssuesMedia  IssuesMedia?  @relation("IssuesMediaRelation", fields: [media_id], references: [id], map: "media_issue_id", onDelete: Cascade)
+  GenericMedia GenericMedia? @relation("GenericMediaRelation", fields: [media_id], references: [id], map: "media_generic_id", onDelete: Cascade)
+
+  @@index([media_id, s3_key])
+}
+
+model IssuesMedia {
+  id        String   @id @default(cuid())
+  key       String
+  url       String
+  fileType  String
+  fileName  String
+  meta      String?
+  timestamp DateTime @default(now()) @db.Timestamp(0)
+
+  issue   Issue   @relation(fields: [issueId], references: [id])
+  issueId Int
+  Media   Media[] @relation("IssuesMediaRelation")
+
+  @@index([issueId])
+}
+
+model GenericMedia {
+  id        String   @id @default(cuid())
+  key       String
+  url       String
+  fileType  String
+  fileName  String
+  meta      String?
+  timestamp DateTime @default(now()) @db.Timestamp(0)
+  Media     Media[]  @relation("GenericMediaRelation")
+}
+
+enum ComponentCategory {
+  BASE
+  ATOMS
+  MOLECULES
+  ORGANISMS
+}
+
+model Component {
+  id          String            @id @default(cuid())
+  notion_id   String?           @unique
+  name        String
+  category    ComponentCategory
+  description String?
+  Issue       Issue[]
+}
+
+model GuildRole {
+  id               String  @id
+  name             String
+  isAutoAssignable Boolean @default(false)
+  lab              Lab?
+}
+
+model Lab {
+  id          String  @id @default(cuid())
+  name        String
+  displayName String?
+  channelId   String? @unique
+  channelName String? @unique
+
+  GuildRole    GuildRole?     @relation(fields: [guildRoleId], references: [id])
+  guildRoleId  String?        @unique
+  LabGuildUser LabGuildUser[]
+  Issue        Issue[]
+  GuildUser    GuildUser[]
+}
+
+model LabGuildUser {
+  Lab         Lab       @relation(fields: [labId], references: [id])
+  labId       String
+  GuildUser   GuildUser @relation(fields: [guildUserId], references: [id])
+  guildUserId String
+
+  @@id([labId, guildUserId])
 }

@@ -1,21 +1,4 @@
-import type { KudosType, Roles } from "./types";
-
-export const GuildChannelName = {
-  pr: "pr-approvals",
-  releasesNotes: "release-notes",
-  issueTracking: "issue-tracking",
-  issueValidation: "issue-validation",
-};
-
-export const GuildRoles = {
-  admin: "Admin",
-  dev: "DEV 👨‍💻",
-  design: "Design 🎨",
-  labs: "LABS 🧪",
-  issueValidation: "issue-validation",
-  techLead: "tech-lead",
-  visitor: "Visitors 👽",
-};
+import type { KudosType } from "./types";
 
 export const Emojis = {
   check: "✅",
@@ -30,26 +13,7 @@ export const Emojis = {
   six: "6️⃣",
   seven: "7️⃣",
   eight: "8️⃣",
-};
-
-export const autoAssignableRole: Roles[] = [
-  "LABS 🧪",
-  "m2030",
-  "mse",
-  "chatbot",
-  "izibizi",
-  "shopping",
-  "dmm",
-  "apparte",
-  "investments-savings",
-  "gip",
-  "credit-experience",
-  "e-commerce",
-  "personal-credit",
-];
-
-export const c18Avatar =
-  "https://cdn.discordapp.com/avatars/1000309925643309127/b40e96bd5967560f43a4762379c086f6";
+} as const;
 
 export const kudosTypes: KudosType[] = [
   // {
