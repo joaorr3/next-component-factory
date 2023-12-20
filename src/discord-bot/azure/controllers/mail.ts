@@ -6,9 +6,9 @@ import { MailReceiver } from 'simple-mail-receiver'
 import { parseTable } from '@pedroentringer/cheerio-table-parser';
 import EventEmitter from 'node:events'
 
-import config from "../config/mail.js"
-import getAuthor from '../utils/people.js';
-import captalize from "../utils/captalize.js";
+import config from "../config/mail"
+import getAuthor from '../utils/people';
+import captalize from "../utils/captalize";
 
 class AzureMail extends EventEmitter{
 

@@ -1,13 +1,9 @@
-import * as dotenv from 'dotenv'
+import { env } from '../../../env/server';
 import { c18Avatar } from '../../../shared/dataUtils';
 import { channelNames } from '../../../shared/discord';
 
-dotenv.config({
-    path: `.env.${process.env.NODE_ENV || "local"}`,
-});
-
 const config = {
-    token: process.env.DISCORD_TOKEN || "",
+    token: env.DISCORD_BOT_TOKEN || "",
     pullRequestChannelName: channelNames.pr,
     avatar: c18Avatar
 }

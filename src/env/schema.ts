@@ -23,8 +23,8 @@ export const serverSchema = z.object({
   MAIL_USER: z.string(),
   MAIL_PASSWORD: z.string(),
   MAIL_HOST: z.string(),
-  MAIL_PORT: z.number(),
-  MAIL_USE_TLS: z.boolean(),
+  MAIL_PORT: z.string(),
+  MAIL_USE_TLS: z.string(),
   MAIL_AZURE_ADDRESS: z.string(),
 
   DISCORD_CLIENT_ID: z.string(),

@@ -12,7 +12,7 @@ const config = {
   "Frazão": "LastName",
 
   "Renan": "FirstName",
-  "Zozimo": "LastName",
+  "Zózimo": "LastName",
 
   "Ricardo": "FirstName",
   "Oliveira": "LastName",

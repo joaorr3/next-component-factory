@@ -1,6 +1,6 @@
 import nlp from 'compromise/three'
-import config from "../config/people.js"
-import captalize from './captalize.js'
+import config from "../config/people"
+import captalize from './captalize'
 
 nlp.addWords(config)
 
