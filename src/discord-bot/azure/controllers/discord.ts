@@ -16,8 +16,11 @@ class AzureDiscord {
     this.client = client;
   }
 
-  private getThreadName(title: string) {
-    return truncate(title, { length: 100, omission: "" });
+  private getThreadName(mail: ParsedMail) {
+    const id = mail.pullRequest.id;
+    const title = mail.pullRequest.title;
+    const threadName = `[${id}] ${title}`;
+    return truncate(threadName, { length: 100, omission: "" });
   }
 
   async processMail(mail: ParsedMail) {
@@ -59,7 +62,7 @@ class AzureDiscord {
     }
 
     const thread = await channel.threads.create({
-      name: this.getThreadName(mail.pullRequest.title),
+      name: this.getThreadName(mail),
       reason: mail.action,
       autoArchiveDuration: 10080,
     });
@@ -106,7 +109,7 @@ class AzureDiscord {
       return;
     }
 
-    let thread = this.getThreadInChannelByName(channel, mail.pullRequest.title);
+    let thread = this.getThreadInChannelById(channel, mail.pullRequest.id);
 
     if (!thread) {
       thread = await this.createPullRequest(mail);
@@ -143,15 +146,12 @@ class AzureDiscord {
       return;
     }
 
-    const thread = this.getThreadInChannelByName(
-      channel,
-      mail.pullRequest.title
-    );
+    const thread = this.getThreadInChannelById(channel, mail.pullRequest.id);
 
     if (!thread) {
       logger.console.discord({
         level: "error",
-        message: `Thread [${mail.pullRequest.title}] not found in channel [${channelName}]`,
+        message: `Thread [${mail.pullRequest.id}] [${mail.pullRequest.title}] not found in channel [${channelName}]`,
       });
       return;
     }
@@ -223,15 +223,12 @@ class AzureDiscord {
     }
   }
 
-  private getThreadInChannelByName(
-    channel: TextChannel,
-    pullRequestTitle: string
-  ) {
-    const threadName = this.getThreadName(pullRequestTitle);
+  private getThreadInChannelById(channel: TextChannel, pullRequestId: number) {
+    const initialThreadNameWithId = `[${pullRequestId}]`;
 
     for (const cachedThread of channel.threads.cache) {
       const thread = cachedThread[1];
-      if (thread.name === threadName && !thread.archived) {
+      if (thread.name.includes(initialThreadNameWithId) && !thread.archived) {
         return thread;
       }
     }
