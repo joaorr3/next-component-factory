@@ -7,6 +7,7 @@ import type { Client, MessageCreateOptions, TextChannel } from "discord.js";
 import { roleMention } from "discord.js";
 import { discordSharedClient } from "../../../shared/discord";
 import logger from "../../../shared/logger";
+import { truncate } from "lodash";
 
 class AzureDiscord {
   private client;
@@ -15,13 +16,18 @@ class AzureDiscord {
     this.client = client;
   }
 
+  private getThreadName(title: string) {
+    return truncate(title, { length: 100, omission: "" });
+  }
+
   async processMail(mail: ParsedMail) {
     try {
       await this.refreshCache();
       this.normalizeTitle(mail);
 
       if (mail.isCreated) {
-        return await this.createPullRequest(mail);
+        await this.createPullRequest(mail);
+        return;
       }
 
       if (mail.isCompleted || mail.isAbandoned) {
@@ -53,13 +59,15 @@ class AzureDiscord {
     }
 
     const thread = await channel.threads.create({
-      name: mail.pullRequest.title,
+      name: this.getThreadName(mail.pullRequest.title),
       reason: mail.action,
       autoArchiveDuration: 10080,
     });
 
     await thread.join();
     await thread.send(payload);
+
+    return thread;
   }
 
   private async updatePullRequest(mail: ParsedMail) {
@@ -98,18 +106,13 @@ class AzureDiscord {
       return;
     }
 
-    const threadName = mail.pullRequest.title;
-    const thread = this.getThreadInChannelByName(channel, threadName);
+    let thread = this.getThreadInChannelByName(channel, mail.pullRequest.title);
 
     if (!thread) {
-      logger.console.discord({
-        level: "error",
-        message: `Thread [${threadName}] not found in channel [${channelName}]`,
-      });
-      return;
+      thread = await this.createPullRequest(mail);
     }
 
-    await thread.send(payload);
+    await thread?.send(payload);
   }
 
   private async closePullRequest(mail: ParsedMail) {
@@ -140,13 +143,15 @@ class AzureDiscord {
       return;
     }
 
-    const threadName = mail.pullRequest.title;
-    const thread = this.getThreadInChannelByName(channel, threadName);
+    const thread = this.getThreadInChannelByName(
+      channel,
+      mail.pullRequest.title
+    );
 
     if (!thread) {
       logger.console.discord({
         level: "error",
-        message: `Thread [${threadName}] not found in channel [${channelName}]`,
+        message: `Thread [${mail.pullRequest.title}] not found in channel [${channelName}]`,
       });
       return;
     }
@@ -218,7 +223,12 @@ class AzureDiscord {
     }
   }
 
-  private getThreadInChannelByName(channel: TextChannel, threadName: string) {
+  private getThreadInChannelByName(
+    channel: TextChannel,
+    pullRequestTitle: string
+  ) {
+    const threadName = this.getThreadName(pullRequestTitle);
+
     for (const cachedThread of channel.threads.cache) {
       const thread = cachedThread[1];
       if (thread.name === threadName && !thread.archived) {
