@@ -20,6 +20,13 @@ export const serverSchema = z.object({
 
   NODE_ENV: z.enum(["development", "test", "production"]),
 
+  MAIL_USER: z.string(),
+  MAIL_PASSWORD: z.string(),
+  MAIL_HOST: z.string(),
+  MAIL_PORT: z.string(),
+  MAIL_USE_TLS: z.string(),
+  MAIL_AZURE_ADDRESS: z.string(),
+
   DISCORD_CLIENT_ID: z.string(),
   DISCORD_CLIENT_SECRET: z.string(),
   DISCORD_BOT_TOKEN: z.string(),

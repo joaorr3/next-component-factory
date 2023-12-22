@@ -10,10 +10,16 @@ import {
 import { channelUpdateHandler } from "./events/channelUpdate";
 import { guildRolesHandler } from "./events/guildRoles";
 import { BotLog } from "./utils";
+import AzureDiscord from "../azure/controllers/discord";
+import AzureMail from "../azure/controllers/mail";
 
 export const initializeBot = () => {
   discord.client?.once(Discord.Events.ClientReady, async () => {
     logger.console.discord({ level: "info", message: "Ready" });
+
+    const azureDiscord = new AzureDiscord(discord.client)
+    const azureMail = new AzureMail({ autoReconnect: true })
+    azureMail.on("mail", (mail) => azureDiscord.processMail(mail))
 
     BotLog.log(() => {
       return {

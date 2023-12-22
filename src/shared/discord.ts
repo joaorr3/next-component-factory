@@ -14,7 +14,7 @@ import { ErrorHandler } from "../utils/error";
 import { prismaSharedClient } from "./prisma/client";
 import { promisify } from "./utils";
 
-const channelNames = {
+export const channelNames = {
   welcome: "welcome",
   pr: "pr-approvals",
   releases: "releases",
