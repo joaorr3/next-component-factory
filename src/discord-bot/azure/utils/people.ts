@@ -1,16 +1,16 @@
-import nlp from 'compromise/three'
-import config from "../config/people"
-import captalize from './captalize'
+import nlp from "compromise/three";
+import { capitalize } from "lodash";
+import config from "../config/people";
 
-nlp.addWords(config)
+nlp.addWords(config);
 
-const getAuthor = (action: string, captalizeResponse = true): string => {
-  const doc = nlp(action)
-  const author = doc.people().text()
+const getAuthor = (action: string, capitalizeResponse = true): string => {
+  const doc = nlp(action);
+  const author = doc.people().text();
 
-  if(!captalizeResponse) return author
+  if (!capitalizeResponse) return author;
 
-  return captalize(author)
-}
+  return capitalize(author);
+};
 
-export default getAuthor
+export default getAuthor;

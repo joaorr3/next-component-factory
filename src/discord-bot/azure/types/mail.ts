@@ -1,36 +1,36 @@
 export type ParsedMailPullRequest = {
   id: number;
   title: string;
-  url: string
-}
+  url: string;
+};
 
 export type ParsedMailCommit = {
-  id: string; 
+  id: string;
   title: string;
-  createdAt: string; 
+  createdAt: string;
   author: string;
   url: string;
-}
+};
 
 export type ParsedMailReviewer = {
   user: string;
   approved: boolean;
-  isRequired: boolean
-}
+  isRequired: boolean;
+};
 
 export type ParsedMail = {
   action: string;
   author: string;
   isCompleted?: boolean;
   isCommented?: boolean;
-  isCommenteReplied?: boolean;
+  isCommentReplied?: boolean;
   isApproved?: boolean;
   isUpdated?: boolean;
   isAbandoned?: boolean;
   isCreated?: boolean;
   isAutoComplete?: boolean;
-  pullRequest: ParsedMailPullRequest
+  pullRequest: ParsedMailPullRequest;
   comment?: string;
-  reviewers?: ParsedMailReviewer[]
-  commits?: ParsedMailCommit[]
-}
+  reviewers?: ParsedMailReviewer[];
+  commits?: ParsedMailCommit[];
+};
