@@ -125,7 +125,7 @@ class AzureMail extends EventEmitter {
 
     const reviewersTable =
       $(
-        "table > tbody > tr:nth-child(2) > td:nth-child(2) > table > tbody > tr:nth-child(1) > td > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td > table"
+        "table > tbody > tr:nth-child(2) > td:nth-child(2) > table > tbody > tr:nth-child(1) > td > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td"
       ).html() || "";
 
     const reviewers: ParsedMailReviewer[] = parseTable(reviewersTable, {
