@@ -126,7 +126,7 @@ class AzureMail extends EventEmitter {
 
     const reviewersTable =
       $(
-        "table > tbody > tr:nth-child(2) > td:nth-child(2) > table > tbody > tr:nth-child(1) > td > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td > table"
+        "table > tbody > tr:nth-child(2) > td:nth-child(2) > table > tbody > tr:nth-child(1) > td > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td"
       ).html() || "";
 
     const reviewers: ParsedMailReviewer[] = parseTable(reviewersTable, {
@@ -145,7 +145,7 @@ class AzureMail extends EventEmitter {
 
     $(
       "table > tbody > tr:nth-child(2) > td:nth-child(2) > table > tbody > tr:nth-child(3) > td > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td > table > tbody > tr"
-    ).each((id, row) => {
+    ).each((_id, row) => {
       const info = $("span", row).last().text().trim();
 
       const commit = {
