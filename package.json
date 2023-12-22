@@ -74,7 +74,7 @@
     "react-slip-and-slide": "^3.1.0",
     "react-switch": "^7.0.0",
     "react-toggle-dark-mode": "^1.1.1",
-    "simple-mail-receiver": "^1.0.14",
+    "simple-mail-receiver": "^1.0.15",
     "slugify": "^1.6.5",
     "styled-components": "^5.3.6",
     "superjson": "1.9.1",
