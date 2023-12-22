@@ -6,6 +6,7 @@ import config from "../config/discord";
 import type { Client, MessageCreateOptions, TextChannel } from "discord.js";
 import { roleMention } from "discord.js";
 import { discordSharedClient } from "../../../shared/discord";
+import logger from "../../../shared/logger";
 
 class AzureDiscord {
   private client;
@@ -44,7 +45,11 @@ class AzureDiscord {
     const channel = this.getChannelByName(channelName);
 
     if (!channel) {
-      throw new Error(`Channel [${channelName}] not found`);
+      logger.console.discord({
+        level: "error",
+        message: `Channel [${channelName}] not found`,
+      });
+      return;
     }
 
     const thread = await channel.threads.create({
@@ -60,7 +65,7 @@ class AzureDiscord {
   private async updatePullRequest(mail: ParsedMail) {
     let description = mail.pullRequest.title;
 
-    if ((mail.isCommented || mail.isCommenteReplied) && mail.comment) {
+    if ((mail.isCommented || mail.isCommentReplied) && mail.comment) {
       description = mail.comment;
     }
 
@@ -86,16 +91,22 @@ class AzureDiscord {
     const channel = this.getChannelByName(config.pullRequestChannelName);
 
     if (!channel) {
-      throw new Error(`Channel [${channelName}] not found`);
+      logger.console.discord({
+        level: "error",
+        message: `Channel [${channelName}] not found`,
+      });
+      return;
     }
 
     const threadName = mail.pullRequest.title;
     const thread = this.getThreadInChannelByName(channel, threadName);
 
     if (!thread) {
-      throw new Error(
-        `Thread [${threadName}] not found in channel [${channelName}]`
-      );
+      logger.console.discord({
+        level: "error",
+        message: `Thread [${threadName}] not found in channel [${channelName}]`,
+      });
+      return;
     }
 
     await thread.send(payload);
@@ -122,16 +133,22 @@ class AzureDiscord {
     const channel = this.getChannelByName(config.pullRequestChannelName);
 
     if (!channel) {
-      throw new Error(`Channel [${channelName}] not found`);
+      logger.console.discord({
+        level: "error",
+        message: `Channel [${channelName}] not found`,
+      });
+      return;
     }
 
     const threadName = mail.pullRequest.title;
     const thread = this.getThreadInChannelByName(channel, threadName);
 
     if (!thread) {
-      throw new Error(
-        `Thread [${threadName}] not found in channel [${channelName}]`
-      );
+      logger.console.discord({
+        level: "error",
+        message: `Thread [${threadName}] not found in channel [${channelName}]`,
+      });
+      return;
     }
 
     await thread.send(payload);
@@ -146,13 +163,13 @@ class AzureDiscord {
     const reviewersFields: DiscordPayloadEmbedField[] = [];
 
     if (mail.reviewers) {
-      const reviwers = mail.reviewers?.map((reviewer) => ({
+      const reviewers = mail.reviewers?.map((reviewer) => ({
         name: reviewer.user,
         value: reviewer.approved ? ":white_check_mark:" : ":clock3:",
         inline: true,
       }));
 
-      reviewersFields.push(...reviwers);
+      reviewersFields.push(...reviewers);
     }
 
     const embedMessage = discordSharedClient.embed({

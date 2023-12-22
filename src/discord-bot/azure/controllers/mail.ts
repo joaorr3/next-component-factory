@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 import type {
   ParsedMail,
   ParsedMailCommit,
@@ -12,7 +11,7 @@ import EventEmitter from "node:events";
 
 import config from "../config/mail";
 import getAuthor from "../utils/people";
-import captalize from "../utils/captalize";
+import { capitalize } from "lodash";
 
 class AzureMail extends EventEmitter {
   private mailReceiver: MailReceiver;
@@ -20,7 +19,7 @@ class AzureMail extends EventEmitter {
   private actions = [
     { type: "completed", config: { isCompleted: true } },
     { type: "commented", config: { isCommented: true } },
-    { type: "replied", config: { isCommenteReplied: true } },
+    { type: "replied", config: { isCommentReplied: true } },
     { type: "approved", config: { isApproved: true } },
     { type: "pushed", config: { isUpdated: true } },
     { type: "abandoned", config: { isAbandoned: true } },
@@ -119,9 +118,9 @@ class AzureMail extends EventEmitter {
 
     const pullRequestComment = $(pullRequestCommentElement).text().trim();
 
-    const pullRequestLinkSplited = pullRequestLink.split("?")[0].split("/");
+    const pullRequestLinkSplitted = pullRequestLink.split("?")[0].split("/");
     const pullRequestId = parseInt(
-      pullRequestLinkSplited[pullRequestLinkSplited.length - 1]
+      pullRequestLinkSplitted[pullRequestLinkSplitted.length - 1]
     );
 
     const reviewersTable =
@@ -133,7 +132,7 @@ class AzureMail extends EventEmitter {
       headers: ["user", "icon", "status", "type"],
     })
       .map((reviewer: any) => ({
-        user: captalize(reviewer.user),
+        user: capitalize(reviewer.user),
         approved: reviewer.status === "Approved",
         isRequired: reviewer.type === "Required",
       }))
@@ -145,7 +144,7 @@ class AzureMail extends EventEmitter {
 
     $(
       "table > tbody > tr:nth-child(2) > td:nth-child(2) > table > tbody > tr:nth-child(3) > td > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td > table > tbody > tr"
-    ).each((id, row) => {
+    ).each((_, row) => {
       const info = $("span", row).last().text().trim();
 
       const commit = {

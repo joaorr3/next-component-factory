@@ -1,27 +1,27 @@
 const config = {
-  "Pedro": "FirstName",
-  "Daher": "LastName",
+  Pedro: "FirstName",
+  Daher: "LastName",
 
-  "Thomaz": "FirstName",
-  "Capra": "LastName",
+  Thomaz: "FirstName",
+  Capra: "LastName",
 
-  "Maria": "FirstName",
-  "Silva": "LastName",
+  Maria: "FirstName",
+  Silva: "LastName",
 
-  "José": "FirstName",
-  "Frazão": "LastName",
+  José: "FirstName",
+  Frazão: "LastName",
 
-  "Renan": "FirstName",
-  "Zózimo": "LastName",
+  Renan: "FirstName",
+  Zózimo: "LastName",
 
-  "Ricardo": "FirstName",
-  "Oliveira": "LastName",
+  Ricardo: "FirstName",
+  Oliveira: "LastName",
 
-  "João": "FirstName",
-  "Ribeiro": "LastName",
+  João: "FirstName",
+  Ribeiro: "LastName",
 
-  "Catarina": "FirstName",
+  Catarina: "FirstName",
   "Paulo de Matos": "LastName",
-}
+};
 
-export default config
+export default config;
