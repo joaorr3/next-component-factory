@@ -117,7 +117,7 @@ class AzureDiscord {
       thread = await this.createPullRequest(mail);
     }
 
-    //await thread?.send(payload);
+    await thread?.send(payload);
   }
 
   private async closePullRequest(mail: ParsedMail) {

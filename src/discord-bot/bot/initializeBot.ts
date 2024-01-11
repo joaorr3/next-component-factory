@@ -21,9 +21,21 @@ export const initializeBot = () => {
     const azureDiscord = new AzureDiscord(discord.client);
     const azureMail = new AzureMail({ autoReconnect: true });
 
+    azureMail.on("error", async (error) => {
+      BotLog.log(() => {
+        return {
+          embeds: [
+            discord.embed({
+              title: `[AzureMail] Error: ${error.message}`,
+            }),
+          ],
+        };
+      });
+    });
+
     azureMail.on("mail", async (mail) => {
       const updatedPr = await PullRequestController.processMail(mail);
-      azureDiscord.processMail(mail, updatedPr);
+      await azureDiscord.processMail(mail, updatedPr);
     });
 
     BotLog.log(() => {
