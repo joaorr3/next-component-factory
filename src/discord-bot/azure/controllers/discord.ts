@@ -4,10 +4,11 @@ import type { DiscordPayloadEmbedField, PayloadProps } from "../types/discord";
 import config from "../config/discord";
 
 import type { Client, MessageCreateOptions, TextChannel } from "discord.js";
-import { roleMention } from "discord.js";
+import { roleMention, userMention } from "discord.js";
 import { discordSharedClient } from "../../../shared/discord";
 import logger from "../../../shared/logger";
 import { truncate } from "lodash";
+import type { GuildUser } from "@prisma/client";
 
 class AzureDiscord {
   private client;
@@ -23,7 +24,7 @@ class AzureDiscord {
     return truncate(threadName, { length: 100, omission: "" });
   }
 
-  async processMail(mail: ParsedMail) {
+  async processMail(mail: ParsedMail, ownerGuildUser?: GuildUser) {
     try {
       await this.refreshCache();
       this.normalizeTitle(mail);
@@ -37,7 +38,7 @@ class AzureDiscord {
         return await this.closePullRequest(mail);
       }
 
-      return await this.updatePullRequest(mail);
+      return await this.updatePullRequest(mail, ownerGuildUser);
     } catch (error) {
       console.log("azure:discord:error:processMail ", error);
     }
@@ -73,7 +74,10 @@ class AzureDiscord {
     return thread;
   }
 
-  private async updatePullRequest(mail: ParsedMail) {
+  private async updatePullRequest(
+    mail: ParsedMail,
+    ownerGuildUser?: GuildUser
+  ) {
     let description = mail.pullRequest.title;
 
     if ((mail.isCommented || mail.isCommentReplied) && mail.comment) {
@@ -96,6 +100,7 @@ class AzureDiscord {
       title: mail.action,
       description,
       mail,
+      ownerGuildUser,
     });
 
     const channelName = config.pullRequestChannelName;
@@ -164,7 +169,9 @@ class AzureDiscord {
     title,
     description,
     mail,
+    ownerGuildUser,
   }: PayloadProps): MessageCreateOptions {
+    const isUpdatedByOwner = ownerGuildUser?.friendlyName === mail.author;
     const reviewersFields: DiscordPayloadEmbedField[] = [];
 
     if (mail.reviewers) {
@@ -198,8 +205,18 @@ class AzureDiscord {
 
     const guildDevRole = discordSharedClient.role("dev");
 
+    const guildDevRoleMention = guildDevRole
+      ? roleMention(guildDevRole.id)
+      : undefined;
+
+    const ownerMention = ownerGuildUser
+      ? roleMention(ownerGuildUser.id)
+      : undefined;
+
+    const mention = isUpdatedByOwner ? guildDevRoleMention : ownerMention;
+
     const payload: MessageCreateOptions = {
-      content: guildDevRole ? roleMention(guildDevRole.id) : undefined,
+      content: mention,
       embeds: [embedMessage],
     };
 

@@ -52,4 +52,48 @@ export class GuildUserManager {
       console.log("prisma:error:getGuildUser: ", error);
     }
   }
+
+  async getGuildUserByFriendlyName(friendlyName: string) {
+    const friendlyNameOnlyText = friendlyName.replace(/\s/g, "");
+    const friendlyNameOnlyTextWithoutAccents = friendlyName.replace(
+      /[^a-zA-Z]/g,
+      ""
+    );
+
+    const user = await this.client.guildUser.findFirst({
+      where: {
+        OR: [
+          {
+            friendlyName: friendlyName,
+          },
+          {
+            friendlyName: friendlyName.toUpperCase(),
+          },
+          {
+            friendlyName: friendlyName.toLowerCase(),
+          },
+          {
+            friendlyName: friendlyNameOnlyText,
+          },
+          {
+            friendlyName: friendlyNameOnlyText.toUpperCase(),
+          },
+          {
+            friendlyName: friendlyNameOnlyText.toLowerCase(),
+          },
+          {
+            friendlyName: friendlyNameOnlyTextWithoutAccents,
+          },
+          {
+            friendlyName: friendlyNameOnlyTextWithoutAccents.toUpperCase(),
+          },
+          {
+            friendlyName: friendlyNameOnlyTextWithoutAccents.toLowerCase(),
+          },
+        ],
+      },
+    });
+
+    return user;
+  }
 }

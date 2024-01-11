@@ -176,11 +176,19 @@ model NotionUser {
 }
 
 model PullRequest {
-  id               Int       @id @default(autoincrement())
-  pullRequestId    String    @unique
-  webhookMessageId String    @unique
-  guildUser        GuildUser @relation(fields: [guildUserId], references: [id])
-  guildUserId      String
+  id               Int     @id @default(autoincrement())
+  pullRequestId    Int     @unique
+  webhookMessageId String? @unique
+  lastAction       String? @db.Text
+  title            String  @db.Text
+  url              String? @db.Text
+
+  createdAt   DateTime  @default(now()) @db.Timestamp(0)
+  updatedAt   DateTime  @updatedAt @db.Timestamp(0)
+  completedAt DateTime? @db.Timestamp(0)
+
+  guildUser   GuildUser @relation(fields: [guildUserId], references: [id])
+  guildUserId String
 
   @@index([guildUserId])
 }

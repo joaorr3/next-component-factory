@@ -15,5 +15,8 @@
     "Ribeiro",
     "Thomaz",
     "Zózimo"
-  ]
+  ],
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma"
+  }
 }
