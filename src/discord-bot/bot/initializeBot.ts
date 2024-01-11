@@ -20,9 +20,10 @@ export const initializeBot = () => {
 
     const azureDiscord = new AzureDiscord(discord.client);
     const azureMail = new AzureMail({ autoReconnect: true });
+
     azureMail.on("mail", async (mail) => {
-      const ownerGuildUser = await PullRequestController.processMail(mail);
-      azureDiscord.processMail(mail, ownerGuildUser);
+      const updatedPr = await PullRequestController.processMail(mail);
+      azureDiscord.processMail(mail, updatedPr);
     });
 
     BotLog.log(() => {

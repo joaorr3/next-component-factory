@@ -14,8 +14,9 @@ export class PullRequestsManager extends CrudHandler<PullRequest> {
       data: {
         pullRequestId: mail.pullRequest.id,
         title: mail.pullRequest.title,
-        lastAction: mail.action,
         url: mail.pullRequest.url,
+        lastAction: mail.action,
+        lastActionGuildUserId: guildUserId,
         guildUserId,
       },
     });

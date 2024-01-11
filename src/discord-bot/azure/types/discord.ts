@@ -1,11 +1,11 @@
-import type { GuildUser } from "@prisma/client";
+import type { PullRequest } from "@prisma/client";
 import type { ParsedMail } from "./mail";
 
 export type PayloadProps = {
   title: string;
   description: string;
   mail: ParsedMail;
-  ownerGuildUser?: GuildUser;
+  pullRequest?: PullRequest;
 };
 export type DiscordPayloadEmbedAuthor = { name: string };
 export type DiscordPayloadEmbedField = {

@@ -4,12 +4,12 @@ import logger from "../../../shared/logger";
 import type { PullRequest } from "@prisma/client";
 
 class PullRequestController {
-  static async processMail(mail: ParsedMail) {
-    const guildUser = await prisma.guildUser.getGuildUserByFriendlyName(
+  static async processMail(mail: ParsedMail): Promise<PullRequest | undefined> {
+    const actionGuildUser = await prisma.guildUser.getGuildUserByFriendlyName(
       mail.author
     );
 
-    if (!guildUser) {
+    if (!actionGuildUser) {
       logger.console.server({
         level: "error",
         message: `PullRequest [${mail.pullRequest.id}] [${mail.author}] not found in channel [GuildUser]`,
@@ -20,21 +20,43 @@ class PullRequestController {
 
     let pr = await prisma.pullRequests.findPullRequestById(mail.pullRequest.id);
 
+    if (!pr && mail.isCreated) {
+      pr = await prisma.pullRequests.createByMail(mail, actionGuildUser.id);
+    }
+
     if (!pr) {
-      pr = await prisma.pullRequests.createByMail(mail, guildUser.id);
+      logger.console.server({
+        level: "error",
+        message: `PullRequest [${mail.pullRequest.id}] not found`,
+      });
+
+      return;
     }
 
     const payloadToUpdatePullRequest: Partial<PullRequest> = {
       lastAction: mail.action,
+      lastActionGuildUserId: actionGuildUser.id,
     };
 
     if (mail.isCompleted || mail.isAbandoned) {
       payloadToUpdatePullRequest.completedAt = new Date();
     }
 
-    await prisma.pullRequests.update(payloadToUpdatePullRequest, pr.id);
+    const updatedPr = await prisma.pullRequests.update(
+      payloadToUpdatePullRequest,
+      pr.id
+    );
 
-    return guildUser;
+    if (!updatedPr) {
+      logger.console.server({
+        level: "error",
+        message: `PullRequest [${mail.pullRequest.id}] not updated`,
+      });
+
+      return;
+    }
+
+    return updatedPr;
   }
 }
 

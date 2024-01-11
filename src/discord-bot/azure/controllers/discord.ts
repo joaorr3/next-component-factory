@@ -7,8 +7,8 @@ import type { Client, MessageCreateOptions, TextChannel } from "discord.js";
 import { roleMention, userMention } from "discord.js";
 import { discordSharedClient } from "../../../shared/discord";
 import logger from "../../../shared/logger";
-import { truncate } from "lodash";
-import type { GuildUser } from "@prisma/client";
+import { pull, truncate } from "lodash";
+import type { GuildUser, PullRequest } from "@prisma/client";
 
 class AzureDiscord {
   private client;
@@ -24,7 +24,7 @@ class AzureDiscord {
     return truncate(threadName, { length: 100, omission: "" });
   }
 
-  async processMail(mail: ParsedMail, ownerGuildUser?: GuildUser) {
+  async processMail(mail: ParsedMail, pullRequest?: PullRequest) {
     try {
       await this.refreshCache();
       this.normalizeTitle(mail);
@@ -38,7 +38,7 @@ class AzureDiscord {
         return await this.closePullRequest(mail);
       }
 
-      return await this.updatePullRequest(mail, ownerGuildUser);
+      return await this.updatePullRequest(mail, pullRequest);
     } catch (error) {
       console.log("azure:discord:error:processMail ", error);
     }
@@ -74,10 +74,7 @@ class AzureDiscord {
     return thread;
   }
 
-  private async updatePullRequest(
-    mail: ParsedMail,
-    ownerGuildUser?: GuildUser
-  ) {
+  private async updatePullRequest(mail: ParsedMail, pullRequest?: PullRequest) {
     let description = mail.pullRequest.title;
 
     if ((mail.isCommented || mail.isCommentReplied) && mail.comment) {
@@ -100,7 +97,7 @@ class AzureDiscord {
       title: mail.action,
       description,
       mail,
-      ownerGuildUser,
+      pullRequest,
     });
 
     const channelName = config.pullRequestChannelName;
@@ -120,7 +117,7 @@ class AzureDiscord {
       thread = await this.createPullRequest(mail);
     }
 
-    await thread?.send(payload);
+    //await thread?.send(payload);
   }
 
   private async closePullRequest(mail: ParsedMail) {
@@ -169,9 +166,10 @@ class AzureDiscord {
     title,
     description,
     mail,
-    ownerGuildUser,
+    pullRequest,
   }: PayloadProps): MessageCreateOptions {
-    const isUpdatedByOwner = ownerGuildUser?.friendlyName === mail.author;
+    const isUpdatedByOwner =
+      pullRequest?.guildUserId === pullRequest?.lastActionGuildUserId;
     const reviewersFields: DiscordPayloadEmbedField[] = [];
 
     if (mail.reviewers) {
@@ -209,14 +207,16 @@ class AzureDiscord {
       ? roleMention(guildDevRole.id)
       : undefined;
 
-    const ownerMention = ownerGuildUser
-      ? roleMention(ownerGuildUser.id)
+    const ownerMention = pullRequest
+      ? userMention(pullRequest.guildUserId)
       : undefined;
 
     const mention = isUpdatedByOwner ? guildDevRoleMention : ownerMention;
 
+    const safeMention = mention ?? guildDevRoleMention; // default mention to dev role
+
     const payload: MessageCreateOptions = {
-      content: mention,
+      content: safeMention,
       embeds: [embedMessage],
     };
 
