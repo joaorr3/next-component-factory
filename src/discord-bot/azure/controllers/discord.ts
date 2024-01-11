@@ -9,6 +9,7 @@ import { discordSharedClient } from "../../../shared/discord";
 import logger from "../../../shared/logger";
 import { pull, truncate } from "lodash";
 import type { GuildUser, PullRequest } from "@prisma/client";
+import { formatRelative } from "date-fns";
 
 class AzureDiscord {
   private client;
@@ -35,7 +36,7 @@ class AzureDiscord {
       }
 
       if (mail.isCompleted || mail.isAbandoned) {
-        return await this.closePullRequest(mail);
+        return await this.closePullRequest(mail, pullRequest);
       }
 
       return await this.updatePullRequest(mail, pullRequest);
@@ -93,6 +94,16 @@ class AzureDiscord {
       description = ":timer: Auto Complete";
     }
 
+    const timeToComplete = pullRequest?.publishedAt
+      ? formatRelative(pullRequest.publishedAt, pullRequest.createdAt)
+      : undefined;
+
+    if (mail.isPublished) {
+      description = `:white_check_mark: ${
+        timeToComplete ? `Published after ${timeToComplete}` : `Published`
+      }`;
+    }
+
     const payload = this.createPayload({
       title: mail.action,
       description,
@@ -120,15 +131,23 @@ class AzureDiscord {
     await thread?.send(payload);
   }
 
-  private async closePullRequest(mail: ParsedMail) {
+  private async closePullRequest(mail: ParsedMail, pullRequest?: PullRequest) {
     let description = mail.pullRequest.title;
 
+    const timeToComplete = pullRequest?.completedAt
+      ? formatRelative(pullRequest.completedAt, pullRequest.createdAt)
+      : undefined;
+
     if (mail.isCompleted) {
-      description = ":white_check_mark: Finished";
+      description = `:white_check_mark: ${
+        timeToComplete ? `Completed after ${timeToComplete}` : `Completed`
+      }`;
     }
 
     if (mail.isAbandoned) {
-      description = ":no_entry_sign: Canceled";
+      description = `:no_entry_sign: ${
+        timeToComplete ? `Canceled after ${timeToComplete}` : `Canceled`
+      }`;
     }
 
     const payload = this.createPayload({

@@ -38,8 +38,19 @@ class PullRequestController {
       lastActionGuildUserId: actionGuildUser.id,
     };
 
-    if (mail.isCompleted || mail.isAbandoned) {
+    if (mail.isPublished) {
+      payloadToUpdatePullRequest.publishedAt = new Date();
+      payloadToUpdatePullRequest.status = "PENDING";
+    }
+
+    if (mail.isCompleted) {
       payloadToUpdatePullRequest.completedAt = new Date();
+      payloadToUpdatePullRequest.status = "COMPLETED";
+    }
+
+    if (mail.isAbandoned) {
+      payloadToUpdatePullRequest.completedAt = new Date();
+      payloadToUpdatePullRequest.status = "CANCELLED";
     }
 
     const updatedPr = await prisma.pullRequests.update(

@@ -176,15 +176,24 @@ model NotionUser {
   GuildUser    GuildUser?
 }
 
+enum PullRequestStatus {
+  DRAFT
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
 model PullRequest {
-  id            Int     @id @default(autoincrement())
-  pullRequestId Int     @unique
-  title         String  @db.Text
-  url           String  @db.Text
-  lastAction    String? @db.Text
+  id            Int               @id @default(autoincrement())
+  pullRequestId Int               @unique
+  status        PullRequestStatus @default(DRAFT)
+  title         String            @db.Text
+  url           String            @db.Text
+  lastAction    String?           @db.Text
 
   createdAt   DateTime  @default(now()) @db.Timestamp(0)
   updatedAt   DateTime  @default(now()) @updatedAt @db.Timestamp(0)
+  publishedAt DateTime? @db.Timestamp(0)
   completedAt DateTime? @db.Timestamp(0)
 
   guildUser   GuildUser @relation("MinePullRequest", fields: [guildUserId], references: [id])

@@ -21,6 +21,7 @@ export type ParsedMailReviewer = {
 export type ParsedMail = {
   action: string;
   author: string;
+  isPublished?: boolean;
   isCompleted?: boolean;
   isCommented?: boolean;
   isCommentReplied?: boolean;

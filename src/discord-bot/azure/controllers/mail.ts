@@ -18,6 +18,7 @@ class AzureMail extends EventEmitter {
   private autoReconnect: boolean;
   private actions = [
     { type: "completed", config: { isCompleted: true } },
+    { type: "published", config: { isPublished: true } },
     { type: "commented", config: { isCommented: true } },
     { type: "replied", config: { isCommentReplied: true } },
     { type: "approved", config: { isApproved: true } },
