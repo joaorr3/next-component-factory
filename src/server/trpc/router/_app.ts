@@ -6,6 +6,7 @@ import { discordRouter } from "./discord";
 import { exampleRouter } from "./example";
 import { faqRouter } from "./faq";
 import { issuesRouter } from "./issues";
+import { pullRequestsRouter } from "./pullRequests";
 import { kudosRouter } from "./kudos";
 import { labsRouter } from "./labs";
 import { mediaRouter } from "./media";
@@ -18,6 +19,7 @@ export const appRouter = router({
   example: exampleRouter,
   auth: authRouter,
   issues: issuesRouter,
+  pullRequests: pullRequestsRouter,
   publicIssues: publicIssuesRouter,
   kudos: kudosRouter,
   discord: discordRouter,

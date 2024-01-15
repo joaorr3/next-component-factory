@@ -2,7 +2,8 @@ import type { GuildUser } from "@prisma/client";
 import produce from "immer";
 import { debounce } from "lodash";
 import React, { type Reducer } from "react";
-import { type FiltersModel } from "../../components/Issue/Filters";
+import { type FiltersModel as IssuesFiltersModel } from "../../components/Issue/Filters";
+import { type FiltersModel as PRFiltersModel } from "../../components/PullRequest/Filters";
 import { localStorageActions } from "../../hooks/useLocalStorage";
 import { useUser } from "../../hooks/useUser";
 import type { Role } from "../../shared/roles";
@@ -18,7 +19,10 @@ export type ContextModel = {
   isLoading: boolean;
   user: UserStateModel;
   issues: {
-    searchFilters: FiltersModel;
+    searchFilters: IssuesFiltersModel;
+  };
+  pullRequests: {
+    searchFilters: PRFiltersModel;
   };
 };
 
@@ -30,6 +34,7 @@ export enum ActionTypes {
   SET_DEFAULT_USER_LAB = "SET_DEFAULT_USER_LAB",
   REMOVE_USER = "REMOVE_USER",
   SET_ISSUE_FILTERS = "SET_ISSUE_FILTERS",
+  SET_PULLREQUEST_FILTERS = "SET_PULLREQUEST_FILTERS",
 }
 
 type InitActionType = {
@@ -67,6 +72,11 @@ type SetIssueFiltersActionType = {
   payload: Partial<ContextModel["issues"]["searchFilters"]>;
 };
 
+type SetPullRequestFiltersActionType = {
+  type: ActionTypes.SET_PULLREQUEST_FILTERS;
+  payload: Partial<ContextModel["pullRequests"]["searchFilters"]>;
+};
+
 type Actions =
   | InitActionType
   | SetThemeNameActionType
@@ -74,7 +84,8 @@ type Actions =
   | SetUserActionType
   | SetDefaultUserLabType
   | RemoveUserActionType
-  | SetIssueFiltersActionType;
+  | SetIssueFiltersActionType
+  | SetPullRequestFiltersActionType;
 
 type ActionHandler<P> = (payload: P, fx?: (payload: P) => void) => void;
 
@@ -89,6 +100,7 @@ export interface ContextHandlers {
     setDefaultUserLab: ActionHandler<SetDefaultUserLabType["payload"]>;
     removeUser: () => void;
     setIssueFilters: ActionHandler<SetIssueFiltersActionType["payload"]>;
+    setPullRequestFilters: ActionHandler<SetPullRequestFiltersActionType["payload"]>;
   };
 }
 
@@ -123,15 +135,16 @@ const GlobalStateProducer = produce<Reducer<ContextModel, Actions>>(
         draft.user.roles = undefined;
         break;
       case ActionTypes.SET_ISSUE_FILTERS:
-        const id = action.payload.id;
-        const title = action.payload.title;
-        const author = action.payload.author;
-        const type = action.payload.type;
-
-        draft.issues.searchFilters.id = id;
-        draft.issues.searchFilters.title = title;
-        draft.issues.searchFilters.author = author;
-        draft.issues.searchFilters.type = type;
+        draft.issues.searchFilters.id = action.payload.id;
+        draft.issues.searchFilters.title = action.payload.title;
+        draft.issues.searchFilters.author = action.payload.author;
+        draft.issues.searchFilters.type = action.payload.type;
+        break;
+      case ActionTypes.SET_PULLREQUEST_FILTERS:
+        draft.pullRequests.searchFilters.id = action.payload.id;
+        draft.pullRequests.searchFilters.title = action.payload.title;
+        draft.pullRequests.searchFilters.author = action.payload.author;
+        draft.pullRequests.searchFilters.status = action.payload.status;
         break;
     }
   }
@@ -150,6 +163,9 @@ const initialState: ContextModel = {
   issues: {
     searchFilters: {},
   },
+  pullRequests: {
+    searchFilters: {},
+  },
 };
 
 export function GlobalStateProvider({
@@ -158,8 +174,10 @@ export function GlobalStateProvider({
 }: DataProviderProps) {
   const [state, dispatch] = React.useReducer(
     GlobalStateProducer,
-    _initialState || initialState
+    initialState
   );
+
+  console.log(state)
 
   const actions = React.useMemo(
     (): ContextHandlers["actions"] => ({
@@ -188,6 +206,10 @@ export function GlobalStateProvider({
       },
       setIssueFilters: (payload, fx) => {
         dispatch({ type: ActionTypes.SET_ISSUE_FILTERS, payload });
+        fx?.(payload);
+      },
+      setPullRequestFilters: (payload, fx) => {
+        dispatch({ type: ActionTypes.SET_PULLREQUEST_FILTERS, payload });
         fx?.(payload);
       },
     }),

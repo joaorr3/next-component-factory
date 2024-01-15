@@ -7,9 +7,13 @@ import type { Client, MessageCreateOptions, TextChannel } from "discord.js";
 import { roleMention, userMention } from "discord.js";
 import { discordSharedClient } from "../../../shared/discord";
 import logger from "../../../shared/logger";
-import { pull, truncate } from "lodash";
-import type { GuildUser, PullRequest } from "@prisma/client";
-import { formatRelative } from "date-fns";
+import { truncate } from "lodash";
+import type { PullRequest } from "@prisma/client";
+
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+
+dayjs.extend(relativeTime);
 
 class AzureDiscord {
   private client;
@@ -95,7 +99,7 @@ class AzureDiscord {
     }
 
     const timeToComplete = pullRequest?.publishedAt
-      ? formatRelative(pullRequest.publishedAt, pullRequest.createdAt)
+      ? dayjs(pullRequest.createdAt).to(dayjs(pullRequest.publishedAt))
       : undefined;
 
     if (mail.isPublished) {

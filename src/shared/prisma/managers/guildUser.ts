@@ -7,6 +7,26 @@ export class GuildUserManager {
     this.client = _client;
   }
 
+  async listCFGuildUsers() {
+    try {
+      const guildUsers = await this.client.guildUser.findMany({
+        select: {
+          id: true,
+          friendlyName: true,
+        },
+        where: {
+          roles: {
+            contains: "CF",
+          },
+        },
+      });
+
+      return guildUsers;
+    } catch (error) {
+      console.log("prisma:error:listGuildUsers: ", error);
+    }
+  }
+
   async upsertGuildUser(data: GuildUser) {
     try {
       const guildUser = await this.client.guildUser.upsert({
