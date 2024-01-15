@@ -97,7 +97,7 @@ export const PRFiltersComponent = ({
           placeholder="Type"
           selected={statusFieldController.field.value}
           onSelect={(status) => statusFieldController.field.onChange(status.id)}
-          options={[undefined, "DRAFT", "PENDING", "PUBLISHED", "COMPLETED"].map(status => ({ id: status, value: status ?? 'Todos'}))}
+          options={[undefined, "DRAFT", "PENDING", "COMPLETED", "CANCELLED"].map(status => ({ id: status, value: status ?? 'Todos'}))}
           control={control}
         />
       </div>

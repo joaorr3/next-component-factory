@@ -87,6 +87,7 @@ export default function PullRequests({authors}: {authors: PRAuthorFilter[]}) {
 
   const convertDurationToHumanReadable = (duration: duration.Duration) => {
     const units = [
+        { label: 'Mês', value: duration.months() },
         { label: 'Dia', value: duration.days() },
         { label: 'Hora', value: duration.hours() },
         { label: 'Minuto', value: duration.minutes() }

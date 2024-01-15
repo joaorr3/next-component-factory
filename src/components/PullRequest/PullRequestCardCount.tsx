@@ -15,7 +15,7 @@ export const PullRequestCardInfo: React.FC<{
     )}
   >
 
-    <p className="text-2xl font-bold mb-5">
+    <p className="text-xl font-bold mb-5">
       {info}
     </p>
     <p className=" text-xl font-semibold text-neutral-600 capitalize">{label.toLowerCase()}</p>
