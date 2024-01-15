@@ -174,10 +174,8 @@ export function GlobalStateProvider({
 }: DataProviderProps) {
   const [state, dispatch] = React.useReducer(
     GlobalStateProducer,
-    initialState
+    _initialState ?? initialState 
   );
-
-  console.log(state)
 
   const actions = React.useMemo(
     (): ContextHandlers["actions"] => ({
