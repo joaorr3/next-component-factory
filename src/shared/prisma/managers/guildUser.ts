@@ -16,7 +16,7 @@ export class GuildUserManager {
         },
         where: {
           roles: {
-            contains: "CF",
+            contains: "DEV-CF",
           },
         },
       });

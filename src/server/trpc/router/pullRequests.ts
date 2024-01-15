@@ -23,7 +23,7 @@ export const pullRequestsRouter = router({
         title: {
           contains: title,
         },
-        guildUserId: author, //JOAO - preciso mostrar o nome do autor mas selecionar o ID la no form
+        guildUserId: author,
         status: status,
       };
 

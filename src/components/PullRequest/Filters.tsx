@@ -54,6 +54,11 @@ export const PRFiltersComponent = ({
     control,
   });
 
+  const getUserNameById = (userId?:string) => {
+    if(!userId) return 'Todos'
+    return authors.find(author => author.id.toString() === userId)?.friendlyName ?? 'Todos'
+  }
+
   return (
     <div>
       <p className="ml-3 mb-3">Search</p>
@@ -80,7 +85,7 @@ export const PRFiltersComponent = ({
           className="mr-4"
           fieldName="author"
           placeholder="PR Author"
-          selected={authorFieldController.field.value}
+          selected={getUserNameById(getValues('author'))}
           onSelect={(author) => authorFieldController.field.onChange(author.id)}
           options={[undefined, ...authors].map(author => ({ id: author?.id?.toString(), value: author?.friendlyName ?? 'Todos'}))}
           control={control}
