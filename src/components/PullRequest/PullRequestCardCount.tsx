@@ -4,8 +4,9 @@ import { cn } from "../../styles/utils";
 export const PullRequestCardInfo: React.FC<{
   className?: string;
   label: string
+  description?: string
   info: string | number
-}> = ({ className, label = '', info = '' }) => {
+}> = ({ className, description, label = '', info = '' }) => {
   return (
     <div
     className={cn(
@@ -18,6 +19,7 @@ export const PullRequestCardInfo: React.FC<{
       {info}
     </p>
     <p className=" text-xl font-semibold text-neutral-600 capitalize">{label.toLowerCase()}</p>
+    {description && (<p className=" text-sm font-semibold text-neutral-600 capitalize">{description}</p>)}
 
   </div>
   );

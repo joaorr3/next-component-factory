@@ -97,7 +97,6 @@ export default function PullRequests({authors}: {authors: PRAuthorFilter[]}) {
         .map(unit => `${unit.value} ${unit.label}${unit.value !== 1 ? 's' : ''}`)
         .join(', ');
 
-        console.log({formattedUnits})
     return formattedUnits || 'Sem dados';
 };
 
@@ -129,9 +128,9 @@ export default function PullRequests({authors}: {authors: PRAuthorFilter[]}) {
       </div>
 
       <div className={`grid gap-5 grid-cols-3`}>
-        <PullRequestCardInfo label="Publicação" info={convertDurationToHumanReadable(durationToPublish)} />
-        <PullRequestCardInfo label="Merge após publicação" info={convertDurationToHumanReadable(durationToCompleteAfterPublish)} />
-        <PullRequestCardInfo label="Fluxo Completo" info={convertDurationToHumanReadable(durationTotal)} />
+        <PullRequestCardInfo description="Tempo Médio" label="Publicação" info={convertDurationToHumanReadable(durationToPublish)} />
+        <PullRequestCardInfo description="Tempo Médio" label="Merge após publicação" info={convertDurationToHumanReadable(durationToCompleteAfterPublish)} />
+        <PullRequestCardInfo description="Tempo Médio" label="Fluxo Completo" info={convertDurationToHumanReadable(durationTotal)} />
       </div>
       
 

@@ -29,6 +29,7 @@ export const pullRequestsRouter = router({
 
       const grouped = await ctx.prisma.pullRequest.groupBy({
         by: ["status"],
+        where: filter,
         _count: {
           id: true,
         },
