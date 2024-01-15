@@ -91,7 +91,7 @@ export type BaseFieldProps = {
 };
 
 export type FieldWrapProps = React.PropsWithChildren<
-  Pick<BaseFieldProps, "label" | "description" | "error" | "required">
+  Pick<BaseFieldProps, "label" | "description" | "error" | "required" | "className">
 >;
 
 export const Description = ({
@@ -136,9 +136,10 @@ export const BaseField = ({
   error,
   required,
   children,
+  className
 }: FieldWrapProps): JSX.Element => {
   return (
-    <div className="mb-3 flex-1">
+    <div className={cn(className, "mb-3 flex-1")}>
       {label && <p className="m-3 mb-5">{`${label} ${required ? "*" : ""}`}</p>}
       {children}
       <Description description={description} />
@@ -303,6 +304,7 @@ export const Select = <S extends object>({
   placeholder,
   control,
   toggleable,
+  className
 }: SelectProps<S>): JSX.Element => {
   const { field } = useController({
     name: fieldName,
@@ -326,6 +328,7 @@ export const Select = <S extends object>({
       label={label}
       description={description}
       error={error}
+      className={className}
     >
       <SelectMenu
         selectedValue={field.value}
@@ -336,7 +339,7 @@ export const Select = <S extends object>({
           <div
             className={cn(
               baseField,
-              "relative flex cursor-pointer items-center",
+              "relative flex cursor-pointer items-center mr-10",
               isOpen
                 ? "outline outline-neutral-600 dark:outline-neutral-400"
                 : ""
