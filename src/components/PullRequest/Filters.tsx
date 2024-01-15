@@ -80,8 +80,9 @@ export const PRFiltersComponent = ({
           className="mr-4"
           fieldName="author"
           placeholder="PR Author"
+          selected={authorFieldController.field.value}
           onSelect={(author) => authorFieldController.field.onChange(author.id)}
-          options={[undefined, ...authors].map(author => ({ id: author?.id, value: author?.friendlyName ?? 'Todos'}))}
+          options={[undefined, ...authors].map(author => ({ id: author?.id?.toString(), value: author?.friendlyName ?? 'Todos'}))}
           control={control}
         />
 
@@ -89,6 +90,7 @@ export const PRFiltersComponent = ({
           toggleable
           fieldName="status"
           placeholder="Type"
+          selected={statusFieldController.field.value}
           onSelect={(status) => statusFieldController.field.onChange(status.id)}
           options={[undefined, "DRAFT", "PENDING", "PUBLISHED", "COMPLETED"].map(status => ({ id: status, value: status ?? 'Todos'}))}
           control={control}

@@ -263,7 +263,7 @@ type SelectProps<S extends object> = Omit<BaseFieldProps, "register"> & {
   toggleable?: boolean;
 };
 
-type StructuredSelectOption = { id: string; value: string };
+type StructuredSelectOption = { id: string | undefined; value: string };
 
 type StructuredSelectProps<S extends object> = Omit<
   BaseFieldProps,
