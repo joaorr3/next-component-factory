@@ -368,6 +368,7 @@ export const StructuredSelect = <S extends object>({
   required,
   placeholder,
   onSelect,
+  className
 }: StructuredSelectProps<S>): JSX.Element => {
   const handleOnChange = React.useCallback(
     (value: string, index: number) => {
@@ -383,6 +384,7 @@ export const StructuredSelect = <S extends object>({
       label={label}
       description={description}
       error={error}
+      className={className}
     >
       <SelectMenu
         selectedValue={selected}

@@ -1,6 +1,6 @@
 import { debounce } from "lodash";
 import React from "react";
-import { useForm } from "react-hook-form";
+import { useController, useForm } from "react-hook-form";
 import * as Fields from "../Form/Fields";
 import type { PullRequestStatus } from "@prisma/client";
 
@@ -44,6 +44,16 @@ export const PRFiltersComponent = ({
     return () => subscription.unsubscribe();
   }, [onChange, watch]);
 
+  const authorFieldController = useController({
+    name: 'author',
+    control,
+  });
+
+  const statusFieldController = useController({
+    name: 'status',
+    control,
+  });
+
   return (
     <div>
       <p className="ml-3 mb-3">Search</p>
@@ -65,20 +75,22 @@ export const PRFiltersComponent = ({
           onChange={(e) => handleSetValue("title", e.target.value)}
         />
 
-        <Fields.Select
+        <Fields.StructuredSelect
           toggleable
           className="mr-4"
           fieldName="author"
           placeholder="PR Author"
-          options={authors?.map(author => author.friendlyName)}
+          onSelect={(author) => authorFieldController.field.onChange(author.id)}
+          options={[undefined, ...authors].map(author => ({ id: author?.id, value: author?.friendlyName ?? 'Todos'}))}
           control={control}
         />
 
-        <Fields.Select
+        <Fields.StructuredSelect
           toggleable
           fieldName="status"
           placeholder="Type"
-          options={["DRAFT", "PENDING", "PUBLISHED", "COMPLETED"]}
+          onSelect={(status) => statusFieldController.field.onChange(status.id)}
+          options={[undefined, "DRAFT", "PENDING", "PUBLISHED", "COMPLETED"].map(status => ({ id: status, value: status ?? 'Todos'}))}
           control={control}
         />
       </div>

@@ -41,7 +41,8 @@ export default function PullRequests({authors}: {authors: PRAuthorFilter[]}) {
 
   const handleFilters = React.useCallback(
     (values: FiltersModel) => {
-      actions.setIssueFilters(values);
+      console.log(values)
+      actions.setPullRequestFilters(values);
     },
     [actions]
   );
