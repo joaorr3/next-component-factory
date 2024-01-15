@@ -76,8 +76,13 @@ export default function PullRequests({authors}: {authors: PRAuthorFilter[]}) {
   const meanTimeToPublishInSeconds = sumTimeToPublishInSeconds / meanCounts.published
   const meanTimeToCompleteAfterPublishInSeconds = sumTimeToCompleteAfterPublishInSeconds / meanCounts.completed
 
-  const durationToPublish = dayjs.duration(isNaN(meanTimeToPublishInSeconds) ? 0 : meanTimeToPublishInSeconds, 'seconds')
-  const durationToCompleteAfterPublish = dayjs.duration(isNaN(meanTimeToCompleteAfterPublishInSeconds) ? 0 : meanTimeToCompleteAfterPublishInSeconds, 'seconds')
+  const normalizedMeanTimeToPublishInSeconds = isNaN(meanTimeToPublishInSeconds) ? 0 : meanTimeToPublishInSeconds
+  const normalizedMeanTimeToCompleteAfterPublishInSeconds = isNaN(meanTimeToCompleteAfterPublishInSeconds) ? 0 : meanTimeToCompleteAfterPublishInSeconds
+  const normalizedTotalMeanTimeInSeconds = normalizedMeanTimeToPublishInSeconds + normalizedMeanTimeToCompleteAfterPublishInSeconds
+
+  const durationToPublish = dayjs.duration(normalizedMeanTimeToPublishInSeconds, 'seconds')
+  const durationToCompleteAfterPublish = dayjs.duration(normalizedMeanTimeToCompleteAfterPublishInSeconds, 'seconds')
+  const durationTotal = dayjs.duration(normalizedTotalMeanTimeInSeconds, 'seconds')
 
   const convertDurationToHumanReadable = (duration: duration.Duration) => {
     const units = [
@@ -121,10 +126,13 @@ export default function PullRequests({authors}: {authors: PRAuthorFilter[]}) {
         })}
       </div>
 
-      <div className={`grid gap-5 grid-cols-2`}>
-        <PullRequestCardInfo label="Publicação" info={convertDurationToHumanReadable(durationToPublish)} />
-        <PullRequestCardInfo label="Merge após publicação" info={convertDurationToHumanReadable(durationToCompleteAfterPublish)} />
-      </div>
+      {convertDurationToHumanReadable(durationToPublish) && (
+        <div className={`grid gap-5 grid-cols-3`}>
+          <PullRequestCardInfo label="Publicação" info={convertDurationToHumanReadable(durationToPublish)} />
+          <PullRequestCardInfo label="Merge após publicação" info={convertDurationToHumanReadable(durationToCompleteAfterPublish)} />
+          <PullRequestCardInfo label="Fluxo Completo" info={convertDurationToHumanReadable(durationTotal)} />
+        </div>
+      )}
       
 
       {prs.data?.list.map( pr => {
