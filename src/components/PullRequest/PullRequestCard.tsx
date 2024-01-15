@@ -1,8 +1,24 @@
-import type { PullRequest} from "@prisma/client";
 import Link from "next/link";
 import React from "react";
 import { ListItem } from "../ListItem";
 import { Tag } from "../Tag";
+import type { GuildUser, PullRequestStatus } from "@prisma/client";
+
+type PullRequest = {
+  id: number
+  pullRequestId: number
+  status: PullRequestStatus
+  title: string
+  url: string
+  lastAction: string | null
+  createdAt: Date
+  updatedAt: Date
+  publishedAt: Date | null
+  completedAt: Date | null
+  guildUserId: string
+  guildUser: GuildUser
+  lastActionGuildUserId: string
+}
 
 export const PullRequestCard: React.FC<{
   className?: string;

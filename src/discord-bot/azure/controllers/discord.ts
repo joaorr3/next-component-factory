@@ -104,7 +104,7 @@ class AzureDiscord {
 
     if (mail.isPublished) {
       description = `:white_check_mark: ${
-        timeToComplete ? `Published after ${timeToComplete}` : `Published`
+        timeToComplete ? `Published ${timeToComplete}` : `Published`
       }`;
     }
 
@@ -139,18 +139,18 @@ class AzureDiscord {
     let description = mail.pullRequest.title;
 
     const timeToComplete = pullRequest?.completedAt
-      ? formatRelative(pullRequest.completedAt, pullRequest.createdAt)
+      ? dayjs(pullRequest.createdAt).to(dayjs(pullRequest.completedAt))
       : undefined;
 
     if (mail.isCompleted) {
       description = `:white_check_mark: ${
-        timeToComplete ? `Completed after ${timeToComplete}` : `Completed`
+        timeToComplete ? `Completed ${timeToComplete}` : `Completed`
       }`;
     }
 
     if (mail.isAbandoned) {
       description = `:no_entry_sign: ${
-        timeToComplete ? `Canceled after ${timeToComplete}` : `Canceled`
+        timeToComplete ? `Canceled ${timeToComplete}` : `Canceled`
       }`;
     }
 
