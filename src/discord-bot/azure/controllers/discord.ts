@@ -99,7 +99,7 @@ class AzureDiscord {
     }
 
     const timeToComplete = pullRequest?.publishedAt
-      ? dayjs(pullRequest.createdAt).to(dayjs(pullRequest.publishedAt))
+      ? dayjs(pullRequest.publishedAt).to(dayjs(pullRequest.createdAt))
       : undefined;
 
     if (mail.isPublished) {
@@ -139,7 +139,7 @@ class AzureDiscord {
     let description = mail.pullRequest.title;
 
     const timeToComplete = pullRequest?.completedAt
-      ? dayjs(pullRequest.createdAt).to(dayjs(pullRequest.completedAt))
+      ? dayjs(pullRequest.completedAt).to(dayjs(pullRequest.createdAt))
       : undefined;
 
     if (mail.isCompleted) {
