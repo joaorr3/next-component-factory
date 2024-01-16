@@ -289,10 +289,12 @@ export const IssueForm = ({
               }
               disabled={formState.isSubmitting || !labUsers}
               onSelect={(option) => {
-                setValue("author", {
-                  id: option.id,
-                  name: option.value,
-                });
+                if(option.id){
+                  setValue("author", {
+                    id: option.id,
+                    name: option.value,
+                  });
+                }
               }}
               error={getFieldState("author").error}
               control={control}
