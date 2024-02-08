@@ -337,7 +337,7 @@ export const commandReactions = async ({
     },
     issue_legacy: async () => await issueCommand({ interaction }),
     roles: async () => {
-      const { options, user, channel } = interaction;
+      const { options, user } = interaction;
       const action = options.getString("action") as RoleAction;
       const guildUser = discord.member(user.id);
       const role = options.getRole("role") as Discord.Role;
@@ -394,6 +394,14 @@ export const commandReactions = async ({
               userId: user.id,
             });
 
+            await discord.sendMessage("manageRoles", {
+              content: `Hey, ${roleMention(
+                guildAdminRole?.id ?? ""
+              )}, ${userMention(user.id)} auto assigned the role ${roleMention(
+                role.id
+              )}.`,
+            });
+
             logger.db.discord({
               level: "info",
               message: `Assigned ${role.name} to ${guildUser.displayName}`,
@@ -436,7 +444,7 @@ export const commandReactions = async ({
             ephemeral: true,
           });
 
-          await channel?.send({
+          await discord.sendMessage("manageRoles", {
             content: `Hey, ${roleMention(
               guildAdminRole?.id ?? ""
             )}, ${userMention(user.id)} is asking for the role ${roleMention(

@@ -25,6 +25,8 @@ export const channelNames = {
   debugBotLogs: "debug-bot-logs",
   webhookLogs: "webhook-logs",
   roles: "roles",
+  introductions: "introductions",
+  manageRoles: "manage-roles",
 } as const;
 
 // type ChanelNamesModel = typeof channelNames;
