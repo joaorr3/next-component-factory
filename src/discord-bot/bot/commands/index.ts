@@ -439,11 +439,6 @@ export const commandReactions = async ({
               .join("\n"),
           ];
 
-          await interaction.reply({
-            content: info.join("\n"),
-            ephemeral: true,
-          });
-
           await discord.sendMessage("manageRoles", {
             content: `Hey, ${roleMention(
               guildAdminRole?.id ?? ""
@@ -451,12 +446,18 @@ export const commandReactions = async ({
               role.id
             )}.`,
           });
+
+          await interaction.reply({
+            content: info.join("\n"),
+            ephemeral: true,
+          });
         }
       } catch (error) {
         await interaction.reply({
           content: `Sorry, something went wrong with me. Try again later.. 😔`,
           ephemeral: true,
         });
+
         logger.db.discord({
           level: "error",
           message: `roles: ${error}`,

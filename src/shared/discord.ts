@@ -260,6 +260,7 @@ export class DiscordClient {
     name: keyof typeof this.channelNames | (string & {}),
     message: Discord.BaseMessageOptions
   ) {
+    await this.client.guilds.fetch();
     const channel = this.channel(name);
     if (!channel) return;
 
