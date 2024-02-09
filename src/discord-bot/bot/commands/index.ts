@@ -837,9 +837,9 @@ export const commandReactions = async ({
     announce: async () => {
       const { user, options, channel } = interaction;
 
-      const userHasDevRole = discord.hasRole(user.id, "dev");
+      const userIsMod = discord.hasRole(user.id, "mods");
 
-      if (userHasDevRole) {
+      if (userIsMod) {
         const title = options.getString(Announce.title, true);
         const description =
           options.getString(Announce.announcement) || undefined;
