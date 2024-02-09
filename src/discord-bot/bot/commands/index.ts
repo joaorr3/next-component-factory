@@ -341,7 +341,7 @@ export const commandReactions = async ({
       const action = options.getString("action") as RoleAction;
       const guildUser = discord.member(user.id);
       const role = options.getRole("role") as Discord.Role;
-      const guildAdminRole = discord.role("admin");
+      const guildModsRole = discord.role("mods");
 
       try {
         if (action === RoleAction.list) {
@@ -396,7 +396,7 @@ export const commandReactions = async ({
 
             await discord.sendMessage("manageRoles", {
               content: `Hey, ${roleMention(
-                guildAdminRole?.id ?? ""
+                guildModsRole?.id ?? ""
               )}, ${userMention(user.id)} auto assigned the role ${roleMention(
                 role.id
               )}.`,
@@ -431,7 +431,7 @@ export const commandReactions = async ({
           const rolesName = autoAssignableRoles.map(({ name }) => name);
 
           const info = [
-            `Sorry, i'm not allowed to assign the role ${role?.name} to you. Don't worry, i'll notify an admin.\n`,
+            `Sorry, i'm not allowed to assign the role ${role?.name} to you. Don't worry, i'll notify a moderator.\n`,
             "Here's a list of the roles you can assign to yourself with the **/roles** command.\n",
             rolesName
               .map((r) => `• ${r}`)
@@ -441,7 +441,7 @@ export const commandReactions = async ({
 
           await discord.sendMessage("manageRoles", {
             content: `Hey, ${roleMention(
-              guildAdminRole?.id ?? ""
+              guildModsRole?.id ?? ""
             )}, ${userMention(user.id)} is asking for the role ${roleMention(
               role.id
             )}.`,
