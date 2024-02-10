@@ -6,6 +6,7 @@ import {
   LabsManager,
   RolesManager,
   FaqManager,
+  PullRequestsManager,
 } from "./managers";
 
 class Prisma {
@@ -17,6 +18,7 @@ class Prisma {
   public labs: LabsManager;
   public roles: RolesManager;
   public faq: FaqManager;
+  public pullRequests: PullRequestsManager;
 
   private static _instance: Prisma = new Prisma();
 
@@ -29,6 +31,7 @@ class Prisma {
     this.labs = new LabsManager(this.client);
     this.roles = new RolesManager(this.client);
     this.faq = new FaqManager(this.client);
+    this.pullRequests = new PullRequestsManager(this.client);
   }
 
   public static get Instance(): Prisma {

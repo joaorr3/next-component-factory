@@ -66,6 +66,9 @@ const MyApp: AppType<{
               issues: {
                 searchFilters: {},
               },
+              pullRequests: {
+                searchFilters: {}
+              }
             }}
           >
             <ThemeProvider>

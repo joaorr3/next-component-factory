@@ -1,13 +1,19 @@
-import type { ParsedMail } from './mail';
+import type { PullRequest } from "@prisma/client";
+import type { ParsedMail } from "./mail";
 
 export type PayloadProps = {
-  title: string; 
+  title: string;
   description: string;
-  mail: ParsedMail
-}
-export type DiscordPayloadEmbedAuthor =  { name: string; };
-export type DiscordPayloadEmbedField =  { name: string; value: string, inline?: boolean };
-export type DiscordPayloadEmbedFooter =  { text: string; icon_url: string };
+  mail: ParsedMail;
+  pullRequest?: PullRequest;
+};
+export type DiscordPayloadEmbedAuthor = { name: string };
+export type DiscordPayloadEmbedField = {
+  name: string;
+  value: string;
+  inline?: boolean;
+};
+export type DiscordPayloadEmbedFooter = { text: string; icon_url: string };
 
 export type DiscordPayloadEmbed = {
   author: DiscordPayloadEmbedAuthor;
@@ -19,8 +25,8 @@ export type DiscordPayloadEmbed = {
   fields: DiscordPayloadEmbedField[];
   timestamp: string;
   footer: DiscordPayloadEmbedFooter;
-}
+};
 
 export type DiscordPayload = {
   embeds: DiscordPayloadEmbed[];
-}
+};

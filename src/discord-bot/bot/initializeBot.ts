@@ -12,14 +12,31 @@ import { guildRolesHandler } from "./events/guildRoles";
 import { BotLog } from "./utils";
 import AzureDiscord from "../azure/controllers/discord";
 import AzureMail from "../azure/controllers/mail";
+import PullRequestController from "../azure/controllers/pullRequests";
 
 export const initializeBot = () => {
   discord.client?.once(Discord.Events.ClientReady, async () => {
     logger.console.discord({ level: "info", message: "Ready" });
 
-    const azureDiscord = new AzureDiscord(discord.client)
-    const azureMail = new AzureMail({ autoReconnect: true })
-    azureMail.on("mail", (mail) => azureDiscord.processMail(mail))
+    const azureDiscord = new AzureDiscord(discord.client);
+    const azureMail = new AzureMail({ autoReconnect: true });
+
+    azureMail.on("error", async (error) => {
+      BotLog.log(() => {
+        return {
+          embeds: [
+            discord.embed({
+              title: `[AzureMail] Error: ${error.message}`,
+            }),
+          ],
+        };
+      });
+    });
+
+    azureMail.on("mail", async (mail) => {
+      const updatedPr = await PullRequestController.processMail(mail);
+      await azureDiscord.processMail(mail, updatedPr);
+    });
 
     BotLog.log(() => {
       return {

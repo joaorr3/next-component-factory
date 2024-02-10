@@ -162,10 +162,11 @@ model GuildUser {
   DefaultLab   Lab?    @relation(fields: [defaultLabId], references: [id])
   defaultLabId String?
 
-  notionUser   NotionUser?    @relation(fields: [notionUserId], references: [id])
-  PullRequest  PullRequest[]
-  User         User?
-  LabGuildUser LabGuildUser[]
+  notionUser            NotionUser?    @relation(fields: [notionUserId], references: [id])
+  pullRequest           PullRequest[]  @relation("MinePullRequest")
+  lastActionPullRequest PullRequest[]  @relation("ActionPullRequest")
+  User                  User?
+  LabGuildUser          LabGuildUser[]
 }
 
 model NotionUser {
@@ -175,12 +176,31 @@ model NotionUser {
   GuildUser    GuildUser?
 }
 
+enum PullRequestStatus {
+  DRAFT
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
 model PullRequest {
-  id               Int       @id @default(autoincrement())
-  pullRequestId    String    @unique
-  webhookMessageId String    @unique
-  guildUser        GuildUser @relation(fields: [guildUserId], references: [id])
-  guildUserId      String
+  id            Int               @id @default(autoincrement())
+  pullRequestId Int               @unique
+  status        PullRequestStatus @default(DRAFT)
+  title         String            @db.Text
+  url           String            @db.Text
+  lastAction    String?           @db.Text
+
+  createdAt   DateTime  @default(now()) @db.Timestamp(0)
+  updatedAt   DateTime  @default(now()) @updatedAt @db.Timestamp(0)
+  publishedAt DateTime? @db.Timestamp(0)
+  completedAt DateTime? @db.Timestamp(0)
+
+  guildUser   GuildUser @relation("MinePullRequest", fields: [guildUserId], references: [id])
+  guildUserId String
+
+  lastActionGuildUser   GuildUser @relation("ActionPullRequest", fields: [lastActionGuildUserId], references: [id])
+  lastActionGuildUserId String
 
   @@index([guildUserId])
 }

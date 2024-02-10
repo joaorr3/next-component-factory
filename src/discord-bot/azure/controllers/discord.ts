@@ -4,10 +4,16 @@ import type { DiscordPayloadEmbedField, PayloadProps } from "../types/discord";
 import config from "../config/discord";
 
 import type { Client, MessageCreateOptions, TextChannel } from "discord.js";
-import { roleMention } from "discord.js";
+import { roleMention, userMention } from "discord.js";
 import { discordSharedClient } from "../../../shared/discord";
 import logger from "../../../shared/logger";
 import { truncate } from "lodash";
+import type { PullRequest } from "@prisma/client";
+
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+
+dayjs.extend(relativeTime);
 
 class AzureDiscord {
   private client;
@@ -23,7 +29,7 @@ class AzureDiscord {
     return truncate(threadName, { length: 100, omission: "" });
   }
 
-  async processMail(mail: ParsedMail) {
+  async processMail(mail: ParsedMail, pullRequest?: PullRequest) {
     try {
       await this.refreshCache();
       this.normalizeTitle(mail);
@@ -34,10 +40,10 @@ class AzureDiscord {
       }
 
       if (mail.isCompleted || mail.isAbandoned) {
-        return await this.closePullRequest(mail);
+        return await this.closePullRequest(mail, pullRequest);
       }
 
-      return await this.updatePullRequest(mail);
+      return await this.updatePullRequest(mail, pullRequest);
     } catch (error) {
       console.log("azure:discord:error:processMail ", error);
     }
@@ -73,7 +79,7 @@ class AzureDiscord {
     return thread;
   }
 
-  private async updatePullRequest(mail: ParsedMail) {
+  private async updatePullRequest(mail: ParsedMail, pullRequest?: PullRequest) {
     let description = mail.pullRequest.title;
 
     if ((mail.isCommented || mail.isCommentReplied) && mail.comment) {
@@ -92,10 +98,21 @@ class AzureDiscord {
       description = ":timer: Auto Complete";
     }
 
+    const timeToComplete = pullRequest?.publishedAt
+      ? dayjs(pullRequest.publishedAt).to(dayjs(pullRequest.createdAt))
+      : undefined;
+
+    if (mail.isPublished) {
+      description = `:white_check_mark: ${
+        timeToComplete ? `Published ${timeToComplete}` : `Published`
+      }`;
+    }
+
     const payload = this.createPayload({
       title: mail.action,
       description,
       mail,
+      pullRequest,
     });
 
     const channelName = config.pullRequestChannelName;
@@ -118,15 +135,23 @@ class AzureDiscord {
     await thread?.send(payload);
   }
 
-  private async closePullRequest(mail: ParsedMail) {
+  private async closePullRequest(mail: ParsedMail, pullRequest?: PullRequest) {
     let description = mail.pullRequest.title;
 
+    const timeToComplete = pullRequest?.completedAt
+      ? dayjs(pullRequest.completedAt).to(dayjs(pullRequest.createdAt))
+      : undefined;
+
     if (mail.isCompleted) {
-      description = ":white_check_mark: Finished";
+      description = `:white_check_mark: ${
+        timeToComplete ? `Completed ${timeToComplete}` : `Completed`
+      }`;
     }
 
     if (mail.isAbandoned) {
-      description = ":no_entry_sign: Canceled";
+      description = `:no_entry_sign: ${
+        timeToComplete ? `Canceled ${timeToComplete}` : `Canceled`
+      }`;
     }
 
     const payload = this.createPayload({
@@ -164,7 +189,10 @@ class AzureDiscord {
     title,
     description,
     mail,
+    pullRequest,
   }: PayloadProps): MessageCreateOptions {
+    const isUpdatedByOwner =
+      pullRequest?.guildUserId === pullRequest?.lastActionGuildUserId;
     const reviewersFields: DiscordPayloadEmbedField[] = [];
 
     if (mail.reviewers) {
@@ -198,8 +226,20 @@ class AzureDiscord {
 
     const guildDevRole = discordSharedClient.role("dev");
 
+    const guildDevRoleMention = guildDevRole
+      ? roleMention(guildDevRole.id)
+      : undefined;
+
+    const ownerMention = pullRequest
+      ? userMention(pullRequest.guildUserId)
+      : undefined;
+
+    const mention = isUpdatedByOwner ? guildDevRoleMention : ownerMention;
+
+    const safeMention = mention ?? guildDevRoleMention; // default mention to dev role
+
     const payload: MessageCreateOptions = {
-      content: guildDevRole ? roleMention(guildDevRole.id) : undefined,
+      content: safeMention,
       embeds: [embedMessage],
     };
 

@@ -1,4 +1,5 @@
 import dayjs from "dayjs";
+import relativeTime from 'dayjs/plugin/relativeTime'
 import Image from "next/image";
 import React from "react";
 import { derive } from "../shared/utils";
@@ -9,6 +10,8 @@ import { ContextMenu } from "./ContextMenu";
 import type { MediaPreviewProps } from "./MediaPreview";
 import { MediaPreview } from "./MediaPreview";
 
+dayjs.extend(relativeTime)
+
 export const ListItem: React.FC<{
   className?: string;
   headerLabel?: string | null;
@@ -16,6 +19,7 @@ export const ListItem: React.FC<{
   startImageUrl?: string | null;
   titleSuffixElement?: JSX.Element;
   footer?: Date | null;
+  footerRelative?: boolean;
   author?: string | null;
   scaleUp?: boolean;
   cursorPointer?: boolean;
@@ -31,6 +35,7 @@ export const ListItem: React.FC<{
   scaleUp = true,
   cursorPointer = true,
   onPress,
+  footerRelative,
 }) => {
   return (
     <div
@@ -70,7 +75,8 @@ export const ListItem: React.FC<{
 
       {footer && (
         <p className="mt-4 text-xs font-light">
-          {dayjs(footer).format("DD/MM/YYYY")}
+          {!footerRelative && dayjs(footer).format("DD/MM/YYYY")}
+          {footerRelative && dayjs().to(dayjs(footer))}
         </p>
       )}
       {author && <p className="text-xs font-bold">{author}</p>}
