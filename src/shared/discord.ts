@@ -33,6 +33,7 @@ export const channelNames = {
 
 const roleNames = {
   admin: "Admin",
+  mods: "mods",
   cf: "CF 🏭",
   projectManager: "Project Manager 📁",
   dev: "DEV-CF 👨‍💻",
