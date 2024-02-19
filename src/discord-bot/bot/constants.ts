@@ -201,8 +201,9 @@ export const helpConstants = {
   name: "help",
   blockedTagId: "1205501062258364476",
   message:
-    "Read with attention to guidelines, this topic is incomplete or incorrect.",
+    "Please, review your message and make sure it follows our Post Guidelines and try again.",
   severityOptions: ["minor", "major", "critical"],
+  titleValidation: /^\[([^\]]+)\]\s*-\s*([^]+)$/,
   requiredSections: {
     description: /Description:\s+(.*)/,
     steps: /Steps to Reproduce:\s*((?:\s*\d+\:\s+.+)+)/m,

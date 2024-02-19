@@ -1,12 +1,22 @@
-import type Discord from "discord.js";
-import { helpConstants } from "../constants";
+import Discord from "discord.js";
 import { startCase } from "lodash";
+import logger from "../../../shared/logger";
+import { helpConstants } from "../constants";
 
-type ValidationMessage = { errors: string[]; explains: string[] };
+type ValidationMessage = { errors: string[]; explanation: string[] };
 
-const validateMessage = (message: string): ValidationMessage => {
+const validateMessage = (title: string, message = ""): ValidationMessage => {
   const errors: string[] = [];
-  const explains: string[] = [];
+  const explanation: string[] = [];
+
+  // Validate title
+  const titleMatch = title.match(helpConstants.titleValidation);
+
+  if (!titleMatch) {
+    errors.push(
+      "Title is invalid. Should be *[ComponentName] - Short description*"
+    );
+  }
 
   // Check for missing required sections
   for (const section of Object.keys(helpConstants.requiredSections)) {
@@ -15,14 +25,14 @@ const validateMessage = (message: string): ValidationMessage => {
         section as keyof typeof helpConstants.requiredSections
       ].test(message)
     ) {
-      errors.push(`${startCase(section)} is missing or has an invalid value`);
+      errors.push(`${startCase(section)} is missing or has an invalid value.`);
     }
   }
 
-  // Check format of specific sections
+  // Check the format of specific sections
   const stepsMatch = message.match(helpConstants.requiredSections.steps);
   if (!stepsMatch || stepsMatch.length < 2) {
-    explains.push(
+    explanation.push(
       'The section "Steps to Reproduce" needs to be a list of steps, each one starting with a number followed by a colon and a space. Example: "1: Open the browser."'
     );
   }
@@ -40,27 +50,33 @@ const validateMessage = (message: string): ValidationMessage => {
   ) {
     errors.push("Severity has an invalid value");
 
-    explains.push(
+    explanation.push(
       `The section "Severity" accept only [${helpConstants.severityOptions.join(
         ", "
       )}], you passed a wrong value: ${severityMatch?.[1]}.`
     );
   }
 
-  return { errors, explains };
+  return { errors, explanation };
 };
 
 export const safeLockThread = async (
+  author: Discord.User,
   thread: Discord.ThreadChannel,
   validation: ValidationMessage
 ) => {
   try {
     const messageToReply = [
+      author ? `Hi ${Discord.userMention(author.id)}!` : "",
       helpConstants.message,
-      "\n\n**Errors:**",
-      validation.errors.map((e) => `- ${e}`).join("\n"),
-      "\n\n**Explains:**",
-      validation.explains.map((e) => `- ${e}`).join("\n"),
+      "\n\n",
+      "**Errors:**",
+      validation.errors.map((e) => `- ${e}.`).join("\n"),
+      "\n\n",
+      "**Explanation:**",
+      validation.explanation.map((e) => `- ${e}.`).join("\n"),
+      "\n",
+      "*This thread will be archived in one hour.*",
     ];
 
     await thread.send(messageToReply.join("\n"));
@@ -68,17 +84,24 @@ export const safeLockThread = async (
       ...thread.appliedTags,
       helpConstants.blockedTagId,
     ]);
+    await thread.setAutoArchiveDuration(
+      Discord.ThreadAutoArchiveDuration.OneHour
+    );
     await thread.setLocked(true, helpConstants.message);
-  } catch (err) {}
+  } catch (err) {
+    logger.console.discord({ level: "error", message: JSON.stringify(err) });
+  }
 };
 
 export const checkThreadGuidelines = async (thread: Discord.ThreadChannel) => {
-  const messages = (await thread.messages.fetch({ limit: 1 })) ?? [];
-  const firstMessage = messages.map((m) => m.content).join(" ");
+  const firstMessage = await thread.fetchStarterMessage();
 
-  const validation = validateMessage(firstMessage);
+  const validation = validateMessage(thread.name, firstMessage?.content);
 
-  if (validation.errors.length > 0 || validation.explains.length > 0) {
-    await safeLockThread(thread, validation);
+  if (
+    firstMessage &&
+    (validation.errors.length > 0 || validation.explanation.length > 0)
+  ) {
+    await safeLockThread(firstMessage.author, thread, validation);
   }
 };

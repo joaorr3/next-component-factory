@@ -25,7 +25,7 @@ const startApp = () => {
       initializeBot();
 
       Cron(CronTime.everyWeek(), syncGuildUsers, "syncGuildUsers");
-      Cron(CronTime.everyWeekDayAt(17, 30), notifyDevTeam, "notifyDevTeam");
+      Cron(CronTime.everyWeekDayAt(10, 15), notifyDevTeam, "notifyDevTeam");
     }
   });
 };
