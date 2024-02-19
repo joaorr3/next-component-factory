@@ -196,3 +196,18 @@ export const kudosTypes: KudosType[] = [
       "ou always are sincere when giving feedback at work, telling us what you think but in a way that's kind and compassionate.",
   },
 ];
+
+export const helpConstants = {
+  name: "help",
+  blockedTagId: "1205501062258364476",
+  message:
+    "Read with attention to guidelines, this topic is incomplete or incorrect.",
+  severityOptions: ["minor", "major", "critical"],
+  requiredSections: {
+    description: /Description:\s+(.*)/,
+    steps: /Steps to Reproduce:\s*((?:\s*\d+\:\s+.+)+)/m,
+    expectedBehavior: /Expected Behavior:\s+(.*)/,
+    actualBehavior: /Actual Behavior:\s+(.*)/,
+    environment: /Environment:\s*((?:\s*.*:\s+.+)+)/m,
+  },
+};

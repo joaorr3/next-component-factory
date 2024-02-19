@@ -104,7 +104,7 @@ class AzureDiscord {
 
     if (mail.isPublished) {
       description = `:white_check_mark: ${
-        timeToComplete ? `Published ${timeToComplete}` : `Published`
+        timeToComplete ? timeToComplete : `Published`
       }`;
     }
 
@@ -144,13 +144,13 @@ class AzureDiscord {
 
     if (mail.isCompleted) {
       description = `:white_check_mark: ${
-        timeToComplete ? `Completed ${timeToComplete}` : `Completed`
+        timeToComplete ? timeToComplete : `Completed`
       }`;
     }
 
     if (mail.isAbandoned) {
       description = `:no_entry_sign: ${
-        timeToComplete ? `Canceled ${timeToComplete}` : `Canceled`
+        timeToComplete ? timeToComplete : `Canceled`
       }`;
     }
 

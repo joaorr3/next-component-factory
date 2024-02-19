@@ -13,6 +13,8 @@ import { BotLog } from "./utils";
 import AzureDiscord from "../azure/controllers/discord";
 import AzureMail from "../azure/controllers/mail";
 import PullRequestController from "../azure/controllers/pullRequests";
+import { helpConstants } from "./constants";
+import { checkThreadGuidelines } from "./utils/help";
 
 export const initializeBot = () => {
   discord.client?.once(Discord.Events.ClientReady, async () => {
@@ -67,6 +69,11 @@ export const initializeBot = () => {
   discord.on(Discord.Events.ChannelUpdate, async (channel) => {
     if (channel.type === Discord.ChannelType.GuildText) {
       await channelUpdateHandler(channel);
+    }
+  });
+  discord.on(Discord.Events.ThreadCreate, async (thread) => {
+    if (thread?.parent?.name === helpConstants.name) {
+      await checkThreadGuidelines(thread);
     }
   });
 };
