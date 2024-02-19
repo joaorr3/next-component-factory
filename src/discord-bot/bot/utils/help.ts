@@ -1,5 +1,5 @@
 import type Discord from "discord.js";
-import { helpConstants, helpGuidelineSeverityOptions } from "../constants";
+import { helpConstants } from "../constants";
 import { startCase } from "lodash";
 
 type ValidationMessage = { errors: string[]; explains: string[] };
@@ -23,20 +23,27 @@ const validateMessage = (message: string): ValidationMessage => {
   const stepsMatch = message.match(helpConstants.requiredSections.steps);
   if (!stepsMatch || stepsMatch.length < 2) {
     explains.push(
-      'The section "Steps to Reproduce" needs to be a list of steps, each one starting with a number followed by a dot and a space. Example: "1. Open the browser."'
+      'The section "Steps to Reproduce" needs to be a list of steps, each one starting with a number followed by a colon and a space. Example: "1: Open the browser."'
     );
   }
 
   // Check severity options
-  const severityMatch = message.match(/Severity:\s+(.*)\n/);
+  const severityMatch = message.match(/Severity:\s+(.*)/);
+
+  if (!severityMatch) {
+    errors.push("Severity is missing or has an invalid value");
+  }
+
   if (
     severityMatch &&
-    !helpGuidelineSeverityOptions.includes(severityMatch[1])
+    !helpConstants.severityOptions.includes(severityMatch[1])
   ) {
+    errors.push("Severity has an invalid value");
+
     explains.push(
-      `The section "Severity" accept only [${helpGuidelineSeverityOptions.join(
+      `The section "Severity" accept only [${helpConstants.severityOptions.join(
         ", "
-      )}], you passed a wrong value: ${severityMatch[1]}.`
+      )}], you passed a wrong value: ${severityMatch?.[1]}.`
     );
   }
 

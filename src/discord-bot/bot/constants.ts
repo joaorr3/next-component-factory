@@ -197,21 +197,17 @@ export const kudosTypes: KudosType[] = [
   },
 ];
 
-export const helpGuidelineSeverityOptions = ["Minor", "Major", "Critical"];
-
 export const helpConstants = {
   name: "help",
   blockedTagId: "1205501062258364476",
   message:
     "Read with attention to guidelines, this topic is incomplete or incorrect.",
+  severityOptions: ["minor", "major", "critical"],
   requiredSections: {
-    description: /Description:\s+(.*)\n/,
-    steps: /Steps to Reproduce:\s*\n((?:\s*\d+\.\s+.+\n)+)/m,
-    expectedBehavior: /Expected Behavior:\s+(.*)\n/,
-    actualBehavior: /Actual Behavior:\s+(.*)\n/,
-    environment: /Environment:\s*\n((?:\s*.*:\s+.+\n)+)/m,
-    severity: new RegExp(
-      `Severity:\\s+(${helpGuidelineSeverityOptions.join("|")})\\n`
-    ),
+    description: /Description:\s+(.*)/,
+    steps: /Steps to Reproduce:\s*((?:\s*\d+\:\s+.+)+)/m,
+    expectedBehavior: /Expected Behavior:\s+(.*)/,
+    actualBehavior: /Actual Behavior:\s+(.*)/,
+    environment: /Environment:\s*((?:\s*.*:\s+.+)+)/m,
   },
 };
