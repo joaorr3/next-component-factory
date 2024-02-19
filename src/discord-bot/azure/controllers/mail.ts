@@ -44,13 +44,14 @@ class AzureMail extends EventEmitter {
 
   private connect() {
     this.mailReceiver
-      .on("end", () => {
-        if (this.autoReconnect) {
+      .on("mail", (mail: any) => this.readMail(mail))
+      .on("error", (error: any) => {
+        if (error?.code === "ETIMEDOUT" && this.autoReconnect) {
           this.connect();
+        } else {
+          this.emit("error", error);
         }
       })
-      .on("mail", (mail: any) => this.readMail(mail))
-      .on("error", (error: any) => this.emit("error", error))
       .start();
   }
 
