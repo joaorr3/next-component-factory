@@ -69,12 +69,12 @@ export const safeLockThread = async (
     const messageToReply = [
       author ? `Hi ${Discord.userMention(author.id)}!` : "",
       helpConstants.message,
-      "\n\n",
+      "\n",
       "**Errors:**",
-      validation.errors.map((e) => `- ${e}.`).join("\n"),
-      "\n\n",
+      validation.errors.map((e) => `- ${e}`).join("\n"),
+      "\n",
       "**Explanation:**",
-      validation.explanation.map((e) => `- ${e}.`).join("\n"),
+      validation.explanation.map((e) => `- ${e}`).join("\n"),
       "\n",
       "*This thread will be archived in one hour.*",
     ];
