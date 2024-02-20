@@ -5,18 +5,24 @@ import { helpConstants } from "../constants";
 
 type ValidationMessage = { errors: string[]; explanation: string[] };
 
-const validateMessage = (title: string, message = ""): ValidationMessage => {
-  const errors: string[] = [];
-  const explanation: string[] = [];
-
-  // Validate title
+const validateTitle = (title: string) => {
   const titleMatch = title.match(helpConstants.titleValidation);
 
   if (!titleMatch) {
-    errors.push(
-      "Title is invalid. Should be *[ComponentName] - Short description*"
-    );
+    return {
+      isValid: false,
+      error:
+        "Title is invalid. Should be *[ComponentName] - Short description*",
+    } as const;
   }
+  return {
+    isValid: true,
+  } as const;
+};
+
+const validateMessage = (message = ""): ValidationMessage => {
+  const errors: string[] = [];
+  const explanation: string[] = [];
 
   // Check for missing required sections
   for (const section of Object.keys(helpConstants.requiredSections)) {
@@ -46,7 +52,9 @@ const validateMessage = (title: string, message = ""): ValidationMessage => {
 
   if (
     severityMatch &&
-    !helpConstants.severityOptions.includes(severityMatch[1])
+    !helpConstants.severityOptions.includes(
+      severityMatch[1] as (typeof helpConstants)["severityOptions"][number]
+    )
   ) {
     errors.push("Severity has an invalid value");
 
@@ -76,18 +84,16 @@ export const safeLockThread = async (
       "**Explanation:**",
       validation.explanation.map((e) => `- ${e}`).join("\n"),
       "\n",
-      "*This thread will be archived in one hour.*",
+      "*This thread will be archived.*",
     ];
 
     await thread.send(messageToReply.join("\n"));
     await thread.setAppliedTags([
       ...thread.appliedTags,
-      helpConstants.blockedTagId,
+      helpConstants.tags.blocked,
     ]);
-    await thread.setAutoArchiveDuration(
-      Discord.ThreadAutoArchiveDuration.OneHour
-    );
     await thread.setLocked(true, helpConstants.message);
+    await thread.setArchived(true);
   } catch (err) {
     logger.console.discord({ level: "error", message: JSON.stringify(err) });
   }
@@ -95,13 +101,35 @@ export const safeLockThread = async (
 
 export const checkThreadGuidelines = async (thread: Discord.ThreadChannel) => {
   const firstMessage = await thread.fetchStarterMessage();
+  if (!firstMessage) {
+    return;
+  }
 
-  const validation = validateMessage(thread.name, firstMessage?.content);
+  const titleValidation = validateTitle(thread.name);
+
+  if (thread.appliedTags.includes(helpConstants.tags.quickQuestion)) {
+    if (!titleValidation.isValid) {
+      await safeLockThread(firstMessage.author, thread, {
+        errors: [titleValidation.error],
+        explanation: [],
+      });
+    }
+
+    return;
+  }
+
+  const messageValidation = validateMessage(firstMessage?.content);
 
   if (
-    firstMessage &&
-    (validation.errors.length > 0 || validation.explanation.length > 0)
+    !titleValidation.isValid ||
+    messageValidation.errors.length > 0 ||
+    messageValidation.explanation.length > 0
   ) {
-    await safeLockThread(firstMessage.author, thread, validation);
+    await safeLockThread(firstMessage.author, thread, {
+      errors: titleValidation.isValid
+        ? messageValidation.errors
+        : [titleValidation.error, ...messageValidation.errors],
+      explanation: messageValidation.explanation,
+    });
   }
 };

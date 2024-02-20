@@ -199,7 +199,10 @@ export const kudosTypes: KudosType[] = [
 
 export const helpConstants = {
   name: "help",
-  blockedTagId: "1205501062258364476",
+  tags: {
+    blocked: "1205501062258364476",
+    quickQuestion: "1205507957937406032",
+  },
   message:
     "Please, review your message and make sure it follows our Post Guidelines and try again.",
   severityOptions: ["minor", "major", "critical"],
@@ -211,4 +214,4 @@ export const helpConstants = {
     actualBehavior: /Actual Behavior:\s+(.*)/,
     environment: /Environment:\s*((?:\s*.*:\s+.+)+)/m,
   },
-};
+} as const;
