@@ -28,6 +28,7 @@ import {
   videoOrImage,
 } from "./utils";
 import { camelCase } from "lodash";
+import { derive } from "../utils";
 
 class Notion {
   public client: Client;
@@ -76,7 +77,14 @@ class Notion {
 
   @ErrorHandler({ code: "NOTION", message: "getAllPrs" })
   async getAllPrs() {
-    const pageMap: Array<{ id: string; pullRequestId: string }> = [];
+    const pageMap: Array<{
+      id: string;
+      title: string;
+      author: string;
+      creationDate: string;
+      url?: string;
+      pullRequestId: string;
+    }> = [];
 
     const get = async (cursor?: string) => {
       const { results, next_cursor } = await this.client.databases.query({
@@ -84,12 +92,39 @@ class Notion {
         start_cursor: cursor,
       });
 
-      for (const page of results) {
+      for (const page of results as PageObjectResponse[]) {
         pageMap.push({
           id: page.id,
-          //prettier-ignore
-          // @ts-ignore
-          pullRequestId: page.properties?.pullRequestId?.rich_text?.[0]?.plain_text || null,
+          title: derive(() => {
+            if (page.properties["Name"].type === "title") {
+              return page.properties["Name"].title[0].plain_text;
+            }
+            return "untitled";
+          }),
+          author: derive(() => {
+            if (page.properties["Author"].type === "select") {
+              return page.properties["Author"].select?.name || "";
+            }
+            return "";
+          }),
+          creationDate: derive(() => {
+            if (page.properties["Creation Date"].type === "date") {
+              return page.properties["Creation Date"].date?.start || "";
+            }
+            return "";
+          }),
+          url: derive(() => {
+            if (page.properties["URL"].type === "url") {
+              return page.properties["URL"].url || "";
+            }
+            return "";
+          }),
+          pullRequestId: derive(() => {
+            if (page.properties["Id"]?.type === "rich_text") {
+              return page.properties["Id"]?.rich_text[0].plain_text;
+            }
+            return "";
+          }),
         });
       }
 
@@ -169,6 +204,49 @@ class Notion {
         },
       },
       children: [...markdownToBlocks(dedent(data.description))],
+    });
+
+    return res.id;
+  }
+
+  /**
+   * Simplified version of `createPr`
+   */
+  @ErrorHandler({ code: "NOTION", message: "insertPr" })
+  async insertPr(data: {
+    title: string;
+    author?: string;
+    creationDate?: string;
+    url?: string;
+  }) {
+    const res = await this.client.pages.create({
+      parent: {
+        type: "database_id",
+        database_id: env.NOTION_PR_DB_ID,
+      },
+      icon: {
+        type: "emoji",
+        emoji: "🚀",
+      },
+      properties: {
+        title: {
+          title: [{ type: "text", text: { content: data.title } }],
+        },
+        Author: {
+          select: {
+            name: data.author || "CF Dev",
+          },
+        },
+        URL: {
+          url: data.url || "",
+        },
+        "Creation Date": {
+          type: "date",
+          date: {
+            start: data.creationDate || new Date().toISOString(),
+          },
+        },
+      },
     });
 
     return res.id;

@@ -127,6 +127,9 @@ export const azureRouter = router({
 
     return [];
   }),
+  getPullRequests: protectedProcedure.mutation(async () => {
+    return await azureSharedClient.getPullRequests();
+  }),
   createItem: protectedProcedure
     .input(
       z.object({

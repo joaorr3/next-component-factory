@@ -52,3 +52,70 @@ export const getFileTypeFromUrl = (url: string) => {
   }
   return null;
 };
+
+export const getPullRequestUrl = (id?: string) =>
+  `https://dev.azure.com/ptbcp/IT.DIT/_git/BCP.DesignSystem/pullrequest/${id}`;
+
+export class DataExchange<T> {
+  source: T | null = null;
+  replica: T | null = null;
+  isEqual = false;
+  signal = true;
+  pollTime = 10_000;
+
+  fetchSource: () => Promise<T>;
+  fetchReplica: () => Promise<T>;
+  isEqualFn: (props: { source: T | null; replica: T | null }) => boolean;
+  insertFn: (props: { source: T | null; replica: T | null }) => Promise<void>;
+  shouldFetchFn: () => boolean;
+
+  constructor({
+    pollTime,
+    fetchSource,
+    fetchReplica,
+    isEqual,
+    insert,
+    shouldFetch,
+  }: {
+    pollTime: number;
+    fetchSource: () => Promise<T>;
+    fetchReplica: () => Promise<T>;
+    insert: (props: { source: T | null; replica: T | null }) => Promise<void>;
+    isEqual: (props: { source: T | null; replica: T | null }) => boolean;
+    shouldFetch: () => boolean;
+  }) {
+    this.pollTime = pollTime;
+    this.fetchSource = fetchSource;
+    this.fetchReplica = fetchReplica;
+    this.isEqualFn = isEqual;
+    this.insertFn = insert;
+    this.shouldFetchFn = shouldFetch;
+  }
+
+  async start() {
+    if (!this.signal || !this.shouldFetchFn()) {
+      return;
+    }
+    this.source = await this.fetchSource();
+
+    this.isEqual = this.isEqualFn({
+      source: this.source,
+      replica: this.replica,
+    });
+
+    if (!this.isEqual) {
+      this.replica = await this.fetchReplica();
+      await this.insertFn({
+        source: this.source,
+        replica: this.replica,
+      });
+    }
+
+    await wait(this.pollTime);
+    await this.start();
+  }
+
+  setSignal(value: boolean) {
+    this.signal = value;
+  }
+}
