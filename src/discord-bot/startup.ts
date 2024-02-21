@@ -21,8 +21,8 @@ type PRExchangeModel = {
 };
 
 const dataExchange = new DataExchange<PRExchangeModel[]>({
-  // 5 min
-  pollTime: 1000 * 60 * 5,
+  // 2 min
+  pollTime: 1000 * 60 * 2,
   shouldFetch: () => {
     const pollRange = {
       from: 9,
@@ -38,7 +38,7 @@ const dataExchange = new DataExchange<PRExchangeModel[]>({
     const data = sourceData.map(
       (pr): PRExchangeModel => ({
         title: pr.title!,
-        author: pr.createdBy!.displayName!,
+        author: pr.createdBy?.displayName!,
         creationDate: dayjs(pr.creationDate as unknown as string).toISOString(),
         url: getPullRequestUrl(String(pr.pullRequestId)),
       })
@@ -138,16 +138,13 @@ const startApp = () => {
 
       Cron(
         CronTime.everyWeekDayAt(9),
-        () => {
-          dataExchange.setSignal(true);
-          dataExchange.start();
-        },
+        () => dataExchange.start(),
         "start-data-exchange"
       );
 
       Cron(
         CronTime.everyWeekDayAt(20),
-        () => dataExchange.setSignal(false),
+        () => dataExchange.stop(),
         "stop-data-exchange"
       );
 
