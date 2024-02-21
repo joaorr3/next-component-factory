@@ -93,22 +93,25 @@ export class DataExchange<T> {
   }
 
   async start() {
-    if (!this.signal || !this.shouldFetchFn()) {
+    if (!this.signal) {
       return;
     }
-    this.source = await this.fetchSource();
 
-    this.isEqual = this.isEqualFn({
-      source: this.source,
-      replica: this.replica,
-    });
+    if (this.shouldFetchFn()) {
+      this.source = await this.fetchSource();
 
-    if (!this.isEqual) {
-      this.replica = await this.fetchReplica();
-      await this.insertFn({
+      this.isEqual = this.isEqualFn({
         source: this.source,
         replica: this.replica,
       });
+
+      if (!this.isEqual) {
+        this.replica = await this.fetchReplica();
+        await this.insertFn({
+          source: this.source,
+          replica: this.replica,
+        });
+      }
     }
 
     await wait(this.pollTime);

@@ -96,13 +96,36 @@ const startApp = () => {
     res.status(200).json({ endPoint: req.url });
   });
 
+  app.get("/start-data-exchange", (req, res) => {
+    dataExchange.setSignal(true);
+    dataExchange.start();
+    res.status(200).json({
+      endPoint: req.url,
+      dataExchange: dataExchange.signal,
+    });
+  });
+
   app.listen(+env.PORT, "0.0.0.0", () => {
     console.log(`Example app listening on port ${env.PORT}`);
 
     if (env.START_DISCORD === "true") {
       initializeBot();
 
-      dataExchange.start();
+      Cron(
+        CronTime.everyWeekDayAt(9),
+        () => {
+          dataExchange.setSignal(true);
+          dataExchange.start();
+        },
+        "start-data-exchange"
+      );
+
+      Cron(
+        CronTime.everyWeekDayAt(20),
+        () => dataExchange.setSignal(false),
+        "stop-data-exchange"
+      );
+
       Cron(CronTime.everyWeek(), syncGuildUsers, "syncGuildUsers");
       Cron(CronTime.everyWeekDayAt(10, 15), notifyDevTeam, "notifyDevTeam");
     }
