@@ -53,6 +53,9 @@ export const azureRouter = router({
         `${wi.fields?.["System.Title"]} - ${wi.fields?.["System.AssignedTo"]?.["displayName"]}`
     );
 
+    const AssignedTo = wis.map((wi) => wi.fields?.["System.AssignedTo"]);
+    console.log("AssignedTo: ", AssignedTo);
+
     console.log("workItems: ", JSON.stringify(workItemsApi, undefined, 2));
 
     // console.log("workItems: ", wis[0].fields?.["System.Title"]);
@@ -134,48 +137,15 @@ export const azureRouter = router({
     .input(
       z.object({
         title: z.string(),
+        description: z.string(),
       })
     )
-    .mutation(async ({ input: { title } }) => {
-      const workItemApi =
-        await azureSharedClient.client.getWorkItemTrackingApi();
-
-      const workItemPayload = [
-        {
-          op: "add",
-          path: "/fields/System.Title",
-          value: title,
-        },
-        {
-          op: "add",
-          path: "/fields/System.Description",
-          value: "Test Description",
-        },
-        {
-          op: "add",
-          path: "/fields/System.WorkItemType",
-          value: "User Story",
-        },
-        {
-          op: "add",
-          path: "/fields/System.AreaPath",
-          value: "IT.DIT\\DIT\\DesignSystem",
-        },
-        {
-          op: "add",
-          path: "/fields/System.IterationPath",
-          value: "IT.DIT\\DIT",
-        },
-      ];
-
-      const createdWorkItem = await workItemApi.createWorkItem(
-        null,
-        workItemPayload,
-        "6972fd8c-2a19-4b27-a72b-d650691f5943",
-        "User Story"
-      );
-
-      console.log("createdWorkItem: ", createdWorkItem);
-      return createdWorkItem;
+    .mutation(async ({ input: { title, description } }) => {
+      await azureSharedClient.createWorkItem({
+        title,
+        description,
+        author: "",
+        threadUrl: "",
+      });
     }),
 });

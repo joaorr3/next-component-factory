@@ -53,6 +53,7 @@ export const serverSchema = z.object({
 
   ISSUES_FORM_SECRET: z.string(),
   AZURE_TOKEN: z.string(),
+  ASSIGNED_TO: z.string(),
 });
 
 /**

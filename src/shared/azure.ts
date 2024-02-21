@@ -65,6 +65,75 @@ export class AzureClient {
     return [] as PullRequest[];
   }
 
+  public async createWorkItem({
+    title,
+    description,
+    author,
+    threadUrl,
+  }: {
+    title: string;
+    description: string;
+    author: string;
+    threadUrl: string;
+  }) {
+    const workItemApi = await this.client.getWorkItemTrackingApi();
+
+    const _description = [
+      `Author: ${author}`,
+      "\n",
+      description,
+      "\n",
+      `<a href="${threadUrl}">Discord Thread</a>`,
+    ];
+
+    const workItemPayload = [
+      {
+        op: "add",
+        path: "/fields/System.AssignedTo",
+        value: env.ASSIGNED_TO,
+      },
+      {
+        op: "add",
+        path: "/fields/System.Title",
+        value: title,
+      },
+      {
+        op: "add",
+        path: "/fields/System.Description",
+        value: _description.join("\n").replace(/\n/g, "<br/>"),
+      },
+      {
+        op: "add",
+        path: "/fields/System.WorkItemType",
+        value: "User Story",
+      },
+      {
+        op: "add",
+        path: "/fields/System.AreaPath",
+        value: "IT.DIT\\DIT\\DesignSystem",
+      },
+      {
+        op: "add",
+        path: "/fields/System.IterationPath",
+        value: "IT.DIT\\DIT",
+      },
+      {
+        op: "add",
+        path: "/fields/System.Tags",
+        value: "Discord Issue;",
+      },
+    ];
+
+    const createdWorkItem = await workItemApi.createWorkItem(
+      null,
+      workItemPayload,
+      "6972fd8c-2a19-4b27-a72b-d650691f5943",
+      "User Story"
+    );
+
+    return createdWorkItem;
+  }
+
   public static get Instance(): AzureClient {
     return this._instance;
   }

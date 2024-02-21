@@ -15,6 +15,7 @@ import AzureMail from "../azure/controllers/mail";
 import PullRequestController from "../azure/controllers/pullRequests";
 import { helpConstants } from "./constants";
 import { checkThreadGuidelines } from "./utils/help";
+import { azureSharedClient } from "../../shared/azure";
 
 export const initializeBot = () => {
   discord.client?.once(Discord.Events.ClientReady, async () => {
@@ -73,7 +74,24 @@ export const initializeBot = () => {
   });
   discord.on(Discord.Events.ThreadCreate, async (thread) => {
     if (thread?.parent?.name === helpConstants.name) {
-      await checkThreadGuidelines(thread);
+      const data = await checkThreadGuidelines(thread);
+
+      if (data) {
+        const workItem = await azureSharedClient.createWorkItem(data);
+
+        await thread.send({
+          content: `Azure Work Item: https://dev.azure.com/ptbcp/IT.DIT/_workitems/edit/${workItem.id}`,
+        });
+
+        logger.db.discord({
+          level: "info",
+          message: JSON.stringify(
+            { title: "createWorkItem", payload: workItem.id },
+            undefined,
+            2
+          ),
+        });
+      }
     }
   });
 };

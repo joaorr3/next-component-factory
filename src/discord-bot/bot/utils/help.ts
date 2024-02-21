@@ -1,6 +1,7 @@
 import Discord from "discord.js";
 import { startCase } from "lodash";
 import logger from "../../../shared/logger";
+import discord from "../client";
 import { helpConstants } from "../constants";
 
 type ValidationMessage = { errors: string[]; explanation: string[] };
@@ -132,4 +133,13 @@ export const checkThreadGuidelines = async (thread: Discord.ThreadChannel) => {
       explanation: messageValidation.explanation,
     });
   }
+
+  return {
+    title: thread.name,
+    description: firstMessage.content,
+    author:
+      discord.member(firstMessage.author.id)?.displayName ||
+      firstMessage.author.username,
+    threadUrl: thread.url,
+  };
 };
