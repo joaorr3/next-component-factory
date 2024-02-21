@@ -132,6 +132,7 @@ export const checkThreadGuidelines = async (thread: Discord.ThreadChannel) => {
         : [titleValidation.error, ...messageValidation.errors],
       explanation: messageValidation.explanation,
     });
+    return;
   }
 
   return {
