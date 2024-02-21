@@ -57,17 +57,25 @@ export const getPullRequestUrl = (id?: string) =>
   `https://dev.azure.com/ptbcp/IT.DIT/_git/BCP.DesignSystem/pullrequest/${id}`;
 
 export class DataExchange<T> {
-  source: T | null = null;
-  replica: T | null = null;
-  isEqual = false;
+  private source: T | null = null;
+  private replica: T | null = null;
+  private isEqual = false;
+  iterations = 0;
   signal = true;
   pollTime = 10_000;
+  isWorking = false;
 
-  fetchSource: () => Promise<T>;
-  fetchReplica: () => Promise<T>;
-  isEqualFn: (props: { source: T | null; replica: T | null }) => boolean;
-  insertFn: (props: { source: T | null; replica: T | null }) => Promise<void>;
-  shouldFetchFn: () => boolean;
+  private fetchSource: () => Promise<T>;
+  private fetchReplica: () => Promise<T>;
+  private isEqualFn: (props: {
+    source: T | null;
+    replica: T | null;
+  }) => boolean;
+  private insertFn: (props: {
+    source: T | null;
+    replica: T | null;
+  }) => Promise<void>;
+  private shouldFetchFn: () => boolean;
 
   constructor({
     pollTime,
@@ -92,12 +100,30 @@ export class DataExchange<T> {
     this.shouldFetchFn = shouldFetch;
   }
 
-  async start() {
+  public async start() {
+    this.signal = true;
+    if (!this.isWorking) {
+      await this.beginWork();
+    }
+  }
+
+  public stop() {
+    this.signal = false;
+    this.isWorking = false;
+    this.iterations = 0;
+    this.source = null;
+    this.replica = null;
+    this.isEqual = false;
+  }
+
+  private async beginWork() {
     if (!this.signal) {
       return;
     }
 
     if (this.shouldFetchFn()) {
+      this.iterations++;
+      this.isWorking = true;
       this.source = await this.fetchSource();
 
       this.isEqual = this.isEqualFn({
@@ -115,7 +141,21 @@ export class DataExchange<T> {
     }
 
     await wait(this.pollTime);
-    await this.start();
+    await this.beginWork();
+  }
+
+  public setPollTime(time: number) {
+    this.pollTime = time;
+  }
+
+  public getStatus() {
+    return {
+      isWorking: this.isWorking,
+      signal: this.signal,
+      pollTime: this.pollTime,
+      iterations: this.iterations,
+      shouldFetch: this.shouldFetchFn(),
+    };
   }
 
   setSignal(value: boolean) {

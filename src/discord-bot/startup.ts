@@ -3,9 +3,11 @@ import { CronTime } from "cron-time-generator";
 import dayjs from "dayjs";
 import express from "express";
 import { difference, intersection } from "lodash";
+import { z } from "zod";
 import { env } from "../env/server";
 import { azureSharedClient } from "../shared/azure";
 import { Cron } from "../shared/Cron";
+import logger from "../shared/logger";
 import notion from "../shared/notion";
 import { prismaSharedClient } from "../shared/prisma/client";
 import { DataExchange, getPullRequestUrl, wait } from "../shared/utils";
@@ -85,6 +87,14 @@ const dataExchange = new DataExchange<PRExchangeModel[]>({
   },
 });
 
+const dataExchangeEndpointQueryScheme = z.object({
+  action: z.enum(["start", "stop"]).optional(),
+  pollTime: z
+    .string()
+    .transform((arg) => +arg)
+    .optional(),
+});
+
 const startApp = () => {
   const app = express();
 
@@ -97,11 +107,26 @@ const startApp = () => {
   });
 
   app.get("/start-data-exchange", (req, res) => {
-    dataExchange.setSignal(true);
-    dataExchange.start();
+    const query = dataExchangeEndpointQueryScheme.safeParse(req.query);
+
+    if (query.success) {
+      if (query.data.action) {
+        dataExchange[query.data.action]();
+      }
+
+      if (query.data.pollTime) {
+        dataExchange.setPollTime(query.data.pollTime);
+      }
+    }
+
+    logger.console.server({
+      level: "info",
+      message: JSON.stringify(dataExchange.getStatus(), undefined, 2),
+    });
+
     res.status(200).json({
       endPoint: req.url,
-      dataExchange: dataExchange.signal,
+      dataExchange: dataExchange.getStatus(),
     });
   });
 
