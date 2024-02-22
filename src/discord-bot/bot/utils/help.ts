@@ -100,9 +100,27 @@ export const safeLockThread = async (
   }
 };
 
+const getFirstMessage = async (thread: Discord.ThreadChannel) => {
+  try {
+    const firstMessage = await thread.fetchStarterMessage();
+    if (firstMessage) {
+      return firstMessage;
+    }
+  } catch (error) {
+    logger.console.discord({
+      level: "error",
+      message: "Error fetchStarterMessage()",
+    });
+  }
+};
+
 export const checkThreadGuidelines = async (thread: Discord.ThreadChannel) => {
-  const firstMessage = await thread.fetchStarterMessage();
+  const firstMessage = await getFirstMessage(thread);
   if (!firstMessage) {
+    logger.console.discord({
+      level: "warn",
+      message: "warning no firstMessage",
+    });
     return;
   }
 
