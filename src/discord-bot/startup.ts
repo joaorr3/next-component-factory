@@ -119,11 +119,6 @@ const startApp = () => {
       }
     }
 
-    logger.console.server({
-      level: "info",
-      message: JSON.stringify(dataExchange.getStatus(), undefined, 2),
-    });
-
     res.status(200).json({
       endPoint: req.url,
       dataExchange: dataExchange.getStatus(),

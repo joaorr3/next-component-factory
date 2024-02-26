@@ -1,6 +1,7 @@
 import Discord from "discord.js";
 import { startCase } from "lodash";
 import logger from "../../../shared/logger";
+import { wait } from "../../../shared/utils";
 import discord from "../client";
 import { helpConstants } from "../constants";
 
@@ -100,22 +101,43 @@ export const safeLockThread = async (
   }
 };
 
-const getFirstMessage = async (thread: Discord.ThreadChannel) => {
+const forceGetFirstMessage = async (thread: Discord.ThreadChannel) => {
   try {
-    const firstMessage = await thread.fetchStarterMessage();
-    if (firstMessage) {
-      return firstMessage;
+    const message = (await thread.messages.fetch({ limit: 1 })).at(0);
+    return message;
+  } catch (error) {
+    logger.console.discord({
+      level: "error",
+      message: "Error forceGetFirstMessage()",
+    });
+    console.error("forceGetFirstMessage: ", error);
+  }
+};
+
+const getStarterMessage = async (thread: Discord.ThreadChannel) => {
+  try {
+    const starterMessage = await thread.fetchStarterMessage();
+
+    if (!starterMessage) {
+      return await forceGetFirstMessage(thread);
     }
+
+    return starterMessage;
   } catch (error) {
     logger.console.discord({
       level: "error",
       message: "Error fetchStarterMessage()",
     });
+    console.error("fetchStarterMessage: ", error);
+
+    return await forceGetFirstMessage(thread);
   }
 };
 
 export const checkThreadGuidelines = async (thread: Discord.ThreadChannel) => {
-  const firstMessage = await getFirstMessage(thread);
+  await thread.sendTyping();
+  await wait(500);
+  const firstMessage = await getStarterMessage(thread);
   if (!firstMessage) {
     logger.console.discord({
       level: "warn",
