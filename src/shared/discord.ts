@@ -41,7 +41,7 @@ const roleNames = {
   labs: "DEV-LABS 🧪",
   issueValidation: "issue-validation",
   techLead: "tech-lead",
-  visitor: "Visitors 👽",
+  visitor: "Visitor 👽",
 } as const;
 
 type RoleNameModels = typeof roleNames;
