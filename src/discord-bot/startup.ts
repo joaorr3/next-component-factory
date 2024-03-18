@@ -7,7 +7,6 @@ import { z } from "zod";
 import { env } from "../env/server";
 import { azureSharedClient } from "../shared/azure";
 import { Cron } from "../shared/Cron";
-import logger from "../shared/logger";
 import notion from "../shared/notion";
 import { prismaSharedClient } from "../shared/prisma/client";
 import { DataExchange, getPullRequestUrl, wait } from "../shared/utils";
@@ -47,13 +46,15 @@ const dataExchange = new DataExchange<PRExchangeModel[]>({
   },
   fetchReplica: async () => {
     const replicaData = await notion.getAllPrs();
-    const data = replicaData.map(
-      ({ title, author, creationDate }): PRExchangeModel => ({
-        title,
-        author,
-        creationDate: dayjs(creationDate).toISOString(),
-      })
-    );
+    const data = replicaData
+      .filter(({ creationDate }) => !!creationDate)
+      .map(
+        ({ title, author, creationDate }): PRExchangeModel => ({
+          title,
+          author,
+          creationDate: dayjs(creationDate).toISOString(),
+        })
+      );
     return data;
   },
   isEqual: ({ source, replica }) => {
