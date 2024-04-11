@@ -24,7 +24,7 @@ const dataExchange = new DataExchange<PRExchangeModel[]>({
   pollTime: 1000 * 60 * 2,
   shouldFetch: () => {
     const pollRange = {
-      from: 9,
+      from: 8,
       to: 20,
     };
 
@@ -133,7 +133,7 @@ const startApp = () => {
       initializeBot();
 
       Cron(
-        CronTime.everyWeekDayAt(9),
+        CronTime.everyWeekDayAt(8),
         () => dataExchange.start(),
         "start-data-exchange",
         dataExchange.getStatus().shouldFetch
