@@ -135,7 +135,8 @@ const startApp = () => {
       Cron(
         CronTime.everyWeekDayAt(9),
         () => dataExchange.start(),
-        "start-data-exchange"
+        "start-data-exchange",
+        dataExchange.getStatus().shouldFetch
       );
 
       Cron(
