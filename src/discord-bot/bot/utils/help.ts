@@ -148,7 +148,10 @@ export const extractThreadData = async (thread: Discord.ThreadChannel) => {
       message: firstMessage,
       tags: derive(() => {
         if (thread.parent instanceof ForumChannel) {
-          return thread.appliedTags;
+          const tags = thread.parent.availableTags;
+          return tags
+            .filter((tag) => thread.appliedTags.includes(tag.id))
+            .map((t) => t.name);
         }
         return [];
       }),
