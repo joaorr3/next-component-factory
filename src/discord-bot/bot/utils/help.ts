@@ -1,7 +1,7 @@
-import Discord from "discord.js";
+import Discord, { ForumChannel } from "discord.js";
 import { startCase } from "lodash";
 import logger from "../../../shared/logger";
-import { wait } from "../../../shared/utils";
+import { derive, wait } from "../../../shared/utils";
 import discord from "../client";
 import { helpConstants } from "../constants";
 
@@ -146,6 +146,12 @@ export const extractThreadData = async (thread: Discord.ThreadChannel) => {
         firstMessage.author.username,
       threadUrl: thread.url,
       message: firstMessage,
+      tags: derive(() => {
+        if (thread.parent instanceof ForumChannel) {
+          return thread.appliedTags;
+        }
+        return [];
+      }),
     };
   }
 };

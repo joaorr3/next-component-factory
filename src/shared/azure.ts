@@ -70,28 +70,30 @@ export class AzureClient {
     description,
     author,
     threadUrl,
+    tags,
   }: {
     title: string;
     description: string;
     author: string;
     threadUrl: string;
+    tags: string[];
   }) {
     const workItemApi = await this.client.getWorkItemTrackingApi();
 
     const _description = [
       `Author: ${author}`,
+      `Tags: ${tags.join("; ")}`,
       "\n",
-      description,
+      `Description: ${description}`,
       "\n",
-      `<a href="${threadUrl}">Discord Thread</a>`,
     ];
 
     const workItemPayload = [
-      {
-        op: "add",
-        path: "/fields/System.AssignedTo",
-        value: env.ASSIGNED_TO,
-      },
+      // {
+      //   op: "add",
+      //   path: "/fields/System.AssignedTo",
+      //   value: env.ASSIGNED_TO,
+      // },
       {
         op: "add",
         path: "/fields/System.Title",
@@ -105,7 +107,8 @@ export class AzureClient {
       {
         op: "add",
         path: "/fields/System.WorkItemType",
-        value: "User Story",
+        // value: "User Story",
+        value: "Issue",
       },
       {
         op: "add",
