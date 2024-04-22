@@ -1,7 +1,12 @@
 import Discord from "discord.js";
+import { azureSharedClient } from "../../shared/azure";
 import logger from "../../shared/logger";
+import AzureDiscord from "../azure/controllers/discord";
+import AzureMail from "../azure/controllers/mail";
+import PullRequestController from "../azure/controllers/pullRequests";
 import discord from "./client";
 import { registerCommands } from "./commands";
+import { helpConstants } from "./constants";
 import {
   guildMemberAddHandler,
   guildMemberUpdateHandler,
@@ -10,12 +15,7 @@ import {
 import { channelUpdateHandler } from "./events/channelUpdate";
 import { guildRolesHandler } from "./events/guildRoles";
 import { BotLog } from "./utils";
-import AzureDiscord from "../azure/controllers/discord";
-import AzureMail from "../azure/controllers/mail";
-import PullRequestController from "../azure/controllers/pullRequests";
-import { helpConstants } from "./constants";
-import { checkThreadGuidelines } from "./utils/help";
-import { azureSharedClient } from "../../shared/azure";
+import { extractThreadData } from "./utils/help";
 
 export const initializeBot = () => {
   discord.client?.once(Discord.Events.ClientReady, async () => {
@@ -74,7 +74,7 @@ export const initializeBot = () => {
   });
   discord.on(Discord.Events.ThreadCreate, async (thread) => {
     if (thread?.parent?.name === helpConstants.name) {
-      const data = await checkThreadGuidelines(thread);
+      const data = await extractThreadData(thread);
 
       if (data) {
         const workItem = await azureSharedClient.createWorkItem(data);

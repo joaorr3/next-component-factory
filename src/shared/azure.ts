@@ -122,6 +122,25 @@ export class AzureClient {
         path: "/fields/System.Tags",
         value: "Discord Issue;",
       },
+      {
+        op: "add",
+        path: "/relations/-",
+        value: {
+          rel: "System.LinkTypes.Hierarchy-Reverse",
+          url: "https://dev.azure.com/fabrikam/_apis/wit/workItems/697212",
+          attributes: {
+            comment: "Making a new link for the dependency",
+          },
+        },
+      },
+      {
+        op: "add",
+        path: "/relations/-",
+        value: {
+          rel: "Hyperlink",
+          url: threadUrl,
+        },
+      },
     ];
 
     const createdWorkItem = await workItemApi.createWorkItem(

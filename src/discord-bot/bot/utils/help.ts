@@ -134,11 +134,29 @@ const getStarterMessage = async (thread: Discord.ThreadChannel) => {
   }
 };
 
+export const extractThreadData = async (thread: Discord.ThreadChannel) => {
+  const firstMessage = await getStarterMessage(thread);
+
+  if (firstMessage) {
+    return {
+      title: thread.name,
+      description: firstMessage.content,
+      author:
+        discord.member(firstMessage.author.id)?.displayName ||
+        firstMessage.author.username,
+      threadUrl: thread.url,
+      message: firstMessage,
+    };
+  }
+};
+
 export const checkThreadGuidelines = async (thread: Discord.ThreadChannel) => {
   await thread.sendTyping();
   await wait(500);
-  const firstMessage = await getStarterMessage(thread);
-  if (!firstMessage) {
+
+  const data = await extractThreadData(thread);
+
+  if (!data) {
     logger.console.discord({
       level: "warn",
       message: "warning no firstMessage",
@@ -146,11 +164,13 @@ export const checkThreadGuidelines = async (thread: Discord.ThreadChannel) => {
     return;
   }
 
-  const titleValidation = validateTitle(thread.name);
+  const { title, description, author, threadUrl, message } = data;
+
+  const titleValidation = validateTitle(title);
 
   if (thread.appliedTags.includes(helpConstants.tags.quickQuestion)) {
     if (!titleValidation.isValid) {
-      await safeLockThread(firstMessage.author, thread, {
+      await safeLockThread(message.author, thread, {
         errors: [titleValidation.error],
         explanation: [],
       });
@@ -159,14 +179,14 @@ export const checkThreadGuidelines = async (thread: Discord.ThreadChannel) => {
     return;
   }
 
-  const messageValidation = validateMessage(firstMessage?.content);
+  const messageValidation = validateMessage(description);
 
   if (
     !titleValidation.isValid ||
     messageValidation.errors.length > 0 ||
     messageValidation.explanation.length > 0
   ) {
-    await safeLockThread(firstMessage.author, thread, {
+    await safeLockThread(message.author, thread, {
       errors: titleValidation.isValid
         ? messageValidation.errors
         : [titleValidation.error, ...messageValidation.errors],
@@ -176,11 +196,9 @@ export const checkThreadGuidelines = async (thread: Discord.ThreadChannel) => {
   }
 
   return {
-    title: thread.name,
-    description: firstMessage.content,
-    author:
-      discord.member(firstMessage.author.id)?.displayName ||
-      firstMessage.author.username,
-    threadUrl: thread.url,
+    title,
+    description: message.content,
+    author,
+    threadUrl,
   };
 };
