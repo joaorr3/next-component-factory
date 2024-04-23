@@ -107,14 +107,14 @@ export class AzureClient {
       {
         op: "add",
         path: "/fields/System.WorkItemType",
-        // value: "User Story",
-        value: "Issue",
+        value: "User Story",
+        // value: "Issue",
       },
-      {
-        op: "add",
-        path: "/fields/Microsoft.VSTS.Common.AcceptanceCriteria",
-        value: ".",
-      },
+      // {
+      //   op: "add",
+      //   path: "/fields/Microsoft.VSTS.Common.AcceptanceCriteria",
+      //   value: ".",
+      // },
       {
         op: "add",
         path: "/fields/System.State",
