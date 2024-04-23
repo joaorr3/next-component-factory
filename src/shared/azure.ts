@@ -115,11 +115,11 @@ export class AzureClient {
       //   path: "/fields/Microsoft.VSTS.Common.AcceptanceCriteria",
       //   value: ".",
       // },
-      {
-        op: "add",
-        path: "/fields/System.State",
-        value: "Active",
-      },
+      // {
+      //   op: "add",
+      //   path: "/fields/System.State",
+      //   value: "Active",
+      // },
       {
         op: "add",
         path: "/fields/System.AreaPath",
