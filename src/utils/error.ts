@@ -1,4 +1,9 @@
-export type ErrorScope = "DISCORD" | "NOTION" | "PRISMA" | "UNKNOWN";
+export type ErrorScope =
+  | "DISCORD"
+  | "NOTION"
+  | "PRISMA"
+  | "DATA_EXCHANGE"
+  | "UNKNOWN";
 
 type ServiceErrorOptions = {
   message?: string;
