@@ -5,7 +5,9 @@
   "scripts": {
     "build:next": "next build",
     "start:next": "next start --port ${PORT-3000}",
-    "build:bot": "rm -rf dist && tsc -p ./tsconfig.bot.json",
+    "copy-frontend": "mkdir -p dist/discord-bot/frontend_vite/dist && cp -R src/discord-bot/frontend_vite/dist dist/discord-bot/frontend_vite",
+    "build:bot": "rm -rf dist && vite build && tsc -p ./tsconfig.bot.json && npm run copy-frontend",
+    "build:bot:frontend_vite": "vite build",
     "start:bot": "node dist/discord-bot/startup.js",
     "postinstall": "prisma generate",
     "lint": "next lint",
@@ -99,6 +101,7 @@
     "@types/styled-components": "^5.1.26",
     "@typescript-eslint/eslint-plugin": "^5.33.0",
     "@typescript-eslint/parser": "^5.33.0",
+    "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.13",
     "babel-plugin-styled-components": "^2.0.7",
     "eslint": "^8.26.0",
@@ -112,7 +115,8 @@
     "tailwind-styled-components": "^2.2.0",
     "tailwindcss": "^3.2.4",
     "ts-node": "^10.9.1",
-    "typescript": "4.8.4"
+    "typescript": "4.8.4",
+    "vite": "^5.2.10"
   },
   "ct3aMetadata": {
     "initVersion": "6.10.1"

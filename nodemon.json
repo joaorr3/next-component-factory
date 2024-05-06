@@ -1,6 +1,6 @@
 {
-  "watch": ["src/discord-bot/**/*.ts", "src/shared/*.ts"],
-  "ext": "ts",
+  "watch": ["src/discord-bot", "src/shared"],
+  "ext": "ts,tsx",
   "ignore": ["node_modules"],
-  "exec": "ts-node --project ./tsconfig.bot.json ./src/discord-bot/startup.ts"
+  "exec": "vite build && ts-node --project ./tsconfig.bot.json ./src/discord-bot/startup.ts"
 }

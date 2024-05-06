@@ -66,6 +66,20 @@ export class DataExchange<T> {
   pollTime = 10_000;
   isWorking = false;
 
+  private lastExchange: {
+    data: {
+      source?: T;
+      replica?: T;
+    };
+    timestamp?: string;
+  } = {
+    data: {
+      source: undefined,
+      replica: undefined,
+    },
+    timestamp: undefined,
+  };
+
   private fetchSource: () => Promise<T>;
   private fetchReplica: () => Promise<T>;
   private isEqualFn: (props: {
@@ -135,6 +149,15 @@ export class DataExchange<T> {
 
       if (!this.isEqual) {
         this.replica = await this.fetchReplica();
+
+        this.lastExchange = {
+          timestamp: new Date().toString(),
+          data: {
+            source: this.source,
+            replica: this.replica,
+          },
+        };
+
         await this.insertFn({
           source: this.source,
           replica: this.replica,
@@ -157,6 +180,7 @@ export class DataExchange<T> {
       pollTime: this.pollTime,
       iterations: this.iterations,
       shouldFetch: this.shouldFetchFn(),
+      lastExchange: this.lastExchange,
     };
   }
 

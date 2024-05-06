@@ -17,6 +17,7 @@ export const Cron = (
 
   if (task) {
     task.stop();
+    task.removeAllListeners();
   }
 
   const event = () => {
