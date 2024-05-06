@@ -146,7 +146,7 @@ const startApp = () => {
       );
 
       Cron(CronTime.everyWeek(), syncGuildUsers, "syncGuildUsers");
-      Cron(CronTime.everyWeekDayAt(10, 15), notifyDevTeam, "notifyDevTeam");
+      Cron(CronTime.everyWeekDayAt(12), notifyDevTeam, "notifyDevTeam");
     }
   });
 };
