@@ -1,5 +1,6 @@
 import { kebabCase, lowerCase } from "lodash";
 import slugify from "slugify";
+import { ErrorHandler } from "../utils/error";
 import { acceptedFileTypes } from "./dataUtils";
 
 export const derive = <T>(fn: () => T): T => fn();
@@ -116,6 +117,7 @@ export class DataExchange<T> {
     this.isEqual = false;
   }
 
+  @ErrorHandler({ code: "DATA_EXCHANGE", message: "beginWork Error" })
   private async beginWork() {
     if (!this.signal) {
       return;
