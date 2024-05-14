@@ -16,7 +16,10 @@ import logger from "../logger";
 import type { NotionIssueDetailsModel } from "../models";
 
 import dedent from "dedent";
+import { camelCase } from "lodash";
 import { ErrorHandler } from "../../utils/error";
+import type { PullRequestModel } from "../azure";
+import { derive } from "../utils";
 import {
   bookmark,
   getPublicUrl,
@@ -27,8 +30,6 @@ import {
   spacer,
   videoOrImage,
 } from "./utils";
-import { camelCase } from "lodash";
-import { derive } from "../utils";
 
 class Notion {
   public client: Client;
@@ -84,6 +85,8 @@ class Notion {
       creationDate: string;
       url?: string;
       pullRequestId: string;
+      mergeStatus: string;
+      status: string;
     }> = [];
 
     const get = async (cursor?: string) => {
@@ -120,8 +123,20 @@ class Notion {
             return "";
           }),
           pullRequestId: derive(() => {
-            if (page.properties["Id"]?.type === "rich_text") {
-              return page.properties["Id"]?.rich_text[0].plain_text;
+            if (page.properties["pullRequestId"]?.type === "rich_text") {
+              return page.properties["pullRequestId"]?.rich_text[0]?.plain_text;
+            }
+            return "";
+          }),
+          mergeStatus: derive(() => {
+            if (page.properties["Merge Status"]?.type === "select") {
+              return page.properties["Merge Status"].select?.name || "";
+            }
+            return "";
+          }),
+          status: derive(() => {
+            if (page.properties["Status"]?.type === "select") {
+              return page.properties["Status"].select?.name || "";
             }
             return "";
           }),
@@ -211,13 +226,16 @@ class Notion {
 
   /**
    * Simplified version of `createPr`
+   * Prefer `upsertPr`
    */
   @ErrorHandler({ code: "NOTION", message: "insertPr" })
   async insertPr(data: {
+    pullRequestId: string;
     title: string;
     author?: string;
     creationDate?: string;
     url?: string;
+    mergeStatus: PullRequestModel["mergeStatus"];
   }) {
     const res = await this.client.pages.create({
       parent: {
@@ -232,9 +250,24 @@ class Notion {
         title: {
           title: [{ type: "text", text: { content: data.title } }],
         },
+        pullRequestId: {
+          rich_text: [
+            {
+              type: "text",
+              text: {
+                content: data.pullRequestId,
+              },
+            },
+          ],
+        },
         Author: {
           select: {
             name: data.author || "CF Dev",
+          },
+        },
+        "Merge Status": {
+          select: {
+            name: data.mergeStatus,
           },
         },
         URL: {
@@ -247,6 +280,85 @@ class Notion {
           },
         },
       },
+    });
+
+    return res.id;
+  }
+  /**
+   * Create or update PR page
+   */
+  @ErrorHandler({ code: "NOTION", message: "insertPr" })
+  async upsertPr(
+    data: {
+      pullRequestId: string;
+      title: string;
+      author?: string;
+      creationDate?: string;
+      url?: string;
+      mergeStatus: PullRequestModel["mergeStatus"];
+      status: PullRequestModel["status"];
+    },
+    pageId?: string
+  ) {
+    const properties = {
+      title: {
+        title: [{ type: "text", text: { content: data.title } }],
+      },
+      pullRequestId: {
+        rich_text: [
+          {
+            type: "text",
+            text: {
+              content: data.pullRequestId,
+            },
+          },
+        ],
+      },
+      Author: {
+        select: {
+          name: data.author || "CF Dev",
+        },
+      },
+      "Merge Status": {
+        select: {
+          name: data.mergeStatus || "notSet",
+        },
+      },
+      Status: {
+        select: {
+          name: data.status || "NotSet",
+        },
+      },
+      URL: {
+        url: data.url || "",
+      },
+      "Creation Date": {
+        type: "date",
+        date: {
+          start: data.creationDate || new Date().toISOString(),
+        },
+      },
+    } as any;
+
+    if (pageId) {
+      const res = await this.client.pages.update({
+        page_id: pageId,
+        properties,
+      });
+
+      return res.id;
+    }
+
+    const res = await this.client.pages.create({
+      parent: {
+        type: "database_id",
+        database_id: env.NOTION_PR_DB_ID,
+      },
+      icon: {
+        type: "emoji",
+        emoji: "🚀",
+      },
+      properties,
     });
 
     return res.id;

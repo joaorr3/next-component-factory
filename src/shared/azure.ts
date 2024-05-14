@@ -18,8 +18,20 @@ const mergeStatusMap = {
   5: "failure",
 } as const;
 
-type PullRequest = Omit<GitPullRequest, "mergeStatus"> & {
+const statusMap = {
+  0: "NotSet",
+  1: "Active",
+  2: "Abandoned",
+  3: "Completed",
+  4: "All",
+} as const;
+
+export type PullRequestModel = Omit<
+  GitPullRequest,
+  "mergeStatus" | "status"
+> & {
   mergeStatus: (typeof mergeStatusMap)[keyof typeof mergeStatusMap];
+  status: (typeof statusMap)[keyof typeof statusMap];
 };
 
 export class AzureClient {
@@ -36,7 +48,7 @@ export class AzureClient {
     await this.client.connect();
   }
 
-  public async getPullRequests(): Promise<PullRequest[]> {
+  public async getPullRequests(): Promise<PullRequestModel[]> {
     const gitApi = await this.client.getGitApi();
 
     if (!this.designSystemRepo) {
@@ -51,18 +63,21 @@ export class AzureClient {
 
     if (this.designSystemRepo?.id) {
       const dsPullRequests =
-        (await gitApi.getPullRequests(this.designSystemRepo.id, {})) || [];
+        (await gitApi.getPullRequests(this.designSystemRepo.id, {
+          status: 4,
+        })) || [];
 
       return dsPullRequests.map((pr) => {
         return {
           ...pr,
           mergeStatus:
             mergeStatusMap[pr.mergeStatus as keyof typeof mergeStatusMap],
+          status: statusMap[pr.status as keyof typeof statusMap],
         };
-      }) as unknown as PullRequest[];
+      }) as unknown as PullRequestModel[];
     }
 
-    return [] as PullRequest[];
+    return [] as PullRequestModel[];
   }
 
   public async createWorkItem({

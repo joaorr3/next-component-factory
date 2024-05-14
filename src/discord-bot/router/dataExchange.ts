@@ -1,16 +1,24 @@
 import dayjs from "dayjs";
 import express from "express";
-import { difference, intersection } from "lodash";
+import { find, isEqual } from "lodash";
 import { z } from "zod";
+import type { PullRequestModel } from "../../shared/azure";
 import { azureSharedClient } from "../../shared/azure";
 import notion from "../../shared/notion";
 import { DataExchange, getPullRequestUrl } from "../../shared/utils";
 
 type PRExchangeModel = {
+  /**
+   * Notion
+   */
+  pageId?: string;
+  pullRequestId: string;
   title: string;
   author?: string;
   creationDate?: string;
   url?: string;
+  mergeStatus: PullRequestModel["mergeStatus"];
+  status: PullRequestModel["status"];
 };
 
 export const dataExchangeBodySchema = z.object({
@@ -20,9 +28,25 @@ export const dataExchangeBodySchema = z.object({
 
 export type DataExchangeBodySchema = z.infer<typeof dataExchangeBodySchema>;
 
+const findReplicaItem = (
+  replica: PRExchangeModel[],
+  params: Pick<PRExchangeModel, "url" | "pullRequestId">
+) => {
+  return find(
+    replica,
+    (r) => r.url === params.url || r.pullRequestId === params.pullRequestId
+  );
+};
+
+const equals = (source: PRExchangeModel, replica: PRExchangeModel) => {
+  const { pageId: _1, creationDate: _2, ...sourceRest } = source;
+  const { pageId: _3, creationDate: _4, ...replicaRest } = replica;
+  return isEqual(sourceRest, replicaRest);
+};
+
 export const dataExchange = new DataExchange<PRExchangeModel[]>({
-  // 2 min
-  pollTime: 1000 * 60 * 2,
+  // 1 min
+  pollTime: 1000 * 60 * 1,
   shouldFetch: () => {
     const pollRange = {
       from: 8,
@@ -37,10 +61,13 @@ export const dataExchange = new DataExchange<PRExchangeModel[]>({
     const sourceData = await azureSharedClient.getPullRequests();
     const data = sourceData.map(
       (pr): PRExchangeModel => ({
+        pullRequestId: String(pr.pullRequestId),
         title: pr.title!,
         author: pr.createdBy?.displayName!,
         creationDate: dayjs(pr.creationDate as unknown as string).toISOString(),
         url: getPullRequestUrl(String(pr.pullRequestId)),
+        mergeStatus: pr.mergeStatus || "notSet",
+        status: pr.status,
       })
     );
     return data;
@@ -50,10 +77,15 @@ export const dataExchange = new DataExchange<PRExchangeModel[]>({
     const data = replicaData
       .filter(({ creationDate }) => !!creationDate)
       .map(
-        ({ title, author, creationDate }): PRExchangeModel => ({
-          title,
-          author,
-          creationDate: dayjs(creationDate).toISOString(),
+        (page): PRExchangeModel => ({
+          pageId: page.id,
+          pullRequestId: page.pullRequestId,
+          title: page.title,
+          author: page.author,
+          creationDate: dayjs(page.creationDate).toISOString(),
+          url: page.url,
+          mergeStatus: page.mergeStatus as PullRequestModel["mergeStatus"],
+          status: page.status as PullRequestModel["status"],
         })
       );
     return data;
@@ -63,27 +95,40 @@ export const dataExchange = new DataExchange<PRExchangeModel[]>({
       return false;
     }
 
-    const sourceMap = source.map(({ title }) => title);
-    const replicaMap = replica.map(({ title }) => title);
-    const matches = intersection(sourceMap, replicaMap);
+    for (const sourceItem of source) {
+      const replicaItem = findReplicaItem(replica, {
+        pullRequestId: sourceItem.pullRequestId,
+        url: sourceItem.url,
+      });
 
-    const diff = difference(sourceMap, matches);
+      if (replicaItem) {
+        if (!equals(sourceItem, replicaItem)) {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    }
 
-    return !diff.length;
+    return true;
   },
   insert: async ({ source, replica }) => {
-    if (source && replica) {
-      const sourceMap = source.map(({ title }) => title);
-      const replicaMap = replica.map(({ title }) => title);
+    if (!source || !replica) {
+      return;
+    }
 
-      const dataToInsert = difference(sourceMap, replicaMap);
-      // const dataToUpdate = intersection(source, replica);
+    for (const sourceItem of source) {
+      const replicaItem = findReplicaItem(replica, {
+        pullRequestId: sourceItem.pullRequestId,
+        url: sourceItem.url,
+      });
 
-      for (const prTitle of dataToInsert) {
-        const pr = source.find(({ title }) => title === prTitle);
-        if (pr) {
-          await notion.insertPr(pr);
+      if (replicaItem) {
+        if (!equals(sourceItem, replicaItem) && replicaItem.pageId) {
+          await notion.upsertPr(sourceItem, replicaItem.pageId);
         }
+      } else {
+        await notion.upsertPr(sourceItem);
       }
     }
   },
@@ -92,8 +137,9 @@ export const dataExchange = new DataExchange<PRExchangeModel[]>({
 export const dataExchangeRouter = express.Router();
 
 dataExchangeRouter.get("/status", (_, res) => {
+  const { lastExchange: __, ...status } = dataExchange.getStatus();
   res.status(200).json({
-    status: dataExchange.getStatus(),
+    status,
   });
 });
 
@@ -110,8 +156,10 @@ dataExchangeRouter.post("/set", (req, res) => {
       dataExchange.setPollTime(+pollTime);
     }
 
+    const { lastExchange: __, ...status } = dataExchange.getStatus();
+
     res.status(200).json({
-      status: dataExchange.getStatus(),
+      status,
     });
   } else {
     res.status(400).json(payload.error.toString());
