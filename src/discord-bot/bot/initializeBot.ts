@@ -79,15 +79,15 @@ export const initializeBot = () => {
 
       if (data) {
         const workItem = await azureSharedClient.createWorkItem(data);
-        const guildRole = await discord.role('dev');
+        const guildRole = discord.mention({ roles:'dev' });
     
         const content = derive(()=> {
           const workItemLink = `Azure Work Item: https://dev.azure.com/ptbcp/IT.DIT/_workitems/edit/${workItem.id}`;
-          
+
           if(guildRole) {
-            return `<@&${guildRole.id}> ${workItemLink}`
+            return `${guildRole} - ${workItemLink}`;
           } else {
-            return workItemLink
+            return workItemLink;
           }
         })
 
