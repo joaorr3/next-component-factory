@@ -16,6 +16,7 @@ import { channelUpdateHandler } from "./events/channelUpdate";
 import { guildRolesHandler } from "./events/guildRoles";
 import { BotLog } from "./utils";
 import { extractThreadData } from "./utils/help";
+import { derive } from "../../shared/utils";
 
 export const initializeBot = () => {
   discord.client?.once(Discord.Events.ClientReady, async () => {
@@ -78,9 +79,20 @@ export const initializeBot = () => {
 
       if (data) {
         const workItem = await azureSharedClient.createWorkItem(data);
+        const guildRole = discord.mention({ roles:'dev' });
+    
+        const content = derive(()=> {
+          const workItemLink = `Azure Work Item: https://dev.azure.com/ptbcp/IT.DIT/_workitems/edit/${workItem.id}`;
+
+          if(guildRole) {
+            return `${guildRole} - ${workItemLink}`;
+          } else {
+            return workItemLink;
+          }
+        })
 
         await thread.send({
-          content: `Azure Work Item: https://dev.azure.com/ptbcp/IT.DIT/_workitems/edit/${workItem.id}`,
+          content,
         });
 
         logger.db.discord({
