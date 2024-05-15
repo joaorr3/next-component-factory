@@ -70,11 +70,21 @@ export class DiscordClient {
   private static _instance: DiscordClient = new DiscordClient();
 
   private constructor() {
+    this.start();
+  }
+
+  public start() {
+    console.log("DiscordClient.start");
     this.client.login(env.DISCORD_BOT_TOKEN);
 
     this.client.once(Discord.Events.ClientReady, () => {
       this.setGuild();
     });
+  }
+
+  public destroy() {
+    console.log("DiscordClient.destroy");
+    this.client.destroy();
   }
 
   public static get Instance(): DiscordClient {

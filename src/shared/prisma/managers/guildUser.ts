@@ -73,6 +73,55 @@ export class GuildUserManager {
     }
   }
 
+  async getNotionUsers() {
+    try {
+      const users = await this.client.guildUser.findMany({
+        where: {
+          notionUser: {
+            isNot: null,
+          },
+        },
+        include: {
+          notionUser: true,
+        },
+      });
+
+      if (users) {
+        return users.map((user) => ({
+          name: user.friendlyName,
+          azureUserId: user.azureUserId,
+          notionUserId: user.notionUser?.notionUserId,
+        }));
+      }
+
+      return [];
+    } catch (error) {
+      console.log("prisma:error:getNotionUsers: ", error);
+      return [];
+    }
+  }
+
+  async getNotionUserIdByAzureUserId(azureUserId: string) {
+    try {
+      const user = await this.client.guildUser.findUnique({
+        where: {
+          azureUserId,
+        },
+        include: {
+          notionUser: true,
+        },
+      });
+
+      if (user) {
+        return user.notionUser?.notionUserId;
+      }
+
+      return undefined;
+    } catch (error) {
+      console.log("prisma:error:getNotionUserIdByAzureUserId: ", error);
+    }
+  }
+
   async getGuildUserByFriendlyName(friendlyName: string) {
     const friendlyNameOnlyText = friendlyName.replace(/\s/g, "");
     const friendlyNameOnlyTextWithoutAccents = friendlyName.replace(

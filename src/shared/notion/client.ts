@@ -13,12 +13,15 @@ import type {
 } from "../../utils/validators/notion";
 import { c18Avatar } from "../dataUtils";
 import logger from "../logger";
-import type { NotionIssueDetailsModel } from "../models";
+import type {
+  NotionIssueDetailsModel,
+  PRExchangeModel,
+  PullRequestModel,
+} from "../models";
 
 import dedent from "dedent";
 import { camelCase } from "lodash";
 import { ErrorHandler } from "../../utils/error";
-import type { PullRequestModel } from "../azure";
 import { derive } from "../utils";
 import {
   bookmark,
@@ -82,9 +85,11 @@ class Notion {
       id: string;
       title: string;
       author: string;
+      notionUserId: string;
       creationDate: string;
       url?: string;
       pullRequestId: string;
+      commitId: string;
       mergeStatus: string;
       status: string;
     }> = [];
@@ -110,6 +115,12 @@ class Notion {
             }
             return "";
           }),
+          notionUserId: derive(() => {
+            if (page.properties["Person"].type === "people") {
+              return page.properties["Person"].people[0]?.id || "";
+            }
+            return "";
+          }),
           creationDate: derive(() => {
             if (page.properties["Creation Date"].type === "date") {
               return page.properties["Creation Date"].date?.start || "";
@@ -125,6 +136,12 @@ class Notion {
           pullRequestId: derive(() => {
             if (page.properties["pullRequestId"]?.type === "rich_text") {
               return page.properties["pullRequestId"]?.rich_text[0]?.plain_text;
+            }
+            return "";
+          }),
+          commitId: derive(() => {
+            if (page.properties["commitId"]?.type === "rich_text") {
+              return page.properties["commitId"]?.rich_text[0]?.plain_text;
             }
             return "";
           }),
@@ -288,18 +305,7 @@ class Notion {
    * Create or update PR page
    */
   @ErrorHandler({ code: "NOTION", message: "insertPr" })
-  async upsertPr(
-    data: {
-      pullRequestId: string;
-      title: string;
-      author?: string;
-      creationDate?: string;
-      url?: string;
-      mergeStatus: PullRequestModel["mergeStatus"];
-      status: PullRequestModel["status"];
-    },
-    pageId?: string
-  ) {
+  async upsertPr(data: PRExchangeModel, pageId?: string) {
     const properties = {
       title: {
         title: [{ type: "text", text: { content: data.title } }],
@@ -314,10 +320,27 @@ class Notion {
           },
         ],
       },
+      commitId: {
+        rich_text: [
+          {
+            type: "text",
+            text: {
+              content: data.commitId,
+            },
+          },
+        ],
+      },
       Author: {
         select: {
           name: data.author || "CF Dev",
         },
+      },
+      Person: {
+        people: [
+          {
+            id: data.notionUserId,
+          },
+        ],
       },
       "Merge Status": {
         select: {
@@ -1069,6 +1092,15 @@ class Notion {
         message: `updatePageAssignTo: ${error}`,
       });
     }
+  }
+
+  @ErrorHandler({ code: "NOTION", message: "logDatabase" })
+  async queryDatabase(id: string) {
+    const database = await this.client.databases.query({
+      database_id: id,
+    });
+
+    return database;
   }
 }
 

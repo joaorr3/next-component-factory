@@ -1,85 +1,132 @@
 import * as Azure from "azure-devops-node-api";
-import {
-  type GitPullRequest,
-  type GitRepository,
-} from "azure-devops-node-api/interfaces/GitInterfaces";
+import { type GitRepository } from "azure-devops-node-api/interfaces/GitInterfaces";
+import dayjs from "dayjs";
 import { env } from "../env/server";
+import { ErrorHandler } from "../utils/error";
+import type { PRExchangeModel } from "./models";
+import { mergeStatusMap, statusMap, type PullRequestModel } from "./models";
+import { getPullRequestUrl } from "./utils";
 
 const orgUrl = "https://dev.azure.com/ptbcp";
 
 const authHandler = Azure.getPersonalAccessTokenHandler(env.AZURE_TOKEN);
-
-const mergeStatusMap = {
-  0: "notSet",
-  1: "queued",
-  2: "conflicts",
-  3: "succeeded",
-  4: "rejectedByPolicy",
-  5: "failure",
-} as const;
-
-const statusMap = {
-  0: "NotSet",
-  1: "Active",
-  2: "Abandoned",
-  3: "Completed",
-  4: "All",
-} as const;
-
-export type PullRequestModel = Omit<
-  GitPullRequest,
-  "mergeStatus" | "status"
-> & {
-  mergeStatus: (typeof mergeStatusMap)[keyof typeof mergeStatusMap];
-  status: (typeof statusMap)[keyof typeof statusMap];
-};
 
 export class AzureClient {
   public client = new Azure.WebApi(orgUrl, authHandler);
 
   private static _instance: AzureClient = new AzureClient();
   public designSystemRepo: GitRepository | null = null;
+  private designSystemRepoId = "";
 
   private constructor() {
-    this.connect();
+    this.initialize();
   }
 
-  private async connect() {
+  private async initialize() {
     await this.client.connect();
+    await this.setRepo();
   }
 
-  public async getPullRequests(): Promise<PullRequestModel[]> {
-    const gitApi = await this.client.getGitApi();
-
+  @ErrorHandler({ code: "AZURE", message: "setRepo" })
+  private async setRepo() {
     if (!this.designSystemRepo) {
+      const gitApi = await this.client.getGitApi();
       const repos = await gitApi.getRepositories();
       const designSystemRepo = repos.find(
         (repo) => repo.name === "BCP.DesignSystem"
       );
-      if (designSystemRepo) {
+      if (designSystemRepo && designSystemRepo.id) {
         this.designSystemRepo = designSystemRepo;
+        this.designSystemRepoId = designSystemRepo.id;
       }
     }
-
-    if (this.designSystemRepo?.id) {
-      const dsPullRequests =
-        (await gitApi.getPullRequests(this.designSystemRepo.id, {
-          status: 4,
-        })) || [];
-
-      return dsPullRequests.map((pr) => {
-        return {
-          ...pr,
-          mergeStatus:
-            mergeStatusMap[pr.mergeStatus as keyof typeof mergeStatusMap],
-          status: statusMap[pr.status as keyof typeof statusMap],
-        };
-      }) as unknown as PullRequestModel[];
-    }
-
-    return [] as PullRequestModel[];
   }
 
+  @ErrorHandler({ code: "AZURE", message: "getDevelopCommits" })
+  private async getDevelopCommits(): Promise<PRExchangeModel[]> {
+    const gitApi = await this.client.getGitApi();
+
+    const commits = (
+      await gitApi.getCommits(this.designSystemRepoId, {
+        fromDate: "2024-04-05T00:00:00.000Z",
+        itemVersion: {
+          version: "develop",
+        },
+        includePushData: true,
+      })
+    )
+      .filter(
+        ({ comment }) =>
+          comment?.startsWith("feat") || comment?.startsWith("fix")
+      )
+      .map((commit): PRExchangeModel => {
+        return {
+          pullRequestId: commit.commitId!,
+          commitId: commit.commitId!,
+          title: commit.comment!,
+          url: commit.remoteUrl,
+          mergeStatus: "succeeded",
+          status: "Completed",
+          author: commit.author?.name,
+          creationDate: dayjs(commit.author?.date!).toISOString(),
+          authorId: commit.push?.pushedBy?.id,
+        };
+      });
+
+    return commits;
+  }
+
+  @ErrorHandler({ code: "AZURE", message: "getDetailedPullRequests" })
+  public async getDetailedPullRequests(): Promise<PullRequestModel[]> {
+    const gitApi = await this.client.getGitApi();
+
+    const dsPullRequests =
+      (await gitApi.getPullRequests(this.designSystemRepoId, {
+        status: 4,
+      })) || [];
+
+    return dsPullRequests.map((pr) => {
+      return {
+        ...pr,
+        mergeStatus:
+          mergeStatusMap[pr.mergeStatus as keyof typeof mergeStatusMap],
+        status: statusMap[pr.status as keyof typeof statusMap],
+      };
+    }) as unknown as PullRequestModel[];
+  }
+
+  @ErrorHandler({ code: "AZURE", message: "getPullRequests" })
+  public async getPullRequests(): Promise<PRExchangeModel[]> {
+    const detailedPrs = await this.getDetailedPullRequests();
+
+    return detailedPrs.map(
+      (pr): PRExchangeModel => ({
+        pullRequestId: String(pr.pullRequestId),
+        title: pr.title!,
+        author: pr.createdBy?.displayName!,
+        creationDate: dayjs(pr.creationDate as unknown as string).toISOString(),
+        url: getPullRequestUrl(String(pr.pullRequestId)),
+        mergeStatus: pr.mergeStatus || "notSet",
+        status: pr.status,
+        commitId: pr.lastMergeCommit?.commitId || "",
+        authorId: pr.createdBy?.id,
+      })
+    );
+  }
+
+  @ErrorHandler({ code: "AZURE", message: "getReleaseItems" })
+  public async getReleaseItems(): Promise<PRExchangeModel[]> {
+    const developCommits = await this.getDevelopCommits();
+    const pullRequests = await this.getPullRequests();
+
+    const releaseItemsWithoutPR = developCommits.filter(
+      (cmt) => !pullRequests.some((pr) => cmt.commitId === pr.commitId)
+    );
+
+    return pullRequests.concat(releaseItemsWithoutPR);
+  }
+
+  @ErrorHandler({ code: "AZURE", message: "createWorkItem" })
   public async createWorkItem({
     title,
     description,

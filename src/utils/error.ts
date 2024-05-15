@@ -3,6 +3,7 @@ export type ErrorScope =
   | "NOTION"
   | "PRISMA"
   | "DATA_EXCHANGE"
+  | "AZURE"
   | "UNKNOWN";
 
 type ServiceErrorOptions = {
@@ -78,6 +79,15 @@ export const handledServiceCall = <T>(
   try {
     return fn();
   } catch (error) {
+    console.error(
+      new ServiceError({
+        code,
+        message,
+        cause: error,
+      })
+    );
+    return undefined as T;
+
     throw new ServiceError({
       code,
       message,

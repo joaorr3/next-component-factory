@@ -2,24 +2,12 @@ import dayjs from "dayjs";
 import express from "express";
 import { find, isEqual } from "lodash";
 import { z } from "zod";
-import type { PullRequestModel } from "../../shared/azure";
 import { azureSharedClient } from "../../shared/azure";
+import type { PullRequestModel } from "../../shared/models";
+import { type PRExchangeModel } from "../../shared/models";
 import notion from "../../shared/notion";
-import { DataExchange, getPullRequestUrl } from "../../shared/utils";
-
-type PRExchangeModel = {
-  /**
-   * Notion
-   */
-  pageId?: string;
-  pullRequestId: string;
-  title: string;
-  author?: string;
-  creationDate?: string;
-  url?: string;
-  mergeStatus: PullRequestModel["mergeStatus"];
-  status: PullRequestModel["status"];
-};
+import { prismaSharedClient } from "../../shared/prisma/client";
+import { DataExchange } from "../../shared/utils";
 
 export const dataExchangeBodySchema = z.object({
   action: z.enum(["start", "stop"]).optional(),
@@ -39,8 +27,13 @@ const findReplicaItem = (
 };
 
 const equals = (source: PRExchangeModel, replica: PRExchangeModel) => {
-  const { pageId: _1, creationDate: _2, ...sourceRest } = source;
-  const { pageId: _3, creationDate: _4, ...replicaRest } = replica;
+  const { pageId: _1, creationDate: _2, authorId: _3, ...sourceRest } = source;
+  const {
+    pageId: __1,
+    creationDate: __2,
+    authorId: __3,
+    ...replicaRest
+  } = replica;
   return isEqual(sourceRest, replicaRest);
 };
 
@@ -58,19 +51,17 @@ export const dataExchange = new DataExchange<PRExchangeModel[]>({
     return should;
   },
   fetchSource: async () => {
-    const sourceData = await azureSharedClient.getPullRequests();
-    const data = sourceData.map(
-      (pr): PRExchangeModel => ({
-        pullRequestId: String(pr.pullRequestId),
-        title: pr.title!,
-        author: pr.createdBy?.displayName!,
-        creationDate: dayjs(pr.creationDate as unknown as string).toISOString(),
-        url: getPullRequestUrl(String(pr.pullRequestId)),
-        mergeStatus: pr.mergeStatus || "notSet",
-        status: pr.status,
+    const notionUsers = await prismaSharedClient.guildUser.getNotionUsers();
+    const releaseItems = await azureSharedClient.getReleaseItems();
+
+    return releaseItems.map(
+      (item): PRExchangeModel => ({
+        ...item,
+        notionUserId: notionUsers.find(
+          ({ azureUserId }) => item.authorId === azureUserId
+        )?.notionUserId,
       })
     );
-    return data;
   },
   fetchReplica: async () => {
     const replicaData = await notion.getAllPrs();
@@ -86,6 +77,8 @@ export const dataExchange = new DataExchange<PRExchangeModel[]>({
           url: page.url,
           mergeStatus: page.mergeStatus as PullRequestModel["mergeStatus"],
           status: page.status as PullRequestModel["status"],
+          commitId: page.commitId,
+          notionUserId: page.notionUserId,
         })
       );
     return data;
@@ -116,18 +109,22 @@ export const dataExchange = new DataExchange<PRExchangeModel[]>({
     if (!source || !replica) {
       return;
     }
-
     for (const sourceItem of source) {
       const replicaItem = findReplicaItem(replica, {
         pullRequestId: sourceItem.pullRequestId,
         url: sourceItem.url,
       });
-
       if (replicaItem) {
         if (!equals(sourceItem, replicaItem) && replicaItem.pageId) {
+          // console.log(
+          //   `update: ${sourceItem.title} | ${sourceItem.author} | ${sourceItem.notionUserId} | commitId: ${sourceItem.commitId}`
+          // );
           await notion.upsertPr(sourceItem, replicaItem.pageId);
         }
       } else {
+        // console.log(
+        //   `insert: ${sourceItem.title} | ${sourceItem.author}| commitId: ${sourceItem.commitId}`
+        // );
         await notion.upsertPr(sourceItem);
       }
     }
@@ -136,7 +133,18 @@ export const dataExchange = new DataExchange<PRExchangeModel[]>({
 
 export const dataExchangeRouter = express.Router();
 
-dataExchangeRouter.get("/status", (_, res) => {
+dataExchangeRouter.get("/status", async (_, res) => {
+  // const teamDb = await notion.queryDatabase("feae753976d7403584ff2c1708764ad1");
+
+  // console.log(
+  //   teamDb.results.map((page) => ({
+  //     // @ts-ignore
+  //     name: page.properties["Name"].title[0].plain_text,
+  //     // @ts-ignore
+  //     person: page.properties["Person"].people[0],
+  //   }))
+  // );
+
   const { lastExchange: __, ...status } = dataExchange.getStatus();
   res.status(200).json({
     status,

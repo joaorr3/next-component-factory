@@ -1,6 +1,7 @@
 import React from "react";
 import type { CronJob, CronJobBodySchema } from "../../router/cronJobs";
 import type { DataExchangeBodySchema } from "../../router/dataExchange";
+import type { DiscordBotAction } from "../../router/discordBot";
 
 const createDataExchangePayload = (options: DataExchangeBodySchema) => {
   return JSON.stringify(options);
@@ -10,65 +11,13 @@ const createCronJobPayload = (options: CronJobBodySchema) => {
 };
 
 export const App = () => {
-  const [status, setStatus] = React.useState<string>();
-
-  const inputPollTimeRef = React.useRef<HTMLInputElement>(null);
-
-  React.useEffect(() => {
-    getStatus();
-  }, []);
-
-  const getStatus = () => {
-    fetch("data-exchange/status")
-      .then((res) => res.json())
-      .then((data) => {
-        setStatus(data);
-      });
-  };
-
-  const setOptions = (options: DataExchangeBodySchema) => {
-    fetch("data-exchange/set", {
-      method: "POST",
-      credentials: "same-origin",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: createDataExchangePayload(options),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setStatus(data);
-      });
-  };
-
-  const handleSetPollTime = () => {
-    const value = inputPollTimeRef.current?.value;
-
-    if (value) {
-      setOptions({
-        pollTime: value,
-      });
-    }
-  };
-
   return (
     <div>
       <Jobs />
       <hr />
-
-      <h4>Data Exchange</h4>
-      <pre>{JSON.stringify(status, undefined, 2)}</pre>
-      <button onClick={getStatus}>Get Status</button>
-
-      <div style={{ display: "flex" }}>
-        <button onClick={() => setOptions({ action: "start" })}>Start</button>
-        <button onClick={() => setOptions({ action: "stop" })}>Stop</button>
-      </div>
-
-      <div style={{ display: "flex", gap: 16 }}>
-        <input ref={inputPollTimeRef} type="text" name="poll-time" />
-        <button onClick={handleSetPollTime}>Update Poll time</button>
-      </div>
+      <DataExchange />
+      <hr />
+      <DiscordBot />
     </div>
   );
 };
@@ -177,6 +126,103 @@ const Jobs = () => {
           </div>
         </React.Fragment>
       )}
+    </div>
+  );
+};
+
+const DataExchange = () => {
+  const [status, setStatus] = React.useState<string>();
+
+  const inputPollTimeRef = React.useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    getStatus();
+  }, []);
+
+  const getStatus = () => {
+    fetch("data-exchange/status")
+      .then((res) => res.json())
+      .then((data) => {
+        setStatus(data);
+      });
+  };
+
+  const setOptions = (options: DataExchangeBodySchema) => {
+    fetch("data-exchange/set", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: createDataExchangePayload(options),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setStatus(data);
+      });
+  };
+
+  const handleSetPollTime = () => {
+    const value = inputPollTimeRef.current?.value;
+
+    if (value) {
+      setOptions({
+        pollTime: value,
+      });
+    }
+  };
+
+  return (
+    <div>
+      <h4>Data Exchange</h4>
+      <pre>{JSON.stringify(status, undefined, 2)}</pre>
+      <button onClick={getStatus}>Get Status</button>
+
+      <div style={{ display: "flex" }}>
+        <button onClick={() => setOptions({ action: "start" })}>Start</button>
+        <button onClick={() => setOptions({ action: "stop" })}>Stop</button>
+      </div>
+
+      <div style={{ display: "flex", gap: 16 }}>
+        <input ref={inputPollTimeRef} type="text" name="poll-time" />
+        <button onClick={handleSetPollTime}>Update Poll time</button>
+      </div>
+    </div>
+  );
+};
+
+const DiscordBot = () => {
+  const [status, setStatus] = React.useState<string>();
+
+  React.useEffect(() => {
+    getStatus();
+  }, []);
+
+  const getStatus = () => {
+    fetch("discord-bot")
+      .then((res) => res.json())
+      .then((data) => {
+        setStatus(data);
+      });
+  };
+
+  const setBotState = (action: DiscordBotAction) => {
+    fetch(`discord-bot/${action}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setStatus(data);
+      });
+  };
+
+  return (
+    <div>
+      <h4>Discord Bot</h4>
+      <div style={{ display: "flex" }}>
+        <button onClick={() => setBotState("start")}>Start</button>
+        <button onClick={() => setBotState("destroy")}>Destroy</button>
+      </div>
+
+      <pre>{JSON.stringify(status, undefined, 2)}</pre>
     </div>
   );
 };

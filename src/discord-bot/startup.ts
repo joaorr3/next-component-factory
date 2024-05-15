@@ -4,6 +4,7 @@ import { env } from "../env/server";
 import { initializeBot } from "./bot";
 import { cronJobsRouter, initCronJobs } from "./router/cronJobs";
 import { dataExchangeRouter } from "./router/dataExchange";
+import { discordBotRouter } from "./router/discordBot";
 
 const startApp = () => {
   const app = express();
@@ -28,6 +29,7 @@ const startApp = () => {
 
   app.use("/data-exchange", dataExchangeRouter);
   app.use("/cron-jobs", cronJobsRouter);
+  app.use("/discord-bot", discordBotRouter);
 
   app.listen(+env.PORT, "0.0.0.0", () => {
     console.log(`Example app listening on port ${env.PORT}`);
