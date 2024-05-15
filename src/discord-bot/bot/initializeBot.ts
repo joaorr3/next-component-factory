@@ -98,7 +98,7 @@ export const initializeBot = () => {
         logger.db.discord({
           level: "info",
           message: JSON.stringify(
-            { title: "createWorkItem",  payload: workItem.id },
+            { title: "createWorkItem", payload: workItem.id },
             undefined,
             2
           ),
