@@ -16,7 +16,7 @@ export class AzureClient {
 
   private static _instance: AzureClient = new AzureClient();
   public designSystemRepo: GitRepository | null = null;
-  private designSystemRepoId = "";
+  private designSystemRepoId = "caa5a412-6db0-4692-9050-7813ed49125f";
 
   private constructor() {
     this.initialize();
@@ -24,22 +24,6 @@ export class AzureClient {
 
   private async initialize() {
     await this.client.connect();
-    await this.setRepo();
-  }
-
-  @ErrorHandler({ code: "AZURE", message: "setRepo" })
-  private async setRepo() {
-    if (!this.designSystemRepo) {
-      const gitApi = await this.client.getGitApi();
-      const repos = await gitApi.getRepositories();
-      const designSystemRepo = repos.find(
-        (repo) => repo.name === "BCP.DesignSystem"
-      );
-      if (designSystemRepo && designSystemRepo.id) {
-        this.designSystemRepo = designSystemRepo;
-        this.designSystemRepoId = designSystemRepo.id;
-      }
-    }
   }
 
   @ErrorHandler({ code: "AZURE", message: "getDevelopCommits" })
