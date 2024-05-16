@@ -18,23 +18,54 @@ export type DataExchangeBodySchema = z.infer<typeof dataExchangeBodySchema>;
 
 const findReplicaItem = (
   replica: PRExchangeModel[],
-  params: Pick<PRExchangeModel, "url" | "pullRequestId">
+  params: Pick<PRExchangeModel, "url" | "pullRequestId" | "commitId" | "title">
 ) => {
   return find(
     replica,
-    (r) => r.url === params.url || r.pullRequestId === params.pullRequestId
+    (r) =>
+      r.url === params.url ||
+      r.pullRequestId === params.pullRequestId ||
+      r.commitId === params.commitId ||
+      r.title === params.title
   );
 };
 
-const equals = (source: PRExchangeModel, replica: PRExchangeModel) => {
-  const { pageId: _1, creationDate: _2, authorId: _3, ...sourceRest } = source;
-  const {
-    pageId: __1,
-    creationDate: __2,
-    authorId: __3,
-    ...replicaRest
-  } = replica;
-  return isEqual(sourceRest, replicaRest);
+type EqualShape = Pick<
+  PRExchangeModel,
+  // | "pullRequestId"
+  // | "commitId"
+  | "title"
+  // | "author"
+  // | "notionUserId"
+  // | "url"
+  | "mergeStatus"
+  | "status"
+>;
+
+const shouldUpdate = (source: PRExchangeModel, replica: PRExchangeModel) => {
+  const a: EqualShape = {
+    // pullRequestId: source.pullRequestId,
+    // commitId: source.commitId,
+    title: source.title,
+    // author: source.author,
+    // notionUserId: source.notionUserId,
+    // url: source.url,
+    mergeStatus: source.mergeStatus,
+    status: source.status,
+  };
+
+  const b: EqualShape = {
+    // pullRequestId: replica.pullRequestId,
+    // commitId: replica.commitId,
+    title: replica.title,
+    // author: replica.author,
+    // notionUserId: replica.notionUserId,
+    // url: replica.url,
+    mergeStatus: replica.mergeStatus,
+    status: replica.status,
+  };
+
+  return !isEqual(a, b);
 };
 
 export const dataExchange = new DataExchange<PRExchangeModel[]>({
@@ -92,10 +123,12 @@ export const dataExchange = new DataExchange<PRExchangeModel[]>({
       const replicaItem = findReplicaItem(replica, {
         pullRequestId: sourceItem.pullRequestId,
         url: sourceItem.url,
+        commitId: sourceItem.commitId,
+        title: sourceItem.title,
       });
 
       if (replicaItem) {
-        if (!equals(sourceItem, replicaItem)) {
+        if (shouldUpdate(sourceItem, replicaItem)) {
           return false;
         }
       } else {
@@ -113,9 +146,11 @@ export const dataExchange = new DataExchange<PRExchangeModel[]>({
       const replicaItem = findReplicaItem(replica, {
         pullRequestId: sourceItem.pullRequestId,
         url: sourceItem.url,
+        commitId: sourceItem.commitId,
+        title: sourceItem.title,
       });
       if (replicaItem) {
-        if (!equals(sourceItem, replicaItem) && replicaItem.pageId) {
+        if (shouldUpdate(sourceItem, replicaItem) && replicaItem.pageId) {
           // console.log(
           //   `update: ${sourceItem.title} | ${sourceItem.author} | ${sourceItem.notionUserId} | commitId: ${sourceItem.commitId}`
           // );

@@ -79,4 +79,5 @@ export type PRExchangeModel = {
   url?: string;
   mergeStatus: PullRequestModel["mergeStatus"];
   status: PullRequestModel["status"];
+  type?: "commit" | "pullRequest";
 };

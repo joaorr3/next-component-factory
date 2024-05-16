@@ -45,8 +45,8 @@ export class AzureClient {
       )
       .map((commit): PRExchangeModel => {
         return {
-          pullRequestId: commit.commitId!,
           commitId: commit.commitId!,
+          pullRequestId: "",
           title: commit.comment!,
           url: commit.remoteUrl,
           mergeStatus: "succeeded",
@@ -54,6 +54,7 @@ export class AzureClient {
           author: commit.author?.name,
           creationDate: dayjs(commit.author?.date!).toISOString(),
           authorId: commit.push?.pushedBy?.id,
+          type: "commit",
         };
       });
 
@@ -86,14 +87,15 @@ export class AzureClient {
     return detailedPrs.map(
       (pr): PRExchangeModel => ({
         pullRequestId: String(pr.pullRequestId),
+        commitId: "",
         title: pr.title!,
         author: pr.createdBy?.displayName!,
         creationDate: dayjs(pr.creationDate as unknown as string).toISOString(),
         url: getPullRequestUrl(String(pr.pullRequestId)),
         mergeStatus: pr.mergeStatus || "notSet",
         status: pr.status,
-        commitId: pr.lastMergeCommit?.commitId || "",
         authorId: pr.createdBy?.id,
+        type: "pullRequest",
       })
     );
   }
