@@ -149,17 +149,18 @@ export const dataExchange = new DataExchange<PRExchangeModel[]>({
         commitId: sourceItem.commitId,
         title: sourceItem.title,
       });
+
       if (replicaItem) {
         if (shouldUpdate(sourceItem, replicaItem) && replicaItem.pageId) {
-          // console.log(
-          //   `update: ${sourceItem.title} | ${sourceItem.author} | ${sourceItem.notionUserId} | commitId: ${sourceItem.commitId}`
-          // );
+          console.log(
+            `update: ${sourceItem.title} | ${sourceItem.author} | ${sourceItem.notionUserId} | commitId: ${sourceItem.commitId}`
+          );
           await notion.upsertPr(sourceItem, replicaItem.pageId);
         }
       } else {
-        // console.log(
-        //   `insert: ${sourceItem.title} | ${sourceItem.author}| commitId: ${sourceItem.commitId}`
-        // );
+        console.log(
+          `insert: ${sourceItem.title} | ${sourceItem.author}| commitId: ${sourceItem.commitId}`
+        );
         await notion.upsertPr(sourceItem);
       }
     }

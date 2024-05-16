@@ -335,13 +335,17 @@ class Notion {
           name: data.author || "CF Dev",
         },
       },
-      Person: {
-        people: [
-          {
-            id: data.notionUserId,
-          },
-        ],
-      },
+      ...(data.notionUserId
+        ? {
+            Person: {
+              people: [
+                {
+                  id: data.notionUserId,
+                },
+              ],
+            },
+          }
+        : {}),
       "Merge Status": {
         select: {
           name: data.mergeStatus || "notSet",

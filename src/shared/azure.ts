@@ -66,18 +66,30 @@ export class AzureClient {
     const gitApi = await this.client.getGitApi();
 
     const dsPullRequests =
-      (await gitApi.getPullRequests(this.designSystemRepoId, {
-        status: 4,
-      })) || [];
+      (await gitApi.getPullRequests(
+        this.designSystemRepoId,
+        {
+          status: 4,
+        },
+        undefined,
+        undefined,
+        undefined,
+        800
+      )) || [];
 
-    return dsPullRequests.map((pr) => {
-      return {
-        ...pr,
-        mergeStatus:
-          mergeStatusMap[pr.mergeStatus as keyof typeof mergeStatusMap],
-        status: statusMap[pr.status as keyof typeof statusMap],
-      };
-    }) as unknown as PullRequestModel[];
+    return dsPullRequests
+      .map((pr) => {
+        return {
+          ...pr,
+          mergeStatus:
+            mergeStatusMap[pr.mergeStatus as keyof typeof mergeStatusMap],
+          status: statusMap[pr.status as keyof typeof statusMap],
+        };
+      })
+      .filter(
+        // We don't care about without a lastMergeCommit or drafts
+        ({ lastMergeCommit, isDraft }) => !!lastMergeCommit && !isDraft
+      ) as unknown as PullRequestModel[];
   }
 
   @ErrorHandler({ code: "AZURE", message: "getPullRequests" })
@@ -87,7 +99,7 @@ export class AzureClient {
     return detailedPrs.map(
       (pr): PRExchangeModel => ({
         pullRequestId: String(pr.pullRequestId),
-        commitId: "",
+        commitId: pr.lastMergeCommit?.commitId!,
         title: pr.title!,
         author: pr.createdBy?.displayName!,
         creationDate: dayjs(pr.creationDate as unknown as string).toISOString(),
