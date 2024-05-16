@@ -1,4 +1,5 @@
 import React from "react";
+import "./App.css";
 import type { CronJob, CronJobBodySchema } from "../../router/cronJobs";
 import type { DataExchangeBodySchema } from "../../router/dataExchange";
 import type { DiscordBotAction } from "../../router/discordBot";
@@ -78,7 +79,7 @@ const Jobs = () => {
   }, [selectedJob]);
 
   return (
-    <div>
+    <div className="card">
       <h4>Cron Jobs</h4>
 
       <pre>{JSON.stringify(jobDetails, undefined, 2)}</pre>
@@ -132,11 +133,20 @@ const Jobs = () => {
 
 const DataExchange = () => {
   const [status, setStatus] = React.useState<string>();
+  const interval = React.useRef<NodeJS.Timer>();
 
   const inputPollTimeRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
     getStatus();
+
+    interval.current = setInterval(() => {
+      getStatus();
+    }, 5_000);
+
+    return () => {
+      clearInterval(interval.current);
+    };
   }, []);
 
   const getStatus = () => {
@@ -173,10 +183,13 @@ const DataExchange = () => {
   };
 
   return (
-    <div>
+    <div className="card" style={{ display: "flex", flexDirection: "column" }}>
       <h4>Data Exchange</h4>
       <pre>{JSON.stringify(status, undefined, 2)}</pre>
-      <button onClick={getStatus}>Get Status</button>
+
+      <div style={{ display: "flex" }}>
+        <button onClick={getStatus}>Get Status</button>
+      </div>
 
       <div style={{ display: "flex" }}>
         <button onClick={() => setOptions({ action: "start" })}>Start</button>
@@ -215,7 +228,7 @@ const DiscordBot = () => {
   };
 
   return (
-    <div>
+    <div className="card">
       <h4>Discord Bot</h4>
       <div style={{ display: "flex" }}>
         <button onClick={() => setBotState("start")}>Start</button>

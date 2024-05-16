@@ -57,39 +57,76 @@ export const getFileTypeFromUrl = (url: string) => {
 export const getPullRequestUrl = (id?: string) =>
   `https://dev.azure.com/ptbcp/IT.DIT/_git/BCP.DesignSystem/pullrequest/${id}`;
 
+export type DataExchangeMetrics = {
+  source: {
+    calls: number;
+    dataLength: number;
+  };
+  replica: {
+    calls: number;
+    dataLength: number;
+  };
+  insert: {
+    calls: number;
+    dataLength: number;
+  };
+  isEqualFn: {
+    calls: number;
+  };
+};
+
+export type LastExchangeStatus<T> = {
+  iteration: number;
+  updates: T[];
+  inserts: T[];
+  timestamp?: string;
+};
+
 export class DataExchange<T> {
-  private source: T | null = null;
-  private replica: T | null = null;
+  private source: T[] = [];
+  private replica: T[] = [];
   private isEqual = false;
-  iterations = 0;
+  iteration = 0;
+  sourceCalls = 0;
+  replicaCalls = 0;
+  insertCalls = 0;
   signal = true;
   pollTime = 10_000;
   isWorking = false;
+  isInitialized = false;
 
-  private lastExchange: {
-    data: {
-      source?: T;
-      replica?: T;
-    };
-    timestamp?: string;
-  } = {
-    data: {
-      source: undefined,
-      replica: undefined,
+  private metrics: DataExchangeMetrics = {
+    source: {
+      calls: 0,
+      dataLength: 0,
     },
+    replica: {
+      calls: 0,
+      dataLength: 0,
+    },
+    insert: {
+      calls: 0,
+      dataLength: 0,
+    },
+    isEqualFn: {
+      calls: 0,
+    },
+  };
+
+  private lastExchange: LastExchangeStatus<T> = {
+    iteration: this.iteration,
+    updates: [],
+    inserts: [],
     timestamp: undefined,
   };
 
-  private fetchSource: () => Promise<T>;
-  private fetchReplica: () => Promise<T>;
-  private isEqualFn: (props: {
-    source: T | null;
-    replica: T | null;
-  }) => boolean;
+  private fetchSource: () => Promise<T[]>;
+  private fetchReplica: () => Promise<T[]>;
+  private isEqualFn: (props: { source: T[]; replica: T[] }) => boolean;
   private insertFn: (props: {
-    source: T | null;
-    replica: T | null;
-  }) => Promise<void>;
+    source: T[];
+    replica: T[];
+  }) => Promise<Omit<LastExchangeStatus<T>, "iteration">>;
   private shouldFetchFn: () => boolean;
 
   constructor({
@@ -101,10 +138,13 @@ export class DataExchange<T> {
     shouldFetch,
   }: {
     pollTime: number;
-    fetchSource: () => Promise<T>;
-    fetchReplica: () => Promise<T>;
-    insert: (props: { source: T | null; replica: T | null }) => Promise<void>;
-    isEqual: (props: { source: T | null; replica: T | null }) => boolean;
+    fetchSource: () => Promise<T[]>;
+    fetchReplica: () => Promise<T[]>;
+    insert: (props: {
+      source: T[];
+      replica: T[];
+    }) => Promise<Omit<LastExchangeStatus<T>, "iteration">>;
+    isEqual: (props: { source: T[]; replica: T[] }) => boolean;
     shouldFetch: () => boolean;
   }) {
     this.pollTime = pollTime;
@@ -113,11 +153,30 @@ export class DataExchange<T> {
     this.isEqualFn = isEqual;
     this.insertFn = insert;
     this.shouldFetchFn = shouldFetch;
+
+    this.initialize();
+  }
+
+  private async initialize() {
+    this.source = await this.fetchSource();
+    this.sourceCalls++;
+    this.metrics.source = {
+      calls: this.sourceCalls,
+      dataLength: this.source.length,
+    };
+    this.replica = await this.fetchReplica();
+    this.replicaCalls++;
+    this.metrics.replica = {
+      calls: this.replicaCalls,
+      dataLength: this.replica.length,
+    };
+    this.isInitialized = true;
   }
 
   public async start() {
     this.signal = true;
     if (!this.isWorking) {
+      await this.initialize();
       await this.beginWork();
     }
   }
@@ -125,10 +184,33 @@ export class DataExchange<T> {
   public stop() {
     this.signal = false;
     this.isWorking = false;
-    this.iterations = 0;
-    this.source = null;
-    this.replica = null;
+    this.iteration = 0;
+    this.source = [];
+    this.replica = [];
     this.isEqual = false;
+    this.metrics = {
+      source: {
+        calls: 0,
+        dataLength: 0,
+      },
+      replica: {
+        calls: 0,
+        dataLength: 0,
+      },
+      insert: {
+        calls: 0,
+        dataLength: 0,
+      },
+      isEqualFn: {
+        calls: 0,
+      },
+    };
+    this.lastExchange = {
+      iteration: this.iteration,
+      updates: [],
+      inserts: [],
+      timestamp: undefined,
+    };
   }
 
   @ErrorHandler({ code: "DATA_EXCHANGE", message: "beginWork Error" })
@@ -137,31 +219,49 @@ export class DataExchange<T> {
       return;
     }
 
-    if (this.shouldFetchFn()) {
-      this.iterations++;
+    if (this.shouldFetchFn() && this.isInitialized) {
+      this.iteration++;
       this.isWorking = true;
+
       this.source = await this.fetchSource();
+      this.sourceCalls++;
+      this.metrics.source = {
+        calls: this.sourceCalls,
+        dataLength: this.source.length,
+      };
 
       this.isEqual = this.isEqualFn({
         source: this.source,
         replica: this.replica,
       });
 
+      this.metrics.isEqualFn = {
+        calls: this.iteration,
+      };
+
       if (!this.isEqual) {
-        this.replica = await this.fetchReplica();
-
-        this.lastExchange = {
-          timestamp: new Date().toString(),
-          data: {
-            source: this.source,
-            replica: this.replica,
-          },
-        };
-
-        await this.insertFn({
+        const res = await this.insertFn({
           source: this.source,
           replica: this.replica,
         });
+
+        this.insertCalls++;
+        this.metrics.insert = {
+          calls: this.insertCalls,
+          dataLength: res.inserts.length + res.updates.length,
+        };
+
+        this.lastExchange = {
+          ...res,
+          iteration: this.iteration,
+        };
+
+        this.replica = await this.fetchReplica();
+        this.replicaCalls++;
+        this.metrics.replica = {
+          calls: this.replicaCalls,
+          dataLength: this.replica.length,
+        };
       }
     }
 
@@ -178,9 +278,11 @@ export class DataExchange<T> {
       isWorking: this.isWorking,
       signal: this.signal,
       pollTime: this.pollTime,
-      iterations: this.iterations,
+      iterations: this.iteration,
       shouldFetch: this.shouldFetchFn(),
       lastExchange: this.lastExchange,
+      metrics: this.metrics,
+      isInitialized: this.isInitialized,
     };
   }
 

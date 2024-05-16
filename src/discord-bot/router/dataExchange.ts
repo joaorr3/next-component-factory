@@ -7,6 +7,7 @@ import type { PullRequestModel } from "../../shared/models";
 import { type PRExchangeModel } from "../../shared/models";
 import notion from "../../shared/notion";
 import { prismaSharedClient } from "../../shared/prisma/client";
+import type { LastExchangeStatus } from "../../shared/utils";
 import { DataExchange } from "../../shared/utils";
 
 export const dataExchangeBodySchema = z.object({
@@ -68,7 +69,7 @@ const shouldUpdate = (source: PRExchangeModel, replica: PRExchangeModel) => {
   return !isEqual(a, b);
 };
 
-export const dataExchange = new DataExchange<PRExchangeModel[]>({
+export const dataExchange = new DataExchange<PRExchangeModel>({
   // 1 min
   pollTime: 1000 * 60 * 1,
   shouldFetch: () => {
@@ -115,10 +116,6 @@ export const dataExchange = new DataExchange<PRExchangeModel[]>({
     return data;
   },
   isEqual: ({ source, replica }) => {
-    if (!source || !replica) {
-      return false;
-    }
-
     for (const sourceItem of source) {
       const replicaItem = findReplicaItem(replica, {
         pullRequestId: sourceItem.pullRequestId,
@@ -139,9 +136,12 @@ export const dataExchange = new DataExchange<PRExchangeModel[]>({
     return true;
   },
   insert: async ({ source, replica }) => {
-    if (!source || !replica) {
-      return;
-    }
+    const status: Omit<LastExchangeStatus<PRExchangeModel>, "iteration"> = {
+      inserts: [],
+      updates: [],
+      timestamp: new Date().toString(),
+    };
+
     for (const sourceItem of source) {
       const replicaItem = findReplicaItem(replica, {
         pullRequestId: sourceItem.pullRequestId,
@@ -155,15 +155,19 @@ export const dataExchange = new DataExchange<PRExchangeModel[]>({
           console.log(
             `update: ${sourceItem.title} | ${sourceItem.author} | ${sourceItem.notionUserId} | commitId: ${sourceItem.commitId}`
           );
+          status.updates.push(sourceItem);
           await notion.upsertPr(sourceItem, replicaItem.pageId);
         }
       } else {
         console.log(
           `insert: ${sourceItem.title} | ${sourceItem.author}| commitId: ${sourceItem.commitId}`
         );
+        status.inserts.push(sourceItem);
         await notion.upsertPr(sourceItem);
       }
     }
+
+    return status;
   },
 });
 
@@ -181,9 +185,8 @@ dataExchangeRouter.get("/status", async (_, res) => {
   //   }))
   // );
 
-  const { lastExchange: __, ...status } = dataExchange.getStatus();
   res.status(200).json({
-    status,
+    status: dataExchange.getStatus(),
   });
 });
 
@@ -200,10 +203,8 @@ dataExchangeRouter.post("/set", (req, res) => {
       dataExchange.setPollTime(+pollTime);
     }
 
-    const { lastExchange: __, ...status } = dataExchange.getStatus();
-
     res.status(200).json({
-      status,
+      status: dataExchange.getStatus(),
     });
   } else {
     res.status(400).json(payload.error.toString());
