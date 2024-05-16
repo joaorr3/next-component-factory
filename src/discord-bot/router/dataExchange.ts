@@ -31,37 +31,17 @@ const findReplicaItem = (
   );
 };
 
-type EqualShape = Pick<
-  PRExchangeModel,
-  // | "pullRequestId"
-  // | "commitId"
-  | "title"
-  // | "author"
-  // | "notionUserId"
-  // | "url"
-  | "mergeStatus"
-  | "status"
->;
+type EqualShape = Pick<PRExchangeModel, "title" | "mergeStatus" | "status">;
 
 const shouldUpdate = (source: PRExchangeModel, replica: PRExchangeModel) => {
   const a: EqualShape = {
-    // pullRequestId: source.pullRequestId,
-    // commitId: source.commitId,
     title: source.title,
-    // author: source.author,
-    // notionUserId: source.notionUserId,
-    // url: source.url,
     mergeStatus: source.mergeStatus,
     status: source.status,
   };
 
   const b: EqualShape = {
-    // pullRequestId: replica.pullRequestId,
-    // commitId: replica.commitId,
     title: replica.title,
-    // author: replica.author,
-    // notionUserId: replica.notionUserId,
-    // url: replica.url,
     mergeStatus: replica.mergeStatus,
     status: replica.status,
   };
@@ -174,17 +154,6 @@ export const dataExchange = new DataExchange<PRExchangeModel>({
 export const dataExchangeRouter = express.Router();
 
 dataExchangeRouter.get("/status", async (_, res) => {
-  // const teamDb = await notion.queryDatabase("feae753976d7403584ff2c1708764ad1");
-
-  // console.log(
-  //   teamDb.results.map((page) => ({
-  //     // @ts-ignore
-  //     name: page.properties["Name"].title[0].plain_text,
-  //     // @ts-ignore
-  //     person: page.properties["Person"].people[0],
-  //   }))
-  // );
-
   res.status(200).json({
     status: dataExchange.getStatus(),
   });
