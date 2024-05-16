@@ -104,6 +104,14 @@ export const safeLockThread = async (
 const forceGetFirstMessage = async (thread: Discord.ThreadChannel) => {
   try {
     const message = (await thread.messages.fetch({ limit: 1 })).at(0);
+
+    if (!message) {
+      logger.console.discord({
+        level: "warn",
+        message: "forceGetFirstMessage() return with undefined",
+      });
+    }
+
     return message;
   } catch (error) {
     logger.console.discord({
@@ -135,6 +143,8 @@ const getStarterMessage = async (thread: Discord.ThreadChannel) => {
 };
 
 export const extractThreadData = async (thread: Discord.ThreadChannel) => {
+  await thread.sendTyping();
+  await wait(2000);
   const firstMessage = await getStarterMessage(thread);
 
   if (firstMessage) {
