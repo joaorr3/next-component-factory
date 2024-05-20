@@ -185,6 +185,9 @@ export class DataExchange<T> {
     this.signal = false;
     this.isWorking = false;
     this.iteration = 0;
+    this.sourceCalls = 0;
+    this.replicaCalls = 0;
+    this.insertCalls = 0;
     this.source = [];
     this.replica = [];
     this.isEqual = false;
