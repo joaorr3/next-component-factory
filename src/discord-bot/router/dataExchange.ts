@@ -96,6 +96,10 @@ export const dataExchange = new DataExchange<PRExchangeModel>({
     return data;
   },
   isEqual: ({ source, replica }) => {
+    if (!source.length || !replica.length) {
+      return true;
+    }
+
     for (const sourceItem of source) {
       const replicaItem = findReplicaItem(replica, {
         pullRequestId: sourceItem.pullRequestId,
@@ -121,6 +125,10 @@ export const dataExchange = new DataExchange<PRExchangeModel>({
       updates: [],
       timestamp: new Date().toString(),
     };
+
+    if (!source.length || !replica.length) {
+      return status;
+    }
 
     for (const sourceItem of source) {
       const replicaItem = findReplicaItem(replica, {
