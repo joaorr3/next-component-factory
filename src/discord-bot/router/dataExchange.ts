@@ -19,16 +19,9 @@ export type DataExchangeBodySchema = z.infer<typeof dataExchangeBodySchema>;
 
 const findReplicaItem = (
   replica: PRExchangeModel[],
-  params: Pick<PRExchangeModel, "url" | "pullRequestId" | "commitId" | "title">
+  params: Pick<PRExchangeModel, "url">
 ) => {
-  return find(
-    replica,
-    (r) =>
-      r.url === params.url ||
-      r.pullRequestId === params.pullRequestId ||
-      r.commitId === params.commitId ||
-      r.title === params.title
-  );
+  return find(replica, (r) => r.url === params.url);
 };
 
 type EqualShape = Pick<PRExchangeModel, "title" | "mergeStatus" | "status">;
@@ -102,10 +95,7 @@ export const dataExchange = new DataExchange<PRExchangeModel>({
 
     for (const sourceItem of source) {
       const replicaItem = findReplicaItem(replica, {
-        pullRequestId: sourceItem.pullRequestId,
         url: sourceItem.url,
-        commitId: sourceItem.commitId,
-        title: sourceItem.title,
       });
 
       if (replicaItem) {
@@ -132,10 +122,7 @@ export const dataExchange = new DataExchange<PRExchangeModel>({
 
     for (const sourceItem of source) {
       const replicaItem = findReplicaItem(replica, {
-        pullRequestId: sourceItem.pullRequestId,
         url: sourceItem.url,
-        commitId: sourceItem.commitId,
-        title: sourceItem.title,
       });
 
       if (replicaItem) {
