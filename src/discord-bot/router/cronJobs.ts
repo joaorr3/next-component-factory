@@ -71,7 +71,7 @@ const jobs: CronJob[] = [
     event: syncGuildUsers,
   },
   {
-    interval: CronTime.everyWeekDayAt(12),
+    interval: CronTime.everyWeekDayAt(10, 30),
     id: "notifyDevTeam",
     event: notifyDevTeam,
   },
