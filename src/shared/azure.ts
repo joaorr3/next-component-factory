@@ -88,7 +88,7 @@ export class AzureClient {
       })
       .filter(
         // We don't care about without a lastMergeCommit or drafts
-        ({ lastMergeCommit, isDraft }) => !!lastMergeCommit && !isDraft
+        ({ isDraft }) => !isDraft
       ) as unknown as PullRequestModel[];
   }
 
