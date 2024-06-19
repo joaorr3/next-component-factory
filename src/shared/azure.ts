@@ -39,7 +39,7 @@ export class AzureClient {
         includePushData: true,
       })
     )
-      .filter(
+      ?.filter(
         ({ comment }) =>
           comment?.startsWith("feat") || comment?.startsWith("fix")
       )
