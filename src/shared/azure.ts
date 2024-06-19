@@ -99,7 +99,7 @@ export class AzureClient {
     return detailedPrs.map(
       (pr): PRExchangeModel => ({
         pullRequestId: String(pr.pullRequestId),
-        commitId: pr.lastMergeCommit?.commitId!,
+        commitId: pr.lastMergeCommit?.commitId || "",
         title: pr.title!,
         author: pr.createdBy?.displayName!,
         creationDate: dayjs(pr.creationDate as unknown as string).toISOString(),
