@@ -146,6 +146,7 @@ export const azureRouter = router({
         description,
         author: "",
         threadUrl: "",
+        tags: [],
       });
     }),
 });
