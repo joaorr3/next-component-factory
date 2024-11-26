@@ -39,11 +39,6 @@ const config = {
       displayName: true,
     },
   },
-  experimental: {
-    fontLoaders: [
-      { loader: "@next/font/google", options: { subsets: ["latin"] } },
-    ],
-  },
 };
 
 export default withRemoveImports(config);

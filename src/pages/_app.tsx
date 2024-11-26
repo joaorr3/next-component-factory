@@ -1,9 +1,9 @@
-import { Montserrat } from "@next/font/google";
 import type { GuildUser } from "@prisma/client";
 import { PrismaClient } from "@prisma/client";
 import { type Session } from "next-auth";
 import { getSession, SessionProvider } from "next-auth/react";
 import { type AppType } from "next/app";
+import { Montserrat } from "next/font/google";
 import { useRouter } from "next/router";
 import React from "react";
 import { AppContainer } from "../components/AppContainer";
@@ -67,8 +67,8 @@ const MyApp: AppType<{
                 searchFilters: {},
               },
               pullRequests: {
-                searchFilters: {}
-              }
+                searchFilters: {},
+              },
             }}
           >
             <ThemeProvider>
