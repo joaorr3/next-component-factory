@@ -1,17 +1,18 @@
-import type { ParsedMail } from "./../types/mail";
 import type { DiscordPayloadEmbedField, PayloadProps } from "../types/discord";
+import type { ParsedMail } from "./../types/mail";
 
 import config from "../config/discord";
 
+import type { PullRequest } from "@prisma/client";
 import type { Client, MessageCreateOptions, TextChannel } from "discord.js";
 import { roleMention, userMention } from "discord.js";
+import { truncate } from "lodash";
 import { discordSharedClient } from "../../../shared/discord";
 import logger from "../../../shared/logger";
-import { truncate } from "lodash";
-import type { PullRequest } from "@prisma/client";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { ErrorHandler } from "../../../utils/error";
 
 dayjs.extend(relativeTime);
 
@@ -49,6 +50,7 @@ class AzureDiscord {
     }
   }
 
+  @ErrorHandler({ code: "DISCORD", message: "createPullRequest" })
   private async createPullRequest(mail: ParsedMail) {
     const payload = this.createPayload({
       title: mail.pullRequest.title,
@@ -79,6 +81,7 @@ class AzureDiscord {
     return thread;
   }
 
+  @ErrorHandler({ code: "DISCORD", message: "updatePullRequest" })
   private async updatePullRequest(mail: ParsedMail, pullRequest?: PullRequest) {
     let description = mail.pullRequest.title;
 
@@ -135,6 +138,7 @@ class AzureDiscord {
     await thread?.send(payload);
   }
 
+  @ErrorHandler({ code: "DISCORD", message: "closePullRequest" })
   private async closePullRequest(mail: ParsedMail, pullRequest?: PullRequest) {
     let description = mail.pullRequest.title;
 

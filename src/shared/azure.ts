@@ -22,6 +22,7 @@ export class AzureClient {
     this.initialize();
   }
 
+  @ErrorHandler({ code: "AZURE", message: "initialize" })
   private async initialize() {
     await this.client.connect();
   }
@@ -30,16 +31,19 @@ export class AzureClient {
   private async getDevelopCommits(): Promise<PRExchangeModel[]> {
     const gitApi = await this.client.getGitApi();
 
-    const commits = (
-      await gitApi.getCommits(this.designSystemRepoId, {
-        fromDate: "2024-04-05T00:00:00.000Z",
+    const thirtyDaysAgo = dayjs().subtract(1, "month").toISOString();
+
+    const devCommits =
+      (await gitApi.getCommits(this.designSystemRepoId, {
+        fromDate: thirtyDaysAgo,
         itemVersion: {
           version: "develop",
         },
         includePushData: true,
-      })
-    )
-      ?.filter(
+      })) || [];
+
+    const commits = devCommits
+      .filter(
         ({ comment }) =>
           comment?.startsWith("feat") || comment?.startsWith("fix")
       )
