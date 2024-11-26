@@ -3,8 +3,8 @@
  * It has to be a `.mjs`-file to be imported there.
  */
 import dotenv from "dotenv";
+import { formatErrors } from "./client";
 import { serverSchema } from "./schema";
-// import { env as clientEnv, formatErrors } from "./client";
 
 dotenv.config({
   path: `.env.${process.env.NODE_ENV || "local"}`,
@@ -14,8 +14,8 @@ const _serverEnv = serverSchema.safeParse(process.env);
 
 if (!_serverEnv.success) {
   console.error(
-    "❌ Invalid server environment variables:\n"
-    // ...formatErrors(_serverEnv.error.format())
+    "❌ Invalid server environment variables:\n",
+    ...formatErrors(_serverEnv.error.format())
   );
   throw new Error("Invalid server environment variables");
 }
