@@ -97,26 +97,25 @@
     "@types/react-dom": "^18.0.5",
     "@types/styled-components": "^5.1.26",
     "@typescript-eslint/eslint-plugin": "^5.33.0",
-    "@typescript-eslint/parser": "^5.33.0"
-  },
-  "devDependencies": {
+    "@typescript-eslint/parser": "^5.33.0",
+    "tailwind-styled-components": "^2.2.0",
+    "eslint": "^8.26.0",
+    "eslint-config-next": "13.0.2",
+    "eslint-plugin-tailwindcss": "^3.8.0",
     "@tailwindcss/forms": "^0.5.3",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.13",
     "babel-plugin-styled-components": "^2.0.7",
-    "eslint": "^8.26.0",
-    "eslint-config-next": "13.0.2",
-    "eslint-plugin-tailwindcss": "^3.8.0",
     "nodemon": "^2.0.20",
     "postcss": "^8.4.21",
     "prettier": "^2.8.3",
     "prettier-plugin-tailwindcss": "^0.2.1",
     "prisma": "4.7.1",
-    "tailwind-styled-components": "^2.2.0",
     "tailwindcss": "^3.2.4",
     "ts-node": "^10.9.1",
     "vite": "^5.2.10"
   },
+  "devDependencies": {},
   "ct3aMetadata": {
     "initVersion": "6.10.1"
   },
