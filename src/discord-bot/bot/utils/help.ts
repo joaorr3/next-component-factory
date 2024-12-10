@@ -105,6 +105,11 @@ const forceGetFirstMessage = async (thread: Discord.ThreadChannel) => {
   try {
     const message = (await thread.messages.fetch({ limit: 1 })).at(0);
 
+    logger.console.discord({
+      level: "info",
+      message: `forceGetFirstMessage(): typeof:${typeof message}\n${message}`,
+    });
+
     if (!message) {
       logger.console.discord({
         level: "warn",
@@ -125,6 +130,10 @@ const forceGetFirstMessage = async (thread: Discord.ThreadChannel) => {
 const getStarterMessage = async (thread: Discord.ThreadChannel) => {
   try {
     const starterMessage = await thread.fetchStarterMessage();
+    logger.console.discord({
+      level: "info",
+      message: `getStarterMessage(): typeof:${typeof starterMessage}\n${starterMessage}`,
+    });
 
     if (!starterMessage) {
       return await forceGetFirstMessage(thread);
@@ -169,7 +178,7 @@ export const extractThreadData = async (thread: Discord.ThreadChannel) => {
   }
 };
 
-export const checkThreadGuidelines = async (thread: Discord.ThreadChannel) => {
+const checkThreadGuidelines = async (thread: Discord.ThreadChannel) => {
   await thread.sendTyping();
   await wait(500);
 
