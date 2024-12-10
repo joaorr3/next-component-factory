@@ -8,8 +8,8 @@ import { env } from "../../env/server";
 import type {
   NotionPullRequestCommentedModel,
   NotionPullRequestCreatedModel,
-  NotionPullRequestUpdatedModel,
   NotionPullRequestUpdateMergeStatusModel,
+  NotionPullRequestUpdatedModel,
 } from "../../utils/validators/notion";
 import { c18Avatar } from "../dataUtils";
 import logger from "../logger";
@@ -536,6 +536,7 @@ class Notion {
 
   //region Component Metadata
 
+  @ErrorHandler({ code: "NOTION", message: "getAllComponentMetadata" })
   async getAllComponentMetadata() {
     const pageMap: Array<Record<string, any>> = [];
 
@@ -672,6 +673,7 @@ class Notion {
     return blocksMap;
   };
 
+  @ErrorHandler({ code: "NOTION", message: "getComponentMetadata" })
   async getComponentMetadata(props: { name?: string }) {
     if (!props.name) {
       return this.getAllComponentMetadata();
@@ -703,6 +705,9 @@ class Notion {
     return { ...metaProps, content: pageContent };
   }
 
+  /**
+   * prefer `getComponentMetadata` with `?name=ComponentName`
+   */
   async getComponentDetails(props: { name?: string }) {
     if (!props.name) {
       return {};

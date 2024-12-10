@@ -1,9 +1,10 @@
 import Discord from "discord.js";
 import { azureSharedClient } from "../../shared/azure";
 import logger from "../../shared/logger";
-import AzureDiscord from "../azure/controllers/discord";
-import AzureMail from "../azure/controllers/mail";
-import PullRequestController from "../azure/controllers/pullRequests";
+// import AzureDiscord from "../azure/controllers/discord";
+// import AzureMail from "../azure/controllers/mail";
+// import PullRequestController from "../azure/controllers/pullRequests";
+import { derive } from "../../shared/utils";
 import discord from "./client";
 import { registerCommands } from "./commands";
 import { helpConstants } from "./constants";
@@ -16,31 +17,30 @@ import { channelUpdateHandler } from "./events/channelUpdate";
 import { guildRolesHandler } from "./events/guildRoles";
 import { BotLog } from "./utils";
 import { extractThreadData } from "./utils/help";
-import { derive } from "../../shared/utils";
 
 export const initializeBot = () => {
   discord.client?.once(Discord.Events.ClientReady, async () => {
     logger.console.discord({ level: "info", message: "Ready" });
 
-    const azureDiscord = new AzureDiscord(discord.client);
-    const azureMail = new AzureMail({ autoReconnect: true });
+    // const azureDiscord = new AzureDiscord(discord.client);
+    // const azureMail = new AzureMail({ autoReconnect: true });
 
-    azureMail.on("error", async (error) => {
-      BotLog.log(() => {
-        return {
-          embeds: [
-            discord.embed({
-              title: `[AzureMail] Error: ${error.message}`,
-            }),
-          ],
-        };
-      });
-    });
+    // azureMail.on("error", async (error) => {
+    //   BotLog.log(() => {
+    //     return {
+    //       embeds: [
+    //         discord.embed({
+    //           title: `[AzureMail] Error: ${error.message}`,
+    //         }),
+    //       ],
+    //     };
+    //   });
+    // });
 
-    azureMail.on("mail", async (mail) => {
-      const updatedPr = await PullRequestController.processMail(mail);
-      await azureDiscord.processMail(mail, updatedPr);
-    });
+    // azureMail.on("mail", async (mail) => {
+    //   const updatedPr = await PullRequestController.processMail(mail);
+    //   await azureDiscord.processMail(mail, updatedPr);
+    // });
 
     BotLog.log(() => {
       return {
@@ -79,17 +79,17 @@ export const initializeBot = () => {
 
       if (data) {
         const workItem = await azureSharedClient.createWorkItem(data);
-        const guildRole = discord.mention({ roles:'dev' });
-    
-        const content = derive(()=> {
+        const guildRole = discord.mention({ roles: "dev" });
+
+        const content = derive(() => {
           const workItemLink = `Azure Work Item: https://dev.azure.com/ptbcp/IT.DIT/_workitems/edit/${workItem.id}`;
 
-          if(guildRole) {
+          if (guildRole) {
             return `${guildRole} - ${workItemLink}`;
           } else {
             return workItemLink;
           }
-        })
+        });
 
         await thread.send({
           content,

@@ -10,6 +10,7 @@ type ServiceErrorOptions = {
   message?: string;
   code: ErrorScope;
   cause?: unknown;
+  fnArgs?: any[];
 };
 
 export function getMessageFromUnknownError(
@@ -37,6 +38,8 @@ export function getErrorFromUnknown(cause: unknown): Error {
 export class ServiceError extends Error {
   public readonly cause?;
   public readonly code;
+  public readonly details;
+  public readonly fnArgs;
 
   constructor(opts: ServiceErrorOptions) {
     const code = opts.code;
@@ -51,8 +54,21 @@ export class ServiceError extends Error {
     this.code = code;
     this.cause = cause;
     this.name = "ServiceError";
+    this.details = opts.message;
+    this.fnArgs = opts.fnArgs;
 
     Object.setPrototypeOf(this, new.target.prototype);
+  }
+
+  log() {
+    return {
+      name: this.name,
+      code: this.code,
+      cause: this.cause?.message,
+      message: this.message,
+      stack: this.stack,
+      fnArgs: this.fnArgs,
+    };
   }
 }
 
@@ -69,30 +85,27 @@ export class ServiceError extends Error {
   );
   ```
  */
-export const handledServiceCall = <T>(
-  fn: () => T,
+export const handledServiceCall = async <T>(
+  fn: () => Promise<T>,
   {
     code = "UNKNOWN",
     message = "Unknown Error",
+    fnArgs,
   }: Omit<ServiceErrorOptions, "cause">
-): T => {
+): Promise<T> => {
   try {
-    return fn();
+    const res = await fn();
+    return res;
   } catch (error) {
-    console.error(
-      new ServiceError({
-        code,
-        message,
-        cause: error,
-      })
-    );
-    return undefined as T;
-
-    throw new ServiceError({
+    const serviceError = new ServiceError({
       code,
       message,
       cause: error,
+      fnArgs,
     });
+
+    console.error(serviceError.log());
+    return serviceError.log() as T;
   }
 };
 
@@ -111,6 +124,7 @@ export function ErrorHandler({
       return handledServiceCall(() => originalMethod.apply(this, args), {
         code,
         message,
+        fnArgs: args,
       });
     };
 
