@@ -107,7 +107,7 @@ const forceGetFirstMessage = async (thread: Discord.ThreadChannel) => {
 
     logger.console.discord({
       level: "info",
-      message: `forceGetFirstMessage(): typeof:${typeof message}\n${message}`,
+      message: `forceGetFirstMessage(): typeof:${typeof message}\n${message?.toJSON()}`,
     });
 
     if (!message) {
@@ -132,10 +132,10 @@ const getStarterMessage = async (thread: Discord.ThreadChannel) => {
     const starterMessage = await thread.fetchStarterMessage();
     logger.console.discord({
       level: "info",
-      message: `getStarterMessage(): typeof:${typeof starterMessage}\n${starterMessage}`,
+      message: `getStarterMessage(): typeof:${typeof starterMessage}\n${starterMessage?.toJSON()}`,
     });
 
-    if (!starterMessage) {
+    if (!starterMessage?.content) {
       return await forceGetFirstMessage(thread);
     }
 
