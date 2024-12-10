@@ -3,8 +3,7 @@
  * It has to be a `.mjs`-file to be imported there.
  */
 import dotenv from "dotenv";
-import { formatErrors } from "./client";
-import { serverSchema } from "./schema";
+import { formatErrors, serverSchema } from "./schema";
 
 dotenv.config({
   path: `.env.${process.env.NODE_ENV || "local"}`,

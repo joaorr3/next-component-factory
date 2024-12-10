@@ -109,7 +109,7 @@ export const handledServiceCall = async <T>(
   }
 };
 
-export function ErrorHandler({
+export function ServiceErrorHandler({
   code,
   message,
 }: Omit<ServiceErrorOptions, "cause">) {
@@ -126,6 +126,31 @@ export function ErrorHandler({
         message,
         fnArgs: args,
       });
+    };
+
+    return descriptor;
+  };
+}
+
+export const handledMethodCall = <T>(fn: () => T): T => {
+  try {
+    return fn();
+  } catch (error) {
+    console.error("error: ", error);
+    return undefined as T;
+  }
+};
+
+export function ErrorHandler() {
+  return function (
+    _target: any,
+    _propertyKey: string,
+    descriptor: PropertyDescriptor
+  ) {
+    const originalMethod = descriptor.value;
+
+    descriptor.value = function (...args: any[]) {
+      return handledMethodCall(() => originalMethod.apply(this, args));
     };
 
     return descriptor;

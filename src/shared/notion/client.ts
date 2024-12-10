@@ -21,7 +21,7 @@ import type {
 
 import dedent from "dedent";
 import { camelCase } from "lodash";
-import { ErrorHandler } from "../../utils/error";
+import { ServiceErrorHandler } from "../../utils/error";
 import { derive } from "../utils";
 import {
   bookmark,
@@ -79,7 +79,7 @@ class Notion {
     return { results: res, next_cursor };
   }
 
-  @ErrorHandler({ code: "NOTION", message: "getAllPrs" })
+  @ServiceErrorHandler({ code: "NOTION", message: "getAllPrs" })
   async getAllPrs() {
     const pageMap: Array<{
       id: string;
@@ -170,7 +170,7 @@ class Notion {
     return pageMap;
   }
 
-  @ErrorHandler({ code: "NOTION", message: "getPrPageByPrId" })
+  @ServiceErrorHandler({ code: "NOTION", message: "getPrPageByPrId" })
   async getPrPageByPrId(pullRequestId: string) {
     const allPrs = await this.getAllPrs();
     const prPage = allPrs.find((item) => item.pullRequestId === pullRequestId);
@@ -183,7 +183,7 @@ class Notion {
     }
   }
 
-  @ErrorHandler({ code: "NOTION", message: "createPr" })
+  @ServiceErrorHandler({ code: "NOTION", message: "createPr" })
   async createPr(data: NotionPullRequestCreatedModel) {
     if (!data.notionUserId) {
       return null;
@@ -245,7 +245,7 @@ class Notion {
    * Simplified version of `createPr`
    * Prefer `upsertPr`
    */
-  @ErrorHandler({ code: "NOTION", message: "insertPr" })
+  @ServiceErrorHandler({ code: "NOTION", message: "insertPr" })
   async insertPr(data: {
     pullRequestId: string;
     title: string;
@@ -304,7 +304,7 @@ class Notion {
   /**
    * Create or update PR page
    */
-  @ErrorHandler({ code: "NOTION", message: "insertPr" })
+  @ServiceErrorHandler({ code: "NOTION", message: "insertPr" })
   async upsertPr(data: PRExchangeModel, pageId?: string) {
     const properties = {
       title: {
@@ -391,7 +391,7 @@ class Notion {
     return res.id;
   }
 
-  @ErrorHandler({ code: "NOTION", message: "updatePr" })
+  @ServiceErrorHandler({ code: "NOTION", message: "updatePr" })
   async updatePr(props: NotionPullRequestUpdatedModel) {
     const res = await this.client.pages.update({
       page_id: props.pageId,
@@ -447,7 +447,7 @@ class Notion {
     return res.id;
   }
 
-  @ErrorHandler({ code: "NOTION", message: "updatePrMergeStatus" })
+  @ServiceErrorHandler({ code: "NOTION", message: "updatePrMergeStatus" })
   async updatePrMergeStatus(props: NotionPullRequestUpdateMergeStatusModel) {
     const res = await this.client.pages.update({
       page_id: props.pageId,
@@ -468,7 +468,7 @@ class Notion {
     return res.id;
   }
 
-  @ErrorHandler({ code: "NOTION", message: "commentedPr" })
+  @ServiceErrorHandler({ code: "NOTION", message: "commentedPr" })
   async commentedPr({
     pageId,
     data: { commentUrl, commentAuthorName },
@@ -519,7 +519,7 @@ class Notion {
     return comp_map;
   }
 
-  @ErrorHandler({ code: "NOTION", message: "getComponentPageById" })
+  @ServiceErrorHandler({ code: "NOTION", message: "getComponentPageById" })
   async getComponentPageById(props: { id?: string; name?: string }) {
     const components = await this.getComponentDatabase();
     const componentPage = components.find(
@@ -536,7 +536,7 @@ class Notion {
 
   //region Component Metadata
 
-  @ErrorHandler({ code: "NOTION", message: "getAllComponentMetadata" })
+  @ServiceErrorHandler({ code: "NOTION", message: "getAllComponentMetadata" })
   async getAllComponentMetadata() {
     const pageMap: Array<Record<string, any>> = [];
 
@@ -673,7 +673,7 @@ class Notion {
     return blocksMap;
   };
 
-  @ErrorHandler({ code: "NOTION", message: "getComponentMetadata" })
+  @ServiceErrorHandler({ code: "NOTION", message: "getComponentMetadata" })
   async getComponentMetadata(props: { name?: string }) {
     if (!props.name) {
       return this.getAllComponentMetadata();
@@ -706,8 +706,9 @@ class Notion {
   }
 
   /**
-   * prefer `getComponentMetadata` with `?name=ComponentName`
+   * use `getComponentMetadata`` with `?name=ComponentName`
    */
+  @ServiceErrorHandler({ code: "NOTION", message: "getComponentDetails" })
   async getComponentDetails(props: { name?: string }) {
     if (!props.name) {
       return {};
@@ -767,7 +768,7 @@ class Notion {
     },
   } as const;
 
-  @ErrorHandler({ code: "NOTION", message: "addIssue" })
+  @ServiceErrorHandler({ code: "NOTION", message: "addIssue" })
   async addIssue(data: NotionIssueDetailsModel) {
     const {
       title,
@@ -1103,7 +1104,7 @@ class Notion {
     }
   }
 
-  @ErrorHandler({ code: "NOTION", message: "logDatabase" })
+  @ServiceErrorHandler({ code: "NOTION", message: "logDatabase" })
   async queryDatabase(id: string) {
     const database = await this.client.databases.query({
       database_id: id,

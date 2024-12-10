@@ -2,7 +2,7 @@ import * as Azure from "azure-devops-node-api";
 import { type GitRepository } from "azure-devops-node-api/interfaces/GitInterfaces";
 import dayjs from "dayjs";
 import { env } from "../env/server";
-import { ErrorHandler } from "../utils/error";
+import { ServiceErrorHandler } from "../utils/error";
 import type { PRExchangeModel } from "./models";
 import { mergeStatusMap, statusMap, type PullRequestModel } from "./models";
 import { getPullRequestUrl } from "./utils";
@@ -22,12 +22,12 @@ export class AzureClient {
     this.initialize();
   }
 
-  @ErrorHandler({ code: "AZURE", message: "initialize" })
+  @ServiceErrorHandler({ code: "AZURE", message: "initialize" })
   private async initialize() {
     await this.client.connect();
   }
 
-  @ErrorHandler({ code: "AZURE", message: "getDevelopCommits" })
+  @ServiceErrorHandler({ code: "AZURE", message: "getDevelopCommits" })
   private async getDevelopCommits(): Promise<PRExchangeModel[]> {
     const gitApi = await this.client.getGitApi();
 
@@ -65,7 +65,7 @@ export class AzureClient {
     return commits;
   }
 
-  @ErrorHandler({ code: "AZURE", message: "getDetailedPullRequests" })
+  @ServiceErrorHandler({ code: "AZURE", message: "getDetailedPullRequests" })
   public async getDetailedPullRequests(): Promise<PullRequestModel[]> {
     const gitApi = await this.client.getGitApi();
 
@@ -96,7 +96,7 @@ export class AzureClient {
       ) as unknown as PullRequestModel[];
   }
 
-  @ErrorHandler({ code: "AZURE", message: "getPullRequests" })
+  @ServiceErrorHandler({ code: "AZURE", message: "getPullRequests" })
   public async getPullRequests(): Promise<PRExchangeModel[]> {
     const detailedPrs = await this.getDetailedPullRequests();
 
@@ -116,7 +116,7 @@ export class AzureClient {
     );
   }
 
-  @ErrorHandler({ code: "AZURE", message: "getReleaseItems" })
+  @ServiceErrorHandler({ code: "AZURE", message: "getReleaseItems" })
   public async getReleaseItems(): Promise<PRExchangeModel[]> {
     const developCommits = await this.getDevelopCommits();
     const pullRequests = await this.getPullRequests();
@@ -128,7 +128,7 @@ export class AzureClient {
     return pullRequests.concat(releaseItemsWithoutPR);
   }
 
-  @ErrorHandler({ code: "AZURE", message: "createWorkItem" })
+  @ServiceErrorHandler({ code: "AZURE", message: "createWorkItem" })
   public async createWorkItem({
     title,
     description,
