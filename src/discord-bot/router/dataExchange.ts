@@ -59,6 +59,10 @@ export const dataExchange = new DataExchange<PRExchangeModel>({
     const notionUsers = await prismaSharedClient.guildUser.getNotionUsers();
     const releaseItems = await azureSharedClient.getReleaseItems();
 
+    if (!releaseItems?.length) {
+      return [];
+    }
+
     return releaseItems.map(
       (item): PRExchangeModel => ({
         ...item,
@@ -70,6 +74,10 @@ export const dataExchange = new DataExchange<PRExchangeModel>({
   },
   fetchReplica: async () => {
     const replicaData = await notion.getAllPrs();
+    if (!replicaData?.length) {
+      return [];
+    }
+
     const data = replicaData
       .filter(({ creationDate }) => !!creationDate)
       .map(
