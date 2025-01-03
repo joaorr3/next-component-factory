@@ -79,30 +79,32 @@ export const initializeBot = () => {
 
       if (data) {
         const workItem = await azureSharedClient.createWorkItem(data);
-        const guildRole = discord.mention({ roles: "dev" });
+        if (workItem) {
+          const guildRole = discord.mention({ roles: "dev" });
 
-        const content = derive(() => {
-          const workItemLink = `Azure Work Item: https://dev.azure.com/ptbcp/IT.DIT/_workitems/edit/${workItem.id}`;
+          const content = derive(() => {
+            const workItemLink = `Azure Work Item: https://dev.azure.com/ptbcp/IT.DIT/_workitems/edit/${workItem.id}`;
 
-          if (guildRole) {
-            return `${guildRole} - ${workItemLink}`;
-          } else {
-            return workItemLink;
-          }
-        });
+            if (guildRole) {
+              return `${guildRole} - ${workItemLink}`;
+            } else {
+              return workItemLink;
+            }
+          });
 
-        await thread.send({
-          content,
-        });
+          await thread.send({
+            content,
+          });
 
-        logger.db.discord({
-          level: "info",
-          message: JSON.stringify(
-            { title: "createWorkItem", payload: workItem.id },
-            undefined,
-            2
-          ),
-        });
+          logger.db.discord({
+            level: "info",
+            message: JSON.stringify(
+              { title: "createWorkItem", payload: workItem.id },
+              undefined,
+              2
+            ),
+          });
+        }
       }
     }
   });

@@ -9,7 +9,8 @@ export const azureRouter = router({
     // const projects = await coreApi.getProjects();
     // const teams = await coreApi.getAllTeams(true);
     // const workApi = await azureSharedClient.client.getWorkApi();
-    const workItemApi = await azureSharedClient.client.getWorkItemTrackingApi();
+    const workItemApi =
+      await azureSharedClient.client?.getWorkItemTrackingApi();
 
     const query = `
       SELECT *
@@ -28,13 +29,19 @@ export const azureRouter = router({
     //   ORDER BY [System.CreatedDate] DESC
     // `;
 
-    const { workItems } = await workItemApi.queryByWiql({
+    const res = await workItemApi?.queryByWiql({
       query,
     });
 
+    if (!res) {
+      return;
+    }
+
+    const { workItems } = res;
+
     const ids = workItems?.map((wi) => Number(wi.id)) || [];
 
-    const wis = await workItemApi.getWorkItems(
+    const wis = await workItemApi?.getWorkItems(
       ids,
       ["System.Title", "System.AssignedTo"],
       undefined,
@@ -42,6 +49,10 @@ export const azureRouter = router({
       undefined,
       "6972fd8c-2a19-4b27-a72b-d650691f5943"
     );
+
+    if (!wis) {
+      return;
+    }
 
     // console.log(
     //   "AssignedTo: ",
@@ -98,9 +109,13 @@ export const azureRouter = router({
     return "OK";
   }),
   pullRequest: protectedProcedure.query(async () => {
-    const gitApi = await azureSharedClient.client.getGitApi();
+    const gitApi = await azureSharedClient.client?.getGitApi();
 
-    const repos = await gitApi.getRepositories();
+    const repos = await gitApi?.getRepositories();
+
+    if (!repos) {
+      return;
+    }
 
     const designSystemRepo = repos.find(
       (repo) => repo.name === "BCP.DesignSystem"
@@ -117,7 +132,7 @@ export const azureRouter = router({
 
     if (designSystemRepo?.id) {
       const dsPullRequests =
-        (await gitApi.getPullRequests(designSystemRepo.id, {})) || [];
+        (await gitApi?.getPullRequests(designSystemRepo.id, {})) || [];
 
       return dsPullRequests.map((pr) => {
         return {

@@ -178,6 +178,7 @@ export const extractThreadData = async (thread: Discord.ThreadChannel) => {
   }
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const checkThreadGuidelines = async (thread: Discord.ThreadChannel) => {
   await thread.sendTyping();
   await wait(500);

@@ -9,10 +9,8 @@ import { getPullRequestUrl } from "./utils";
 
 const orgUrl = "https://dev.azure.com/ptbcp";
 
-const authHandler = Azure.getPersonalAccessTokenHandler(env.AZURE_TOKEN);
-
 export class AzureClient {
-  public client = new Azure.WebApi(orgUrl, authHandler);
+  public client: Azure.WebApi | undefined;
 
   private static _instance: AzureClient = new AzureClient();
   public designSystemRepo: GitRepository | null = null;
@@ -24,17 +22,19 @@ export class AzureClient {
 
   @ServiceErrorHandler({ code: "AZURE", message: "initialize" })
   private async initialize() {
+    const authHandler = Azure.getPersonalAccessTokenHandler(env.AZURE_TOKEN);
+    this.client = new Azure.WebApi(orgUrl, authHandler);
     await this.client.connect();
   }
 
   @ServiceErrorHandler({ code: "AZURE", message: "getDevelopCommits" })
   private async getDevelopCommits(): Promise<PRExchangeModel[]> {
-    const gitApi = await this.client.getGitApi();
+    const gitApi = await this.client?.getGitApi();
 
     const thirtyDaysAgo = dayjs().subtract(1, "month").toISOString();
 
     const devCommits =
-      (await gitApi.getCommits(this.designSystemRepoId, {
+      (await gitApi?.getCommits(this.designSystemRepoId, {
         fromDate: thirtyDaysAgo,
         itemVersion: {
           version: "develop",
@@ -67,10 +67,10 @@ export class AzureClient {
 
   @ServiceErrorHandler({ code: "AZURE", message: "getDetailedPullRequests" })
   public async getDetailedPullRequests(): Promise<PullRequestModel[]> {
-    const gitApi = await this.client.getGitApi();
+    const gitApi = await this.client?.getGitApi();
 
     const dsPullRequests =
-      (await gitApi.getPullRequests(
+      (await gitApi?.getPullRequests(
         this.designSystemRepoId,
         {
           status: 4,
@@ -91,7 +91,7 @@ export class AzureClient {
         };
       })
       .filter(
-        // We don't care about without a lastMergeCommit or drafts
+        // We don't care about items without a lastMergeCommit or drafts
         ({ isDraft }) => !isDraft
       ) as unknown as PullRequestModel[];
   }
@@ -142,7 +142,7 @@ export class AzureClient {
     threadUrl: string;
     tags: string[];
   }) {
-    const workItemApi = await this.client.getWorkItemTrackingApi();
+    const workItemApi = await this.client?.getWorkItemTrackingApi();
 
     const _description = [
       `Author: ${author}`,
@@ -220,7 +220,7 @@ export class AzureClient {
       },
     ];
 
-    const createdWorkItem = await workItemApi.createWorkItem(
+    const createdWorkItem = await workItemApi?.createWorkItem(
       null,
       workItemPayload,
       "6972fd8c-2a19-4b27-a72b-d650691f5943",
