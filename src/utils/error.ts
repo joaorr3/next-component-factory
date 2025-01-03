@@ -104,7 +104,7 @@ export const handledServiceCall = async <T>(
       fnArgs,
     });
 
-    console.error(serviceError.log());
+    console.warn(serviceError.log());
     return serviceError.log() as T;
   }
 };
