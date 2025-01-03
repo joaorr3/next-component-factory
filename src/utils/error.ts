@@ -95,14 +95,21 @@ export const handledServiceCall = <T>(
 ) => {
   try {
     fn().catch((error) => {
-      const serviceError = new ServiceError({
-        code,
-        message,
-        cause: error,
-        fnArgs,
-      });
+      // const serviceError = new ServiceError({
+      //   code,
+      //   message,
+      //   cause: error,
+      //   fnArgs,
+      // });
 
-      console.warn(serviceError.log());
+      console.warn(
+        JSON.stringify({
+          code,
+          message,
+          cause: error,
+          fnArgs,
+        })
+      );
     });
   } catch (error) {
     console.error("ERROR?: ", error);
