@@ -22,9 +22,13 @@ export class AzureClient {
 
   @ServiceErrorHandler({ code: "AZURE", message: "initialize" })
   private async initialize() {
-    const authHandler = Azure.getPersonalAccessTokenHandler(env.AZURE_TOKEN);
-    this.client = new Azure.WebApi(orgUrl, authHandler);
-    await this.client.connect();
+    try {
+      const authHandler = Azure.getPersonalAccessTokenHandler(env.AZURE_TOKEN);
+      this.client = new Azure.WebApi(orgUrl, authHandler);
+      await this.client.connect();
+    } catch (error) {
+      console.error("The Azure Access Token probably is expired.");
+    }
   }
 
   @ServiceErrorHandler({ code: "AZURE", message: "getDevelopCommits" })
