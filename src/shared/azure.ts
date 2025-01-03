@@ -27,7 +27,7 @@ export class AzureClient {
       this.client = new Azure.WebApi(orgUrl, authHandler);
       await this.client.connect();
     } catch (error) {
-      console.error("The Azure Access Token probably is expired.");
+      console.warn("The Azure Access Token probably is expired.");
     }
   }
 

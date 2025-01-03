@@ -85,28 +85,43 @@ export class ServiceError extends Error {
   );
   ```
  */
-export const handledServiceCall = async <T>(
+export const handledServiceCall = <T>(
   fn: () => Promise<T>,
   {
     code = "UNKNOWN",
     message = "Unknown Error",
     fnArgs,
   }: Omit<ServiceErrorOptions, "cause">
-): Promise<T> => {
+) => {
   try {
-    const res = await fn();
-    return res;
-  } catch (error) {
-    const serviceError = new ServiceError({
-      code,
-      message,
-      cause: error,
-      fnArgs,
-    });
+    fn().catch((error) => {
+      const serviceError = new ServiceError({
+        code,
+        message,
+        cause: error,
+        fnArgs,
+      });
 
-    console.warn(serviceError.log());
-    return serviceError.log() as T;
+      console.warn(serviceError.log());
+    });
+  } catch (error) {
+    console.error("ERROR?: ", error);
   }
+
+  // try {
+  //   const res = await fn();
+  //   return res;
+  // } catch (error) {
+  //   const serviceError = new ServiceError({
+  //     code,
+  //     message,
+  //     cause: error,
+  //     fnArgs,
+  //   });
+
+  //   console.warn(serviceError.log());
+  //   return serviceError.log() as T;
+  // }
 };
 
 export function ServiceErrorHandler({
@@ -136,7 +151,7 @@ export const handledMethodCall = <T>(fn: () => T): T => {
   try {
     return fn();
   } catch (error) {
-    console.error("error: ", error);
+    console.warn("error: ", error);
     return undefined as T;
   }
 };
