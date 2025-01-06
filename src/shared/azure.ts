@@ -130,7 +130,7 @@ export class AzureClient {
         (cmt) => !pullRequests.some((pr) => cmt.commitId === pr.commitId)
       ) || [];
 
-    return pullRequests.concat(releaseItemsWithoutPR);
+    return pullRequests?.concat(releaseItemsWithoutPR) || [];
   }
 
   @ServiceErrorHandler({ code: "AZURE", message: "createWorkItem" })
