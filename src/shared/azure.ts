@@ -102,7 +102,7 @@ export class AzureClient {
 
   @ServiceErrorHandler({ code: "AZURE", message: "getPullRequests" })
   public async getPullRequests(): Promise<PRExchangeModel[]> {
-    const detailedPrs = await this.getDetailedPullRequests();
+    const detailedPrs = (await this.getDetailedPullRequests()) || [];
 
     return detailedPrs.map(
       (pr): PRExchangeModel => ({
