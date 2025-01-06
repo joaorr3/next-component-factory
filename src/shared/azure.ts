@@ -49,7 +49,9 @@ export class AzureClient {
     const commits = devCommits
       .filter(
         ({ comment }) =>
-          comment?.startsWith("feat") || comment?.startsWith("fix")
+          comment?.startsWith("feat") ||
+          comment?.startsWith("fix") ||
+          comment?.startsWith("refactor")
       )
       .map((commit): PRExchangeModel => {
         return {
