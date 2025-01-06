@@ -125,9 +125,10 @@ export class AzureClient {
     const developCommits = await this.getDevelopCommits();
     const pullRequests = await this.getPullRequests();
 
-    const releaseItemsWithoutPR = developCommits.filter(
-      (cmt) => !pullRequests.some((pr) => cmt.commitId === pr.commitId)
-    );
+    const releaseItemsWithoutPR =
+      developCommits?.filter(
+        (cmt) => !pullRequests.some((pr) => cmt.commitId === pr.commitId)
+      ) || [];
 
     return pullRequests.concat(releaseItemsWithoutPR);
   }
