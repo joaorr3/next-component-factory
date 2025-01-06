@@ -85,7 +85,7 @@ export class ServiceError extends Error {
   );
   ```
  */
-export const handledServiceCall = <T>(
+export const handledServiceCall = async <T>(
   fn: () => Promise<T>,
   {
     code = "UNKNOWN",
@@ -94,7 +94,7 @@ export const handledServiceCall = <T>(
   }: Omit<ServiceErrorOptions, "cause">
 ) => {
   try {
-    fn().catch((error) => {
+    const res = await fn().catch((error) => {
       const serviceError = new ServiceError({
         code,
         message,
@@ -104,24 +104,11 @@ export const handledServiceCall = <T>(
 
       console.error(serviceError);
     });
+
+    return res;
   } catch (error) {
     console.error("ERROR?: ", error);
   }
-
-  // try {
-  //   const res = await fn();
-  //   return res;
-  // } catch (error) {
-  //   const serviceError = new ServiceError({
-  //     code,
-  //     message,
-  //     cause: error,
-  //     fnArgs,
-  //   });
-
-  //   console.warn(serviceError.log());
-  //   return serviceError.log() as T;
-  // }
 };
 
 export function ServiceErrorHandler({
